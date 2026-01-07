@@ -1,228 +1,369 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Github, Linkedin, Mail, ExternalLink, Code2, Terminal, Cpu, Globe } from "lucide-react";
+import { 
+  Menu, X, Github, Linkedin, Mail, Twitter, 
+  ExternalLink, Code2, Palette, Database, Smartphone 
+} from "lucide-react";
 
-const RevealOnScroll = ({ children }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = React.useRef(null);
+/* -------------------------------------------------------------------------- */
+/* SUB-COMPONENTS                              */
+/* -------------------------------------------------------------------------- */
+
+const LoadingScreen = ({ onComplete }) => {
+  const [text, setText] = useState("");
+  const fullText = "<Hello World />";
 
   useEffect(() => {
-    const scrollObserver = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        scrollObserver.unobserve(entry.target);
-      }
-    });
+    let index = 0;
+    const interval = setInterval(() => {
+      setText(fullText.substring(0, index));
+      index++;
 
-    if (ref.current) {
-      scrollObserver.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) {
-        scrollObserver.unobserve(ref.current);
+      if (index > fullText.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          onComplete();
+        }, 1000);
       }
-    };
-  }, []);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [onComplete]);
 
   return (
-    <div
-      ref={ref}
-      className={`transition-all duration-1000 transform ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-      }`}
-    >
-      {children}
+    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+      <div className="mb-4 text-4xl font-mono font-bold text-white">
+        {text} <span className="animate-blink text-blue-500">|</span>
+      </div>
+      <div className="w-[200px] h-[2px] bg-gray-800 rounded relative overflow-hidden">
+        <div className="w-[40%] h-full bg-blue-500 shadow-[0_0_15px_#3b82f6] animate-[loading_1s_ease-in-out_infinite]" />
+      </div>
     </div>
   );
 };
 
-export default function App() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
+const Navbar = ({ menuOpen, setMenuOpen }) => {
   return (
-    <div className={`min-h-screen bg-black text-gray-100 font-sans selection:bg-blue-500/30 ${isLoaded ? "opacity-100" : "opacity-0"} transition-opacity duration-1000`}>
-      
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-lg border-b border-white/10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-          <a href="#home" className="text-2xl font-bold tracking-tighter hover:text-blue-500 transition-colors">
-            alex<span className="text-blue-500">.dev</span>
+    <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg transition-all duration-300">
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <a href="#home" className="font-mono text-xl font-bold text-white tracking-wider">
+            BHAVESH<span className="text-blue-500">.</span>
           </a>
 
-          <div className="hidden md:flex space-x-8 text-sm font-medium text-gray-400">
-            <a href="#home" className="hover:text-white transition-colors">Home</a>
-            <a href="#about" className="hover:text-white transition-colors">About</a>
-            <a href="#projects" className="hover:text-white transition-colors">Work</a>
-            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+          {/* Mobile Menu Toggle */}
+          <div 
+            className="w-7 h-5 relative cursor-pointer z-40 md:hidden" 
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            &#9776;
           </div>
 
-          <div className="md:hidden">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-white">
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
+          {/* Desktop Menu */}
+          <div className="hidden md:flex space-x-8">
+            <a href="#home" className="text-gray-300 hover:text-white transition-colors hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">Home</a>
+            <a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a>
+            <a href="#projects" className="text-gray-300 hover:text-white transition-colors">Projects</a>
+            <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
+  );
+};
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black flex flex-col items-center justify-center space-y-8 md:hidden">
-            <a href="#home" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold hover:text-blue-500">Home</a>
-            <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold hover:text-blue-500">About</a>
-            <a href="#projects" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold hover:text-blue-500">Work</a>
-            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold hover:text-blue-500">Contact</a>
-        </div>
-      )}
+const MobileMenu = ({ menuOpen, setMenuOpen }) => {
+  return (
+    <div
+      className={`fixed top-0 left-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-40 transform transition-transform duration-300 flex flex-col items-center justify-center space-y-8 ${
+        menuOpen ? "translate-x-0" : "translate-x-full"
+      }`}
+    >
+      <button
+        onClick={() => setMenuOpen(false)}
+        className="absolute top-6 right-6 text-3xl focus:outline-none cursor-pointer"
+        aria-label="Close Menu"
+      >
+        &times;
+      </button>
 
-      {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative px-6">
-         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-[100px]" />
-         <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-[100px]" />
-         
-         <div className="max-w-3xl text-center z-10">
-            <RevealOnScroll>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-                Building <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600">Digital Reality</span>
-              </h1>
-              <p className="text-xl text-gray-400 mb-8 max-w-lg mx-auto">
-                I'm a Full Stack Developer crafting scalable, high-performance web applications with a focus on premium user experiences.
-              </p>
-              <div className="flex justify-center gap-4">
-                <a href="#projects" className="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium transition-all hover:-translate-y-1 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-                  View Projects
-                </a>
-                <a href="#contact" className="px-8 py-3 border border-blue-500/30 hover:border-blue-500 rounded text-blue-400 hover:text-blue-300 transition-all hover:-translate-y-1 hover:bg-blue-500/5">
-                  Contact Me
-                </a>
-              </div>
-            </RevealOnScroll>
-         </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 px-6 bg-zinc-950/50">
-        <div className="max-w-5xl mx-auto">
-          <RevealOnScroll>
-            <h2 className="text-3xl font-bold mb-16 text-center">About <span className="text-blue-500">Me</span></h2>
-          </RevealOnScroll>
-          
-          <div className="grid md:grid-cols-2 gap-12">
-            <RevealOnScroll>
-              <div className="space-y-6 text-gray-400 leading-relaxed">
-                <p>
-                  I specialize in building robust applications using modern technologies. 
-                  My journey started with simple static pages and evolved into complex, 
-                  scalable backend systems and interactive frontends.
-                </p>
-                <p>
-                  I believe in clean code, automated testing, and continuous deployment.
-                  When I'm not coding, I'm exploring new tech trends or contributing to open source.
-                </p>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll>
-              <div className="p-6 border border-white/10 rounded-xl bg-white/5 hover:border-blue-500/30 transition-colors">
-                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Cpu className="text-blue-500" /> Tech Stack</h3>
-                 <div className="flex flex-wrap gap-2">
-                   {['React', 'Next.js', 'TypeScript', 'Tailwind', 'Node.js', 'PostgreSQL', 'Docker', 'AWS'].map((tech) => (
-                     <span key={tech} className="px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full">
-                       {tech}
-                     </span>
-                   ))}
-                 </div>
-              </div>
-            </RevealOnScroll>
-          </div>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <RevealOnScroll>
-            <h2 className="text-3xl font-bold mb-16 text-center">Featured <span className="text-blue-500">Work</span></h2>
-          </RevealOnScroll>
-
-          <div className="grid gap-8">
-            {[
-              {
-                title: "Fintech Dashboard",
-                desc: "Real-time financial data visualization platform with predictive analytics using Machine Learning models.",
-                tech: ["React", "Python", "TensorFlow"],
-                icon: <Terminal className="w-8 h-8 text-blue-500" />
-              },
-              {
-                title: "E-Commerce Microservices",
-                desc: "A distributed e-commerce backend handling 10k+ concurrent users with fault tolerance and auto-scaling.",
-                tech: ["Node.js", "Docker", "Kubernetes"],
-                icon: <Globe className="w-8 h-8 text-purple-500" />
-              },
-              {
-                title: "AI Content Generator",
-                desc: "SaaS application leveraging LLMs to help creators generate blog posts and social media content instantly.",
-                tech: ["Next.js", "OpenAI API", "Stripe"],
-                icon: <Code2 className="w-8 h-8 text-green-500" />
-              }
-            ].map((project, i) => (
-              <RevealOnScroll key={i}>
-                <div className="group relative p-8 bg-zinc-900 border border-white/10 rounded-xl hover:border-blue-500/50 transition-all hover:-translate-y-1 hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-                  <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div className="p-4 bg-white/5 rounded-lg group-hover:bg-blue-500/10 transition-colors">
-                      {project.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{project.title}</h3>
-                      <p className="text-gray-400 mb-4">{project.desc}</p>
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {project.tech.map(t => (
-                          <span key={t} className="text-xs font-mono text-gray-500 border border-gray-800 px-2 py-1 rounded">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="flex gap-4">
-                         <a href="#" className="flex items-center gap-1 text-sm font-medium text-blue-400 hover:text-blue-300">View Project <ExternalLink size={14} /></a>
-                         <a href="#" className="flex items-center gap-1 text-sm font-medium text-gray-400 hover:text-white">GitHub <Github size={14} /></a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-24 px-6 bg-zinc-950/50">
-         <div className="max-w-xl mx-auto text-center">
-            <RevealOnScroll>
-              <h2 className="text-3xl font-bold mb-6">Let's <span className="text-blue-500">Collaborate</span></h2>
-              <p className="text-gray-400 mb-8">
-                I'm currently available for freelance work and full-time positions. 
-                If you have a project that needs a premium touch, let's talk.
-              </p>
-              <a href="mailto:contact@alex.dev" className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition-all hover:-translate-y-1">
-                <Mail size={20} /> Send Message
-              </a>
-            </RevealOnScroll>
-         </div>
-      </section>
-
-      <footer className="py-8 text-center text-gray-600 border-t border-white/5 bg-black">
-        <div className="flex justify-center gap-6 mb-4">
-          <a href="#" className="hover:text-white transition-colors"><Github /></a>
-          <a href="#" className="hover:text-white transition-colors"><Linkedin /></a>
-          <a href="#" className="hover:text-white transition-colors"><Mail /></a>
-        </div>
-        <p>© 2024 Alex.dev. All rights reserved.</p>
-      </footer>
+      {['Home', 'About', 'Projects', 'Contact'].map((item) => (
+        <a
+          key={item}
+          href={`#${item.toLowerCase()}`}
+          onClick={() => setMenuOpen(false)}
+          className={`text-2xl font-semibold text-white hover:text-blue-400 transition-colors cursor-pointer`}
+        >
+          {item}
+        </a>
+      ))}
     </div>
   );
+};
+
+const Home = () => {
+  const [text, setText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopNum, setLoopNum] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(150);
+
+  const words = ["Frontend Developer", "UI/UX Designer", "Web Enthusiast"];
+
+  useEffect(() => {
+    const handleType = () => {
+      const i = loopNum % words.length;
+      const fullText = words[i];
+
+      setText(
+        isDeleting
+          ? fullText.substring(0, text.length - 1)
+          : fullText.substring(0, text.length + 1)
+      );
+
+      setTypingSpeed(isDeleting ? 30 : 150);
+
+      if (!isDeleting && text === fullText) {
+        setTimeout(() => setIsDeleting(true), 1500); // Pause at end
+      } else if (isDeleting && text === "") {
+        setIsDeleting(false);
+        setLoopNum(loopNum + 1);
+      }
+    };
+
+    const timer = setTimeout(handleType, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [text, isDeleting, loopNum, typingSpeed, words]);
+
+  return (
+    <section
+      id="home"
+      className="min-h-screen flex items-center justify-center relative bg-black"
+    >
+      <div className="text-center z-10 px-4">
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400 leading-tight">
+          Hi, I'm <br /> Bhavesh
+        </h1>
+
+        <p className="text-gray-400 text-xl md:text-2xl mb-8 font-mono h-8">
+          I am a <span className="text-blue-500">{text}</span>
+          <span className="animate-blink">|</span>
+        </p>
+
+        <div className="flex justify-center space-x-4">
+          <a
+            href="#projects"
+            className="bg-blue-600 text-white py-3 px-8 rounded font-medium hover:bg-blue-700 transition duration-300 shadow-[0_0_20px_rgba(37,99,235,0.4)]"
+          >
+            View Work
+          </a>
+          <a
+            href="#contact"
+            className="border border-blue-600 text-blue-500 py-3 px-8 rounded font-medium hover:bg-blue-600/10 transition duration-300"
+          >
+            Contact Me
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const About = () => {
+  return (
+    <section id="about" className="py-20 bg-[#0a0a0a] text-white">
+      <div className="max-w-5xl mx-auto px-4">
+        <h2 className="text-3xl font-bold mb-12 text-center">
+          About <span className="text-blue-500">Me</span>
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          {/* Text Content */}
+          <div className="space-y-6">
+            <p className="text-gray-400 text-lg leading-relaxed">
+              I am a passionate <span className="text-blue-400 font-semibold">Frontend Developer</span> with a knack for creating seamless and visually stunning web applications. 
+            </p>
+            <p className="text-gray-400 text-lg leading-relaxed">
+              My journey began with HTML & CSS, and I've grown to master modern frameworks like <span className="text-white">React.js</span> and <span className="text-white">Tailwind CSS</span>. I love turning complex problems into simple, beautiful, and intuitive designs.
+            </p>
+            
+            <div className="flex flex-wrap gap-4 mt-6">
+               <div className="flex items-center gap-2 text-gray-300">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div> Available for Freelance
+               </div>
+               <div className="flex items-center gap-2 text-gray-300">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div> Full-time Opportunities
+               </div>
+            </div>
+          </div>
+
+          {/* Skills / Tech Stack */}
+          <div className="p-6 bg-white/5 border border-white/10 rounded-xl hover:-translate-y-1 transition-transform duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+             <h3 className="text-xl font-bold mb-6">Technical Skills</h3>
+             <div className="space-y-4">
+                {[
+                  { name: "Frontend Development", val: 90, color: "bg-blue-500" },
+                  { name: "React.js", val: 85, color: "bg-cyan-500" },
+                  { name: "Tailwind CSS", val: 95, color: "bg-purple-500" },
+                  { name: "Backend (Node/Firebase)", val: 70, color: "bg-green-500" },
+                ].map((skill, index) => (
+                   <div key={index}>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-300 font-medium">{skill.name}</span>
+                        <span className="text-gray-500 text-sm">{skill.val}%</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-2.5">
+                        <div 
+                          className={`${skill.color} h-2.5 rounded-full transition-all duration-1000`} 
+                          style={{ width: `${skill.val}%` }}
+                        ></div>
+                      </div>
+                   </div>
+                ))}
+             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Projects = () => {
+  const projects = [
+    {
+      title: "Portfolio Website",
+      desc: "A personal portfolio to showcase my work and skills. Built with React and Tailwind.",
+      tech: ["React", "Tailwind", "Vite"],
+      link: "#",
+      github: "#",
+    },
+    {
+      title: "E-Commerce App",
+      desc: "Full-featured shopping platform with cart functionality and payment integration.",
+      tech: ["Next.js", "Stripe", "Firebase"],
+      link: "#",
+      github: "#",
+    },
+    {
+      title: "Weather Dashboard",
+      desc: "Real-time weather tracking application using OpenWeatherMap API.",
+      tech: ["Vue.js", "Axios", "CSS"],
+      link: "#",
+      github: "#",
+    },
+    {
+      title: "Task Manager",
+      desc: "Productivity tool for managing daily tasks with drag-and-drop features.",
+      tech: ["React", "Redux", "Node.js"],
+      link: "#",
+      github: "#",
+    },
+  ];
+
+  return (
+    <section id="projects" className="py-20 bg-black text-white px-4">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold mb-12 text-center">
+          My <span className="text-blue-500">Projects</span>
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          {projects.map((project, index) => (
+            <div 
+              key={index}
+              className="group relative p-6 bg-[#111] border border-white/5 rounded-xl hover:-translate-y-2 hover:border-blue-500/30 hover:shadow-[0_5px_20px_rgba(59,130,246,0.15)] transition-all duration-300"
+            >
+              <div className="mb-4">
+                 <div className="flex justify-between items-center">
+                    <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                      <Code2 size={24} />
+                    </div>
+                    <div className="flex gap-3">
+                       <a href={project.github} className="text-gray-400 hover:text-white transition-colors"><Github size={20} /></a>
+                       <a href={project.link} className="text-gray-400 hover:text-blue-400 transition-colors"><ExternalLink size={20} /></a>
+                    </div>
+                 </div>
+              </div>
+              
+              <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{project.title}</h3>
+              <p className="text-gray-400 mb-4 line-clamp-2">{project.desc}</p>
+              
+              <div className="flex flex-wrap gap-2 mt-auto">
+                {project.tech.map((t, i) => (
+                  <span key={i} className="text-xs font-medium px-2 py-1 bg-gray-800 text-gray-300 rounded">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Contact = () => {
+  return (
+    <section id="contact" className="py-20 bg-[#0a0a0a] text-white px-4">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-3xl font-bold mb-6">
+          Get In <span className="text-blue-500">Touch</span>
+        </h2>
+        <p className="text-gray-400 mb-12 max-w-lg mx-auto">
+          Whether you have a question, a project proposal, or just want to say hi, feel free to reach out. I'll try my best to get back to you!
+        </p>
+
+        <form className="max-w-lg mx-auto space-y-4 text-left">
+           <input type="text" placeholder="Your Name" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white" />
+           <input type="email" placeholder="Your Email" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white" />
+           <textarea rows="5" placeholder="Your Message" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white"></textarea>
+           <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition-colors shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+              Send Message
+           </button>
+        </form>
+
+        <div className="mt-12 flex justify-center space-x-6">
+          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Github size={24} /></a>
+          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Linkedin size={24} /></a>
+          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Twitter size={24} /></a>
+          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Mail size={24} /></a>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/* MAIN COMPONENT                              */
+/* -------------------------------------------------------------------------- */
+
+function App() {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <>
+      {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
+      
+      <div 
+        className={`min-h-screen bg-black text-gray-100 transition-opacity duration-700 ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+        <Home />
+        <About />
+        <Projects />
+        <Contact />
+        
+        <footer className="py-6 text-center text-sm text-gray-600 bg-black border-t border-white/5">
+           Built with ❤️ by Bhavesh.
+        </footer>
+      </div>
+    </>
+  );
 }
+
+export default App;
+
+
