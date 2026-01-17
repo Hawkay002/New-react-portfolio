@@ -2,23 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar for that hacker/cyber feel */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #0f172a; 
-}
-::-webkit-scrollbar-thumb {
-  background: #334155; 
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #34d399; 
+body {
+  background-color: #050505;
+  color: #e5e7eb;
+  overflow-x: hidden;
 }
 
-/* Base styles to ensure dark theme consistency */
-body {
-  background-color: #020617; /* Slate 950 */
-  color: #e2e8f0;
+/* Custom utility for the specific green glow border */
+@layer utilities {
+  .glow-border-green {
+    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  
+  .glow-text {
+     text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
 }
