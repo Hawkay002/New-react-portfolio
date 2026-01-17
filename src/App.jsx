@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
@@ -7,6 +7,7 @@ import {
   BookOpen, GraduationCap, Terminal, Database, Layers
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+
 
 // --- DATA ---
 const data = {
