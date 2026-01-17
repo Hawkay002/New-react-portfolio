@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-
 // --- DATA ---
 const data = {
   about: {
@@ -416,7 +415,7 @@ function App() {
           </RevealCard>
         </section>
 
-        {/* --- CONTACT --- */}
+        {/* --- CONTACT ---- */}
         <section>
           <SectionTitle subtitle="" title="get_in_touch" />
           
