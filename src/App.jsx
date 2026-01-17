@@ -57,7 +57,7 @@ const data = {
     {
       title: "Connect - Link in Bio",
       desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
-      tags: ["React", "Gaming", "Social"],
+      tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", 
       link: "#", 
       icon: Link, 
@@ -69,7 +69,7 @@ const data = {
     {
       title: "Rent Invoicing App",
       desc: "Fast and reliable way to create and send rent invoices to tenants.",
-      tags: ["React", "Fintech", "Automation"],
+      tags: ["Web App", "Offline", "Local Storage"],
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Receipt, 
@@ -105,7 +105,7 @@ const data = {
     {
       title: "Unredactor",
       desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
-      tags: ["AI", "Security", "Forensics"],
+      tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Eye, 
@@ -117,7 +117,7 @@ const data = {
     {
       title: "Event Ticketing System",
       desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
-      tags: ["Management", "Admin", "Scanner"],
+      tags: ["Management", "Admin", "Firestore"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Ticket, 
@@ -129,7 +129,7 @@ const data = {
     {
       title: "Portfolio Website",
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
-      tags: ["React", "Showcase", "Design"],
+      tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Globe, 
@@ -141,21 +141,57 @@ const data = {
   ],
   education: [
     {
-      title: "B.Tech in Data Science and IoT",
-      place: "Amrapali University",
-      status: "Currently Studying",
+      title: "Master’s Degree in Criminology",
+      place: "Edinburgh, United Kingdom",
+      status: "96%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Senior Secondary (CBSE)",
-      place: "PCM, Computer Science",
-      status: "75.2%",
+      title: "Master’s Degree in International Relations",
+      place: "Edinburgh, United Kingdom",
+      status: "92%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Master’s Degree in Graphic Designing",
+      place: "West Bengal, India",
+      status: "96%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Master’s Degree in Computer Science",
+      place: "Delhi, India",
+      status: "90%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Business Administration",
+      place: "West Bengal, India",
+      status: "85%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Science",
+      place: "West Bengal, India",
+      status: "88%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Commerce",
+      place: "West Bengal, India",
+      status: "95%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Higher Secondary (WBCHSE)",
+      place: "West Bengal, India",
+      status: "92%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Secondary (CBSE)",
-      place: "CBSE Board",
-      status: "85.2%",
+      title: "Secondary (WBBSE)",
+      place: "West Bengal, India",
+      status: "87%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
   ],
@@ -547,24 +583,6 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-
-            <RevealCard delay={0.2}>
-              <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
-                <div className="flex items-center gap-4 mb-4 relative z-10">
-                   <div className="p-3 rounded-xl bg-neon-green/20 text-neon-green">
-                     <Award size={24} />
-                   </div>
-                   <div>
-                     <h3 className="font-bold text-lg text-white">National Recognition</h3>
-                     <p className="text-neon-green text-sm">Inspire Awards 2025</p>
-                   </div>
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed relative z-10">
-                  Achieved national selection for the project <span className="text-neon-green font-semibold">E-Rabin</span>, an innovative e-waste segregator.
-                </p>
-              </div>
-            </RevealCard>
           </div>
         </section>
 
@@ -592,7 +610,7 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-          </div> 
+          </div>
 
           <RevealCard className="mt-6">
             <Card className="flex flex-col items-center text-center py-8 border-neon-green/20">
