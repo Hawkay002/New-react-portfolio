@@ -5,9 +5,10 @@ import {
   Cpu, Globe, Smartphone, Award, Target, 
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
-  Plane, PenTool, Video, Box, Radio, Monitor, Origami, Folder
+  Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
+  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- DATA ---
 const data = {
@@ -17,7 +18,7 @@ const data = {
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
       { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
       { icon: Smartphone, label: "Mobile Development", color: "text-blue-500" },
-      { icon: Origami, label: "Origami", color: "text-pink-400" }, // Updated to Origami
+      { icon: Origami, label: "Origami", color: "text-pink-400" },
       { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400" },
       { icon: Target, label: "Problem Solving", color: "text-green-400" },
     ]
@@ -54,81 +55,88 @@ const data = {
   },
   projects: [
     {
-      title: "Pandey Gift Shop",
-      desc: "A full-stack e-commerce application built with React.js and Firebase.",
-      tags: ["React", "Firebase", "Ecommerce"],
-      icon: Smartphone, 
-      color: "text-green-400", 
-      bg: "bg-green-400/10",
-      hoverBorder: "group-hover:border-green-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
-      gradient: "from-green-400/20 to-emerald-600/20"
-    },
-    {
-      title: "E-Litt",
-      desc: "A full-stack Edutech platform for online learning and course management.",
-      tags: ["React", "Firebase", "Edutech"],
-      icon: GraduationCap, 
-      color: "text-purple-400", 
-      bg: "bg-purple-400/10",
-      hoverBorder: "group-hover:border-purple-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
-      gradient: "from-purple-400/20 to-indigo-600/20"
-    },
-    {
-      title: "ElitMock",
-      desc: "A mock test platform for users to prepare for exams by taking or buying tests.",
-      tags: ["React", "Firebase", "Testing"],
-      icon: Layers, 
+      title: "Connect - Link in Bio",
+      desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
+      tags: ["React", "Gaming", "Social"],
+      image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", 
+      link: "#", 
+      icon: Link, 
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       hoverBorder: "group-hover:border-blue-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
-      gradient: "from-blue-400/20 to-cyan-600/20"
     },
     {
-      title: "Kreoverse",
-      desc: "A real-time chatting web application.",
-      tags: ["React", "Firebase", "Chat"],
-      icon: Mail, 
+      title: "Rent Invoicing App",
+      desc: "Fast and reliable way to create and send rent invoices to tenants.",
+      tags: ["React", "Fintech", "Automation"],
+      image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
+      link: "#",
+      icon: Receipt, 
+      color: "text-green-400", 
+      bg: "bg-green-400/10",
+      hoverBorder: "group-hover:border-green-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
+    },
+    {
+      title: "Restaurant POS System",
+      desc: "A multifunctional POS System for restaurants to take and serve orders.",
+      tags: ["POS", "Management", "Real-time"],
+      image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=800",
+      link: "#",
+      icon: Utensils, 
+      color: "text-orange-400", 
+      bg: "bg-orange-400/10",
+      hoverBorder: "group-hover:border-orange-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.2)]",
+    },
+    {
+      title: "Birthday & Shagun Bot",
+      desc: "User interact first telegram bot for send birthday wish cards along with a shagun if you're lucky.",
+      tags: ["Telegram", "Bot", "Automation"],
+      image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800",
+      link: "#",
+      icon: Gift, 
       color: "text-pink-400", 
       bg: "bg-pink-400/10",
       hoverBorder: "group-hover:border-pink-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
-      gradient: "from-pink-400/20 to-rose-600/20"
     },
     {
-      title: "E-Rabin",
-      desc: "An IoT project for e-waste segregation using Arduino.",
-      tags: ["Arduino", "IoT", "Hardware"],
-      icon: Cpu, 
-      color: "text-emerald-400", 
-      bg: "bg-emerald-400/10",
-      hoverBorder: "group-hover:border-emerald-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(52,211,153,0.2)]",
-      gradient: "from-emerald-400/20 to-teal-600/20"
+      title: "Unredactor",
+      desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
+      tags: ["AI", "Security", "Forensics"],
+      image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
+      link: "#",
+      icon: Eye, 
+      color: "text-red-400", 
+      bg: "bg-red-400/10",
+      hoverBorder: "group-hover:border-red-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
     {
-      title: "Kreobot",
-      desc: "A web application for real-time face recognition.",
-      tags: ["React", "ML", "Face Recognition"],
-      icon: Smartphone, 
-      color: "text-cyan-400", 
-      bg: "bg-cyan-400/10",
-      hoverBorder: "group-hover:border-cyan-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
-      gradient: "from-cyan-400/20 to-sky-600/20"
+      title: "Event Ticketing System",
+      desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
+      tags: ["Management", "Admin", "Scanner"],
+      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
+      link: "#",
+      icon: Ticket, 
+      color: "text-purple-400", 
+      bg: "bg-purple-400/10",
+      hoverBorder: "group-hover:border-purple-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
     },
     {
-      title: "Personal Portfolio",
-      desc: "A creative portfolio website designed to look like a desktop OS.",
-      tags: ["React", "TypeScript", "Framer Motion"],
+      title: "Portfolio Website",
+      desc: "A website to showcase my developer skills as an AI full-stack developer.",
+      tags: ["React", "Showcase", "Design"],
+      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
+      link: "#",
       icon: Globe, 
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
       hoverBorder: "group-hover:border-indigo-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
-      gradient: "from-indigo-400/20 to-violet-600/20"
     }
   ],
   education: [
@@ -186,7 +194,6 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 // --- ANIMATION COMPONENTS ---
-// Modified to support Left/Right slide animations
 const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" }) => {
   const variants = {
     hidden: { 
@@ -252,6 +259,9 @@ const ProgressBar = ({ name, level, color }) => (
 
 // --- MAIN APP ---
 function App() {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"; // Replace with your Raw GitHub URL
+
   const scrollToContact = () => {
     const element = document.getElementById('contact');
     if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -260,6 +270,39 @@ function App() {
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black">
       
+      {/* Profile Image Modal (Lightbox) */}
+      <AnimatePresence>
+        {isProfileOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            onClick={() => setIsProfileOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              className="relative max-w-2xl w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setIsProfileOpen(false)}
+                className="absolute -top-12 right-0 p-2 text-white hover:text-neon-green transition-colors"
+              >
+                <X size={32} />
+              </button>
+              <img 
+                src={profileImage} 
+                alt="Profile Full" 
+                className="w-full h-auto rounded-2xl border border-neon-green/30 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Navbar */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-app-bg/80 backdrop-blur-lg border-b border-white/5 h-16 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
@@ -277,11 +320,20 @@ function App() {
         <section className="flex flex-col items-center text-center mb-16">
           <motion.div 
             initial={{ scale: 0 }} animate={{ scale: 1 }} 
-            className="relative w-32 h-32 mb-8"
+            className="relative w-32 h-32 mb-8 group cursor-pointer"
+            onClick={() => setIsProfileOpen(true)}
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70"></div>
-            <div className="absolute inset-1 bg-app-bg rounded-full flex items-center justify-center z-10">
-              <span className="text-4xl font-bold text-neon-green">S</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-1 bg-app-bg rounded-full overflow-hidden border-2 border-app-bg z-10 relative">
+              <img 
+                src={profileImage} 
+                alt="Profile" 
+                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+              />
+              {/* Overlay with Magnifying Glass */}
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <ZoomIn className="text-neon-green w-8 h-8" />
+              </div>
             </div>
           </motion.div>
 
@@ -409,40 +461,47 @@ function App() {
           
           <div className="space-y-6">
             {data.projects.map((project, idx) => (
-              // Alternating Slide Animation: Left for Even (0, 2), Right for Odd (1, 3)
-              // Wait, Index 0 is 1st. User said 1st from Left.
               <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
                 <Card className={`group relative overflow-hidden hover:border-opacity-100 border-white/5 ${project.hoverBorder} ${project.hoverShadow}`}>
                   
-                  {/* Preview Image Area */}
-                  <div className={`h-32 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 bg-gradient-to-br ${project.gradient} relative overflow-hidden group-hover:scale-105 transition-transform duration-500`}>
-                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                      <project.icon size={48} className="text-white mix-blend-overlay" />
-                    </div>
+                  {/* Preview Image */}
+                  <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                    <img 
+                      src={project.image} 
+                      alt={project.title} 
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                   </div>
 
                   {/* Icon */}
-                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4`}>
+                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}>
                     <project.icon size={24} />
                   </div>
 
                   {/* Title & Link */}
-                  <div className="flex justify-between items-center mb-3">
+                  <div className="flex justify-between items-center mb-3 relative z-10">
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>
                       {project.title}
                     </h3>
-                    <div className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors">
+                    {/* Redirect Icon is now a Link */}
+                    <a 
+                      href={project.link}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                    >
                       <ExternalLink size={16} />
-                    </div>
+                    </a>
                   </div>
 
                   {/* Description */}
-                  <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+                  <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">
                     {project.desc}
                   </p>
 
                   {/* Pills */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 relative z-10">
                     {project.tags.map((tag, tIdx) => (
                       <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">
                         {tag}
