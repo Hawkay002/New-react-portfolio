@@ -5,7 +5,7 @@ import {
   Cpu, Globe, Smartphone, Award, Target, 
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
-  Plane, PenTool, Video, Box, Radio, Origami, Monitor
+  Plane, PenTool, Video, Box, Radio, Monitor, Origami, Folder
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -17,7 +17,7 @@ const data = {
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
       { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
       { icon: Smartphone, label: "Mobile Development", color: "text-blue-500" },
-      { icon: Origami, label: "Origami", color: "text-pink-400" },
+      { icon: Origami, label: "Origami", color: "text-pink-400" }, // Updated to Origami
       { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400" },
       { icon: Target, label: "Problem Solving", color: "text-green-400" },
     ]
@@ -42,7 +42,7 @@ const data = {
       { name: "Raspberry Pi", level: 75, color: "bg-pink-500" },
       { name: "Sensors & Actuators", level: 80, color: "bg-purple-500" },
       { name: "Flipper Zero", level: 90, color: "bg-orange-500" },
-      { name: "Kode", level: 85, color: "bg-indigo-400" }, // As requested
+      { name: "Kode", level: 85, color: "bg-indigo-400" },
     ],
     tools: [
       { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "bg-pink-500" },
@@ -57,43 +57,78 @@ const data = {
       title: "Pandey Gift Shop",
       desc: "A full-stack e-commerce application built with React.js and Firebase.",
       tags: ["React", "Firebase", "Ecommerce"],
-      icon: Smartphone, color: "text-green-400", bg: "bg-green-400/10"
+      icon: Smartphone, 
+      color: "text-green-400", 
+      bg: "bg-green-400/10",
+      hoverBorder: "group-hover:border-green-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
+      gradient: "from-green-400/20 to-emerald-600/20"
     },
     {
       title: "E-Litt",
       desc: "A full-stack Edutech platform for online learning and course management.",
       tags: ["React", "Firebase", "Edutech"],
-      icon: GraduationCap, color: "text-purple-400", bg: "bg-purple-400/10"
+      icon: GraduationCap, 
+      color: "text-purple-400", 
+      bg: "bg-purple-400/10",
+      hoverBorder: "group-hover:border-purple-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
+      gradient: "from-purple-400/20 to-indigo-600/20"
     },
     {
       title: "ElitMock",
       desc: "A mock test platform for users to prepare for exams by taking or buying tests.",
       tags: ["React", "Firebase", "Testing"],
-      icon: Layers, color: "text-blue-400", bg: "bg-blue-400/10"
+      icon: Layers, 
+      color: "text-blue-400", 
+      bg: "bg-blue-400/10",
+      hoverBorder: "group-hover:border-blue-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
+      gradient: "from-blue-400/20 to-cyan-600/20"
     },
     {
       title: "Kreoverse",
       desc: "A real-time chatting web application.",
       tags: ["React", "Firebase", "Chat"],
-      icon: Mail, color: "text-pink-400", bg: "bg-pink-400/10"
+      icon: Mail, 
+      color: "text-pink-400", 
+      bg: "bg-pink-400/10",
+      hoverBorder: "group-hover:border-pink-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
+      gradient: "from-pink-400/20 to-rose-600/20"
     },
     {
       title: "E-Rabin",
       desc: "An IoT project for e-waste segregation using Arduino.",
       tags: ["Arduino", "IoT", "Hardware"],
-      icon: Cpu, color: "text-emerald-400", bg: "bg-emerald-400/10"
+      icon: Cpu, 
+      color: "text-emerald-400", 
+      bg: "bg-emerald-400/10",
+      hoverBorder: "group-hover:border-emerald-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(52,211,153,0.2)]",
+      gradient: "from-emerald-400/20 to-teal-600/20"
     },
     {
       title: "Kreobot",
       desc: "A web application for real-time face recognition.",
       tags: ["React", "ML", "Face Recognition"],
-      icon: Smartphone, color: "text-cyan-400", bg: "bg-cyan-400/10"
+      icon: Smartphone, 
+      color: "text-cyan-400", 
+      bg: "bg-cyan-400/10",
+      hoverBorder: "group-hover:border-cyan-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
+      gradient: "from-cyan-400/20 to-sky-600/20"
     },
     {
       title: "Personal Portfolio",
       desc: "A creative portfolio website designed to look like a desktop OS.",
       tags: ["React", "TypeScript", "Framer Motion"],
-      icon: Globe, color: "text-indigo-400", bg: "bg-indigo-400/10"
+      icon: Globe, 
+      color: "text-indigo-400", 
+      bg: "bg-indigo-400/10",
+      hoverBorder: "group-hover:border-indigo-400/50",
+      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
+      gradient: "from-indigo-400/20 to-violet-600/20"
     }
   ],
   education: [
@@ -151,13 +186,28 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 // --- ANIMATION COMPONENTS ---
-const RevealCard = ({ children, delay = 0, className = "" }) => {
+// Modified to support Left/Right slide animations
+const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" }) => {
+  const variants = {
+    hidden: { 
+      opacity: 0, 
+      y: direction === "bottom" ? 50 : 0,
+      x: direction === "left" ? -75 : direction === "right" ? 75 : 0 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      x: 0 
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      variants={variants}
+      initial="hidden"
+      whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 50 }}
+      transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 40 }}
       className={className}
     >
       {children}
@@ -346,7 +396,7 @@ function App() {
               "React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", 
               "IoT", "Flipper Zero", "Adobe", "3D Modeling"
             ].map((tag, i) => (
-              <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono">
+              <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">
                 {tag}
               </span>
             ))}
@@ -357,23 +407,44 @@ function App() {
         <section id="projects">
           <SectionTitle subtitle="" title="featured_projects" />
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             {data.projects.map((project, idx) => (
-              <RevealCard key={idx} delay={idx * 0.1}>
-                <Card className="group">
-                  <div className="flex justify-between items-start mb-3">
-                    <div className={`p-2.5 rounded-xl ${project.bg} ${project.color}`}>
-                      <project.icon size={22} />
+              // Alternating Slide Animation: Left for Even (0, 2), Right for Odd (1, 3)
+              // Wait, Index 0 is 1st. User said 1st from Left.
+              <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
+                <Card className={`group relative overflow-hidden hover:border-opacity-100 border-white/5 ${project.hoverBorder} ${project.hoverShadow}`}>
+                  
+                  {/* Preview Image Area */}
+                  <div className={`h-32 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 bg-gradient-to-br ${project.gradient} relative overflow-hidden group-hover:scale-105 transition-transform duration-500`}>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                      <project.icon size={48} className="text-white mix-blend-overlay" />
                     </div>
+                  </div>
+
+                  {/* Icon */}
+                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4`}>
+                    <project.icon size={24} />
+                  </div>
+
+                  {/* Title & Link */}
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>
+                      {project.title}
+                    </h3>
                     <div className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors">
                       <ExternalLink size={16} />
                     </div>
                   </div>
-                  <h3 className="font-bold text-lg text-white mb-2">{project.title}</h3>
-                  <p className="text-sm text-slate-400 mb-4 leading-relaxed">{project.desc}</p>
+
+                  {/* Description */}
+                  <p className="text-sm text-slate-400 mb-5 leading-relaxed">
+                    {project.desc}
+                  </p>
+
+                  {/* Pills */}
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400">
+                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">
                         {tag}
                       </span>
                     ))}
