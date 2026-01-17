@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
