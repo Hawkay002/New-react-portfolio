@@ -167,15 +167,19 @@ const data = {
   ]
 };
 
-// --- TYPEWRITER COMPONENT ---
+// --- TYPEWRITER COMPONENT (FIXED) ---
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   
   useEffect(() => {
     let i = 0;
+    setDisplayText(''); // Reset
+    
     const timer = setInterval(() => {
       if (i < text.length) {
-        setDisplayText((prev) => prev + text.charAt(i));
+        // We use substring to ensure we get the exact character at the exact index
+        // This prevents the "missing letter" glitch
+        setDisplayText(text.substring(0, i + 1));
         i++;
       } else {
         clearInterval(timer);
@@ -323,10 +327,10 @@ function App() {
             className="relative w-32 h-32 mb-8 group cursor-pointer"
             onClick={() => setIsProfileOpen(true)}
           >
-            {/* Glow Ring - Increased blur for softer effect */}
+            {/* Glow Ring */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70 group-hover:opacity-100 transition-opacity"></div>
             
-            {/* Image Container - Removed bg-app-bg and borders to fix the dark ring issue */}
+            {/* Image Container */}
             <div className="absolute inset-1 rounded-full overflow-hidden z-10 relative">
               <img 
                 src={profileImage} 
