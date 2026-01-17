@@ -5,7 +5,7 @@ import {
   Cpu, Globe, Smartphone, Award, Target, 
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
-  Plane, PenTool, Video, Box, Radio, Paperclip, Monitor
+  Plane, PenTool, Video, Box, Radio, Origami, Monitor
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -17,7 +17,7 @@ const data = {
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
       { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
       { icon: Smartphone, label: "Mobile Development", color: "text-blue-500" },
-      { icon: Paperclip, label: "Origami", color: "text-pink-400" },
+      { icon: Origami, label: "Origami", color: "text-pink-400" },
       { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400" },
       { icon: Target, label: "Problem Solving", color: "text-green-400" },
     ]
