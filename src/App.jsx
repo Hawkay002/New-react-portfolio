@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {  
+import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
   Cpu, Globe, Smartphone, Award, Target, 
@@ -268,7 +268,6 @@ function App() {
   };
 
   return (
-    // FIXED: Added overflow-x-hidden to prevent layout shift during right-slide animation
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
       
       {/* Profile Image Modal (Lightbox) */}
@@ -324,8 +323,11 @@ function App() {
             className="relative w-32 h-32 mb-8 group cursor-pointer"
             onClick={() => setIsProfileOpen(true)}
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70 group-hover:opacity-100 transition-opacity"></div>
-            <div className="absolute inset-1 bg-app-bg rounded-full overflow-hidden border-2 border-app-bg z-10 relative">
+            {/* Glow Ring - Increased blur for softer effect */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70 group-hover:opacity-100 transition-opacity"></div>
+            
+            {/* Image Container - Removed bg-app-bg and borders to fix the dark ring issue */}
+            <div className="absolute inset-1 rounded-full overflow-hidden z-10 relative">
               <img 
                 src={profileImage} 
                 alt="Profile" 
@@ -586,7 +588,7 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-          </div>
+          </div> 
 
           <RevealCard className="mt-6">
             <Card className="flex flex-col items-center text-center py-8 border-neon-green/20">
