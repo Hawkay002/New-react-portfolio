@@ -4,13 +4,15 @@ import {
   Github, Linkedin, Twitter, 
   Cpu, Globe, Smartphone, Award, Target, 
   Music, Mic, Headphones, Guitar,
-  BookOpen, GraduationCap, Layers, Database
+  BookOpen, GraduationCap, Terminal, Database, Layers
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// --- DATA CONFIGURATION ---
+// --- DATA ---
 const data = {
   about: {
+    // Console part removed as requested
+    bio: "I'm a passionate developer currently pursuing B.Tech in Data Science & IoT. My journey began with curiosity about how technology can solve real-world problems, leading me to develop innovative solutions that bridge the gap between digital and physical worlds.",
     highlights: [
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
       { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
@@ -120,7 +122,8 @@ const data = {
 };
 
 // --- ANIMATION COMPONENTS ---
-// RevealCard triggers the animation when the element enters the viewport
+
+// This renders the card with an entry animation when it scrolls into view
 const RevealCard = ({ children, delay = 0, className = "" }) => {
   return (
     <motion.div
@@ -136,6 +139,7 @@ const RevealCard = ({ children, delay = 0, className = "" }) => {
 };
 
 // --- UI COMPONENTS ---
+
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
     <span className="text-neon-green text-lg font-mono mb-2">{'>'} {subtitle}</span>
@@ -147,7 +151,7 @@ const SectionTitle = ({ subtitle, title }) => (
 );
 
 const Card = ({ children, className = "" }) => (
-  <div className={`bg-slate-900 rounded-2xl border border-white/5 p-6 hover:shadow-[0_0_20px_-5px_rgba(16,185,129,0.2)] hover:border-emerald-500/30 transition-all duration-300 ${className}`}>
+  <div className={`bg-card-bg rounded-2xl border border-white/5 p-6 glow-card transition-all duration-300 ${className}`}>
     {children}
   </div>
 );
@@ -171,17 +175,18 @@ const ProgressBar = ({ name, level, color }) => (
 );
 
 // --- MAIN APP ---
+
 function App() {
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-neon-green selection:text-black">
+    <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black">
       
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-[#020617]/80 backdrop-blur-lg border-b border-white/5 h-16 flex items-center justify-between px-6">
+      <nav className="fixed top-0 inset-x-0 z-50 bg-app-bg/80 backdrop-blur-lg border-b border-white/5 h-16 flex items-center justify-between px-6">
         <div className="flex items-center gap-2">
-          <div className="bg-emerald-500/20 p-1.5 rounded-lg">
-             <Code2 className="text-emerald-500 w-5 h-5" />
+          <div className="bg-neon-green/20 p-1.5 rounded-lg">
+             <Code2 className="text-neon-green w-5 h-5" />
           </div>
-          <span className="font-bold text-emerald-500 tracking-tight">Bhavesh.dev</span>
+          <span className="font-bold text-neon-green tracking-tight">Bhavesh.dev</span>
         </div>
         <Menu className="text-slate-400 w-6 h-6" />
       </nav>
@@ -195,19 +200,19 @@ function App() {
             className="relative w-32 h-32 mb-8"
           >
             {/* Spinning Gradient Ring */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-400 animate-spin-slow blur-sm opacity-70"></div>
-            <div className="absolute inset-1 bg-[#020617] rounded-full flex items-center justify-center z-10">
-              <span className="text-4xl font-bold text-emerald-500">B</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70"></div>
+            <div className="absolute inset-1 bg-app-bg rounded-full flex items-center justify-center z-10">
+              <span className="text-4xl font-bold text-neon-green">B</span>
             </div>
           </motion.div>
 
           <RevealCard>
             <h1 className="text-4xl font-bold text-white mb-3">
-              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-400">Bhavesh</span>
+              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Bhavesh</span>
             </h1>
             <p className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2">
               Full Stack Developer & IoT Engineer
-              <span className="w-0.5 h-5 bg-emerald-500 animate-pulse"></span>
+              <span className="w-0.5 h-5 bg-neon-green animate-blink"></span>
             </p>
           </RevealCard>
           
@@ -218,12 +223,12 @@ function App() {
           </RevealCard>
 
           <RevealCard delay={0.2} className="flex flex-col w-full gap-4">
-            <button className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:opacity-90 transition-opacity">
+            <button className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)]">
               Get In Touch
             </button>
             <div className="flex justify-center gap-4">
               {[Mail, Send].map((Icon, i) => (
-                <div key={i} className="p-3 rounded-full bg-slate-900 border border-slate-800 text-emerald-500 hover:bg-slate-800 transition-colors">
+                <div key={i} className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors">
                   <Icon size={20} />
                 </div>
               ))}
@@ -235,28 +240,10 @@ function App() {
         <section>
           <SectionTitle subtitle="" title="about_me" />
           
-          {/* Code Snippet Card */}
-          <RevealCard className="mb-6">
-            <Card className="font-mono text-xs sm:text-sm overflow-hidden relative">
-              <div className="absolute top-0 left-0 right-0 h-8 bg-slate-900 border-b border-white/5 flex items-center px-4 gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
-              </div>
-              <div className="pt-6 space-y-2">
-                <p className="text-green-400">console.log("Hello World!");</p>
-                <p className="text-slate-400 mt-4 leading-relaxed">
-                  I'm a passionate developer currently pursuing B.Tech in Data Science & IoT. My journey began with curiosity...
-                </p>
-                <div className="mt-4 p-3 bg-slate-950 rounded-lg border border-white/5">
-                  <p><span className="text-blue-400">const</span> <span className="text-yellow-200">bhavesh</span> = {'{'}</p>
-                  <p className="pl-4"><span className="text-cyan-400">passion:</span> <span className="text-green-300">"Innovation"</span>,</p>
-                  <p className="pl-4"><span className="text-cyan-400">focus:</span> <span className="text-green-300">"Problem Solving"</span>,</p>
-                  <p className="pl-4"><span className="text-cyan-400">mission:</span> <span className="text-green-300">"Tech for Good"</span></p>
-                  <p>{'};'}</p>
-                </div>
-              </div>
-            </Card>
+          <RevealCard className="mb-8">
+            <p className="text-slate-300 text-sm leading-7 text-center">
+              {data.about.bio}
+            </p>
           </RevealCard>
 
           {/* Highlights Grid */}
@@ -281,28 +268,28 @@ function App() {
           <div className="space-y-4">
             <RevealCard>
               <Card>
-                <h3 className="text-lg font-bold text-emerald-500 mb-4">Frontend</h3>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>
                 {data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
 
             <RevealCard>
               <Card>
-                <h3 className="text-lg font-bold text-emerald-500 mb-4">Backend</h3>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>
                 {data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
 
             <RevealCard>
               <Card>
-                <h3 className="text-lg font-bold text-emerald-500 mb-4">IoT & Hardware</h3>
+                <h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>
                 {data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
 
             <RevealCard>
               <Card>
-                <h3 className="text-lg font-bold text-emerald-500 mb-4">Tools & Others</h3>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>
                 {data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
@@ -311,7 +298,7 @@ function App() {
           {/* Skill Tags */}
           <RevealCard className="mt-8 flex flex-wrap justify-center gap-2">
             {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "IoT", "Machine Learning"].map((tag, i) => (
-              <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-emerald-500 font-mono">
+              <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono">
                 {tag}
               </span>
             ))}
@@ -338,7 +325,7 @@ function App() {
                   <p className="text-sm text-slate-400 mb-4 leading-relaxed">{project.desc}</p>
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-950 border border-slate-800 text-slate-400">
+                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400">
                         {tag}
                       </span>
                     ))}
@@ -348,7 +335,7 @@ function App() {
             ))}
             
             <RevealCard className="mt-8">
-              <div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-emerald-500 font-mono text-sm">
+              <div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">
                 More projects coming soon...
               </div>
             </RevealCard>
@@ -379,19 +366,19 @@ function App() {
 
             {/* National Recognition Special Card */}
             <RevealCard delay={0.2}>
-              <div className="relative overflow-hidden rounded-2xl bg-slate-900 border border-emerald-500/30 p-6 shadow-[0_0_20px_-10px_rgba(16,185,129,0.3)]">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-[50px] rounded-full"></div>
+              <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
                 <div className="flex items-center gap-4 mb-4 relative z-10">
-                   <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-500">
+                   <div className="p-3 rounded-xl bg-neon-green/20 text-neon-green">
                      <Award size={24} />
                    </div>
                    <div>
                      <h3 className="font-bold text-lg text-white">National Recognition</h3>
-                     <p className="text-emerald-500 text-sm">Inspire Awards 2025</p>
+                     <p className="text-neon-green text-sm">Inspire Awards 2025</p>
                    </div>
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed relative z-10">
-                  Achieved national selection for the project <span className="text-emerald-500 font-semibold">E-Rabin</span>, an innovative e-waste segregator.
+                  Achieved national selection for the project <span className="text-neon-green font-semibold">E-Rabin</span>, an innovative e-waste segregator.
                 </p>
               </div>
             </RevealCard>
@@ -412,7 +399,7 @@ function App() {
             {data.music.map((item, idx) => (
               <RevealCard key={idx} delay={idx * 0.1}>
                 <Card className="flex flex-col items-center justify-center py-8">
-                  <div className="p-4 rounded-2xl bg-slate-950 border border-white/5 text-slate-300 mb-4">
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-white/5 text-slate-300 mb-4">
                     <item.icon size={28} />
                   </div>
                   <h3 className="font-bold text-white mb-2">{item.role}</h3>
@@ -425,7 +412,7 @@ function App() {
           </div>
 
           <RevealCard className="mt-6">
-            <Card className="flex flex-col items-center text-center py-8 border-emerald-500/20">
+            <Card className="flex flex-col items-center text-center py-8 border-neon-green/20">
               <div className="w-12 h-12 rounded-full bg-cyan-400/20 flex items-center justify-center text-cyan-400 mb-4 animate-pulse">
                 <Music size={24} />
               </div>
@@ -449,7 +436,7 @@ function App() {
             ].map((contact, idx) => (
               <RevealCard key={idx} delay={idx * 0.1}>
                 <Card className="flex items-center gap-4 py-4">
-                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-emerald-500">
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-neon-green">
                     <contact.icon size={18} />
                   </div>
                   <div className="overflow-hidden">
@@ -462,24 +449,24 @@ function App() {
           </div>
 
           <RevealCard>
-            <Card className="border-t-4 border-t-emerald-500">
-               <h3 className="text-lg font-bold text-emerald-500 mb-6 flex items-center gap-2">
+            <Card className="border-t-4 border-t-neon-green">
+               <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
                  <Send size={20}/> Send Message
                </h3>
                <form className="space-y-4">
                  <div>
                    <label className="text-xs text-slate-400 ml-1">Name</label>
-                   <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition-colors text-white" placeholder="Your name" />
+                   <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your name" />
                  </div>
                  <div>
                    <label className="text-xs text-slate-400 ml-1">Email</label>
-                   <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition-colors text-white" placeholder="your@email.com" />
+                   <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="your@email.com" />
                  </div>
                  <div>
                    <label className="text-xs text-slate-400 ml-1">Message</label>
-                   <textarea rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-emerald-500 outline-none transition-colors text-white" placeholder="Your message..." />
+                   <textarea rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
                  </div>
-                 <button className="w-full py-3 bg-emerald-500 text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                 <button className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
                    Send Message
                  </button>
                </form>
