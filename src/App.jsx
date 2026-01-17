@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// --- DATA ---
+// --- DATA ---//
 const data = {
   about: {
     // NOTE: The problematic 'code snippet' section is completely gone from here.
