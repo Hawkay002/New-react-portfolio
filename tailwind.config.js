@@ -6,19 +6,21 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
-      },
       colors: {
-        // The specific dark background from the screenshots
-        'app-dark': '#050505', 
-        'card-dark': '#0a0a0a',
-        // The neon accents
-        'neon-green': '#10b981', // emerald-500
-        'neon-cyan': '#06b6d4',  // cyan-500
+        'app-bg': '#020617',     // The deep dark background
+        'card-bg': '#0f172a',    // Slightly lighter for cards
+        'neon-green': '#10b981', // Your primary green
+        'neon-blue': '#0ea5e9',  // For React/Tech
+        'neon-purple': '#8b5cf6', // For IoT
+        'neon-pink': '#ec4899',  // For Music
+      },
+      fontFamily: {
+        mono: ['"Fira Code"', 'monospace'], // Ensure you have a good mono font fallback
+        sans: ['Inter', 'sans-serif'],
       },
       animation: {
         'blink': 'blink 1s step-end infinite',
+        'spin-slow': 'spin 8s linear infinite',
       },
       keyframes: {
         blink: {
