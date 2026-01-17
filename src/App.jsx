@@ -260,7 +260,7 @@ const ProgressBar = ({ name, level, color }) => (
 // --- MAIN APP ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"; // Replace with your Raw GitHub URL
+  const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; // Replace with your Raw GitHub URL
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
