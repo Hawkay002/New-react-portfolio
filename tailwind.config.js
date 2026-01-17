@@ -28,7 +28,7 @@ export default {
           '50%': { opacity: 0 },
         }
       }
-    }
+    },
   },
   plugins: [],
 }
