@@ -3,33 +3,35 @@
 @tailwind utilities;
 
 body {
-  background-color: #050505;
-  color: #e5e7eb;
+  background-color: #020617;
+  color: #e2e8f0;
   overflow-x: hidden;
 }
 
-/* Custom utility for the specific green glow border */
-@layer utilities {
-  .glow-border-green {
-    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-  }
-  
-  .glow-text {
-     text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-  }
+/* Specific glows from your screenshots */
+.glow-text-green {
+  text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-/* scrollbar styles */
+.glow-card {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.glow-card:hover {
+  box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #020617;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
-  border-radius: 3px;
+  background: #334155;
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #10b981;
