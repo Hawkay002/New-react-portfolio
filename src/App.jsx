@@ -268,7 +268,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black">
+    // FIXED: Added overflow-x-hidden to prevent layout shift during right-slide animation
+    <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
       
       {/* Profile Image Modal (Lightbox) */}
       <AnimatePresence>
@@ -484,7 +485,6 @@ function App() {
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>
                       {project.title}
                     </h3>
-                    {/* Redirect Icon is now a Link */}
                     <a 
                       href={project.link}
                       target="_blank" 
