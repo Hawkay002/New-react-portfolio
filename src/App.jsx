@@ -1,369 +1,312 @@
-import React, { useState, useEffect } from "react"; 
+import React from 'react';
 import { 
-  Menu, X, Github, Linkedin, Mail, Twitter, 
-  ExternalLink, Code2, Palette, Database, Smartphone 
-} from "lucide-react";
+  Code, 
+  User, 
+  Briefcase, 
+  GraduationCap, 
+  Mail, 
+  Github, 
+  Linkedin, 
+  Twitter, 
+  ExternalLink,
+  Cpu,
+  Globe,
+  Database,
+  Terminal,
+  Layers
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
-/* -------------------------------------------------------------------------- */
-/* SUB-COMPONENTS                              */
-/* -------------------------------------------------------------------------- */
+// --- Configuration & Data ---
+// Edit this object to update your content
+const portfolioData = {
+  personalInfo: {
+    name: "Alex Developer",
+    title: "Full Stack Developer",
+    bio: "Passionate builder of pixel-perfect web experiences. I transform complex problems into elegant, scalable code.",
+    availability: "Open to work",
+    socials: [
+      { icon: Github, href: "#" },
+      { icon: Linkedin, href: "#" },
+      { icon: Twitter, href: "#" },
+      { icon: Mail, href: "mailto:hello@example.com" }
+    ]
+  },
+  stats: [
+    { label: "Years Exp", value: "4+" },
+    { label: "Projects", value: "25+" },
+    { label: "Clients", value: "10+" },
+    { label: "Commits", value: "2k+" }
+  ],
+  skills: {
+    frontend: [
+      { name: "React / Next.js", level: 90 },
+      { name: "Tailwind CSS", level: 95 },
+      { name: "TypeScript", level: 85 }
+    ],
+    backend: [
+      { name: "Node.js", level: 80 },
+      { name: "Python / Django", level: 75 },
+      { name: "PostgreSQL", level: 85 }
+    ],
+    tools: [
+      { name: "Docker", level: 70 },
+      { name: "AWS", level: 65 },
+      { name: "Git", level: 90 }
+    ]
+  },
+  experience: [
+    {
+      company: "Tech Innovators Inc.",
+      role: "Senior Frontend Engineer",
+      period: "2023 - Present",
+      description: "Leading the frontend team, migrating legacy code to Next.js, and improving site performance by 40%."
+    },
+    {
+      company: "WebSolutions Studio",
+      role: "Full Stack Developer",
+      period: "2021 - 2023",
+      description: "Developed e-commerce platforms using MERN stack and integrated payment gateways."
+    }
+  ],
+  education: [
+    {
+      school: "University of Technology",
+      degree: "B.S. Computer Science",
+      period: "2017 - 2021"
+    }
+  ]
+};
 
-const LoadingScreen = ({ onComplete }) => {
-  const [text, setText] = useState("");
-  const fullText = "<Hello World />";
+// --- Components ---
 
-  useEffect(() => {
-    let index = 0;
-    const interval = setInterval(() => {
-      setText(fullText.substring(0, index));
-      index++;
-
-      if (index > fullText.length) {
-        clearInterval(interval);
-        setTimeout(() => {
-          onComplete();
-        }, 1000);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [onComplete]);
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
-      <div className="mb-4 text-4xl font-mono font-bold text-white">
-        {text} <span className="animate-blink text-blue-500">|</span>
-      </div>
-      <div className="w-[200px] h-[2px] bg-gray-800 rounded relative overflow-hidden">
-        <div className="w-[40%] h-full bg-blue-500 shadow-[0_0_15px_#3b82f6] animate-[loading_1s_ease-in-out_infinite]" />
-      </div>
+const ProgressBar = ({ label, percentage, colorClass }) => (
+  <div className="mb-4">
+    <div className="flex justify-between mb-1">
+      <span className="text-sm font-medium text-slate-300">{label}</span>
+      <span className="text-sm font-medium text-slate-400">{percentage}%</span>
     </div>
-  );
-};
-
-const Navbar = ({ menuOpen, setMenuOpen }) => {
-  return (
-    <nav className="fixed top-0 w-full z-40 bg-[rgba(10,10,10,0.8)] backdrop-blur-lg border-b border-white/10 shadow-lg transition-all duration-300">
-      <div className="max-w-5xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          <a href="#home" className="font-mono text-xl font-bold text-white tracking-wider">
-            BHAVESH<span className="text-blue-500">.</span>
-          </a>
-
-          {/* Mobile Menu Toggle */}
-          <div 
-            className="w-7 h-5 relative cursor-pointer z-40 md:hidden" 
-            onClick={() => setMenuOpen((prev) => !prev)}
-          >
-            &#9776;
-          </div>
-
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-8">
-            <a href="#home" className="text-gray-300 hover:text-white transition-colors hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">Home</a>
-            <a href="#about" className="text-gray-300 hover:text-white transition-colors">About</a>
-            <a href="#projects" className="text-gray-300 hover:text-white transition-colors">Projects</a>
-            <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-const MobileMenu = ({ menuOpen, setMenuOpen }) => {
-  return (
-    <div
-      className={`fixed top-0 left-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-40 transform transition-transform duration-300 flex flex-col items-center justify-center space-y-8 ${
-        menuOpen ? "translate-x-0" : "translate-x-full"
-      }`}
-    >
-      <button
-        onClick={() => setMenuOpen(false)}
-        className="absolute top-6 right-6 text-3xl focus:outline-none cursor-pointer"
-        aria-label="Close Menu"
-      >
-        &times;
-      </button>
-
-      {['Home', 'About', 'Projects', 'Contact'].map((item) => (
-        <a
-          key={item}
-          href={`#${item.toLowerCase()}`}
-          onClick={() => setMenuOpen(false)}
-          className={`text-2xl font-semibold text-white hover:text-blue-400 transition-colors cursor-pointer`}
-        >
-          {item}
-        </a>
-      ))}
+    <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+      <motion.div 
+        initial={{ width: 0 }}
+        whileInView={{ width: `${percentage}%` }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className={`h-2.5 rounded-full ${colorClass}`}
+      ></motion.div>
     </div>
-  );
-};
+  </div>
+);
 
-const Home = () => {
-  const [text, setText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopNum, setLoopNum] = useState(0);
-  const [typingSpeed, setTypingSpeed] = useState(150);
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-slate-900/50 backdrop-blur-sm border border-slate-800 p-6 rounded-2xl hover:border-emerald-500/50 transition-colors duration-300 ${className}`}>
+    {children}
+  </div>
+);
 
-  const words = ["Frontend Developer", "UI/UX Designer", "Web Enthusiast"];
+const SectionTitle = ({ icon: Icon, title }) => (
+  <div className="flex items-center gap-2 mb-6">
+    <Icon className="w-6 h-6 text-emerald-400" />
+    <h2 className="text-2xl font-bold text-slate-100 tracking-tight">{title}</h2>
+  </div>
+);
 
-  useEffect(() => {
-    const handleType = () => {
-      const i = loopNum % words.length;
-      const fullText = words[i];
-
-      setText(
-        isDeleting
-          ? fullText.substring(0, text.length - 1)
-          : fullText.substring(0, text.length + 1)
-      );
-
-      setTypingSpeed(isDeleting ? 30 : 150);
-
-      if (!isDeleting && text === fullText) {
-        setTimeout(() => setIsDeleting(true), 1500); // Pause at end
-      } else if (isDeleting && text === "") {
-        setIsDeleting(false);
-        setLoopNum(loopNum + 1);
-      }
-    };
-
-    const timer = setTimeout(handleType, typingSpeed);
-    return () => clearTimeout(timer);
-  }, [text, isDeleting, loopNum, typingSpeed, words]);
-
-  return (
-    <section
-      id="home"
-      className="min-h-screen flex items-center justify-center relative bg-black"
-    >
-      <div className="text-center z-10 px-4">
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400 leading-tight">
-          Hi, I'm <br /> Bhavesh
-        </h1>
-
-        <p className="text-gray-400 text-xl md:text-2xl mb-8 font-mono h-8">
-          I am a <span className="text-blue-500">{text}</span>
-          <span className="animate-blink">|</span>
-        </p>
-
-        <div className="flex justify-center space-x-4">
-          <a
-            href="#projects"
-            className="bg-blue-600 text-white py-3 px-8 rounded font-medium hover:bg-blue-700 transition duration-300 shadow-[0_0_20px_rgba(37,99,235,0.4)]"
-          >
-            View Work
-          </a>
-          <a
-            href="#contact"
-            className="border border-blue-600 text-blue-500 py-3 px-8 rounded font-medium hover:bg-blue-600/10 transition duration-300"
-          >
-            Contact Me
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const About = () => {
-  return (
-    <section id="about" className="py-20 bg-[#0a0a0a] text-white">
-      <div className="max-w-5xl mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-12 text-center">
-          About <span className="text-blue-500">Me</span>
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          {/* Text Content */}
-          <div className="space-y-6">
-            <p className="text-gray-400 text-lg leading-relaxed">
-              I am a passionate <span className="text-blue-400 font-semibold">Frontend Developer</span> with a knack for creating seamless and visually stunning web applications. 
-            </p>
-            <p className="text-gray-400 text-lg leading-relaxed">
-              My journey began with HTML & CSS, and I've grown to master modern frameworks like <span className="text-white">React.js</span> and <span className="text-white">Tailwind CSS</span>. I love turning complex problems into simple, beautiful, and intuitive designs.
-            </p>
-            
-            <div className="flex flex-wrap gap-4 mt-6">
-               <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div> Available for Freelance
-               </div>
-               <div className="flex items-center gap-2 text-gray-300">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div> Full-time Opportunities
-               </div>
-            </div>
-          </div>
-
-          {/* Skills / Tech Stack */}
-          <div className="p-6 bg-white/5 border border-white/10 rounded-xl hover:-translate-y-1 transition-transform duration-300 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
-             <h3 className="text-xl font-bold mb-6">Technical Skills</h3>
-             <div className="space-y-4">
-                {[
-                  { name: "Frontend Development", val: 90, color: "bg-blue-500" },
-                  { name: "React.js", val: 85, color: "bg-cyan-500" },
-                  { name: "Tailwind CSS", val: 95, color: "bg-purple-500" },
-                  { name: "Backend (Node/Firebase)", val: 70, color: "bg-green-500" },
-                ].map((skill, index) => (
-                   <div key={index}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-300 font-medium">{skill.name}</span>
-                        <span className="text-gray-500 text-sm">{skill.val}%</span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-2.5">
-                        <div 
-                          className={`${skill.color} h-2.5 rounded-full transition-all duration-1000`} 
-                          style={{ width: `${skill.val}%` }}
-                        ></div>
-                      </div>
-                   </div>
-                ))}
-             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const Projects = () => {
-  const projects = [
-    {
-      title: "Portfolio Website",
-      desc: "A personal portfolio to showcase my work and skills. Built with React and Tailwind.",
-      tech: ["React", "Tailwind", "Vite"],
-      link: "#",
-      github: "#",
-    },
-    {
-      title: "E-Commerce App",
-      desc: "Full-featured shopping platform with cart functionality and payment integration.",
-      tech: ["Next.js", "Stripe", "Firebase"],
-      link: "#",
-      github: "#",
-    },
-    {
-      title: "Weather Dashboard",
-      desc: "Real-time weather tracking application using OpenWeatherMap API.",
-      tech: ["Vue.js", "Axios", "CSS"],
-      link: "#",
-      github: "#",
-    },
-    {
-      title: "Task Manager",
-      desc: "Productivity tool for managing daily tasks with drag-and-drop features.",
-      tech: ["React", "Redux", "Node.js"],
-      link: "#",
-      github: "#",
-    },
-  ];
-
-  return (
-    <section id="projects" className="py-20 bg-black text-white px-4">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center">
-          My <span className="text-blue-500">Projects</span>
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <div 
-              key={index}
-              className="group relative p-6 bg-[#111] border border-white/5 rounded-xl hover:-translate-y-2 hover:border-blue-500/30 hover:shadow-[0_5px_20px_rgba(59,130,246,0.15)] transition-all duration-300"
-            >
-              <div className="mb-4">
-                 <div className="flex justify-between items-center">
-                    <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                      <Code2 size={24} />
-                    </div>
-                    <div className="flex gap-3">
-                       <a href={project.github} className="text-gray-400 hover:text-white transition-colors"><Github size={20} /></a>
-                       <a href={project.link} className="text-gray-400 hover:text-blue-400 transition-colors"><ExternalLink size={20} /></a>
-                    </div>
-                 </div>
-              </div>
-              
-              <h3 className="text-xl font-bold mb-2 group-hover:text-blue-400 transition-colors">{project.title}</h3>
-              <p className="text-gray-400 mb-4 line-clamp-2">{project.desc}</p>
-              
-              <div className="flex flex-wrap gap-2 mt-auto">
-                {project.tech.map((t, i) => (
-                  <span key={i} className="text-xs font-medium px-2 py-1 bg-gray-800 text-gray-300 rounded">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const Contact = () => {
-  return (
-    <section id="contact" className="py-20 bg-[#0a0a0a] text-white px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">
-          Get In <span className="text-blue-500">Touch</span>
-        </h2>
-        <p className="text-gray-400 mb-12 max-w-lg mx-auto">
-          Whether you have a question, a project proposal, or just want to say hi, feel free to reach out. I'll try my best to get back to you!
-        </p>
-
-        <form className="max-w-lg mx-auto space-y-4 text-left">
-           <input type="text" placeholder="Your Name" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white" />
-           <input type="email" placeholder="Your Email" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white" />
-           <textarea rows="5" placeholder="Your Message" className="w-full p-3 bg-[#111] border border-white/10 rounded focus:outline-none focus:border-blue-500 text-white"></textarea>
-           <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded transition-colors shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-              Send Message
-           </button>
-        </form>
-
-        <div className="mt-12 flex justify-center space-x-6">
-          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Github size={24} /></a>
-          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Linkedin size={24} /></a>
-          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Twitter size={24} /></a>
-          <a href="#" className="text-gray-400 hover:text-white hover:-translate-y-1 transition-all"><Mail size={24} /></a>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-/* -------------------------------------------------------------------------- */
-/* MAIN COMPONENT                              */
-/* -------------------------------------------------------------------------- */
+// --- Main App ---
 
 function App() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
-    <>
-      {!isLoaded && <LoadingScreen onComplete={() => setIsLoaded(true)} />}
+    <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-emerald-500/30 font-sans pb-20">
       
-      <div 
-        className={`min-h-screen bg-black text-gray-100 transition-opacity duration-700 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <Navbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-        <MobileMenu menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-        <Home />
-        <About />
-        <Projects />
-        <Contact />
-        
-        <footer className="py-6 text-center text-sm text-gray-600 bg-black border-t border-white/5">
-           Built with ❤️ by Bhavesh.
-        </footer>
+      {/* Background Gradient Mesh */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
       </div>
-    </>
-  );
+
+      <div className="max-w-xl mx-auto px-4 pt-12 relative z-10 space-y-12">
+        
+        {/* --- Header / Profile --- */}
+        <header className="text-center space-y-6">
+          <div className="relative w-32 h-32 mx-auto">
+             {/* Circular Progress Ring Effect */}
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <path
+                className="text-slate-800"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                className="text-emerald-500 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                strokeDasharray="75, 100" // The 75 from the screenshot
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center flex-col">
+              <span className="text-2xl font-bold text-white">75%</span>
+            </div>
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
+              {portfolioData.personalInfo.name}
+            </h1>
+            <p className="text-slate-400 mt-2 text-lg">{portfolioData.personalInfo.title}</p>
+            <div className="inline-flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              {portfolioData.personalInfo.availability}
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-4">
+            {portfolioData.personalInfo.socials.map((social, idx) => (
+              <a 
+                key={idx} 
+                href={social.href}
+                className="p-3 bg-slate-900 rounded-xl border border-slate-800 hover:border-emerald-500 hover:text-emerald-400 transition-all hover:-translate-y-1"
+              >
+                <social.icon size={20} />
+              </a>
+            ))}
+          </div>
+        </header>
+
+        {/* --- About Me --- */}
+        <section>
+          <SectionTitle icon={User} title="About Me" />
+          <Card>
+            <p className="text-slate-300 leading-relaxed">
+              {portfolioData.personalInfo.bio}
+            </p>
+          </Card>
+        </section>
+
+        {/* --- Grid Stats --- */}
+        <section className="grid grid-cols-2 gap-4">
+          {portfolioData.stats.map((stat, idx) => (
+            <Card key={idx} className="flex flex-col items-center justify-center py-8">
+              <span className="text-3xl font-bold text-white mb-1">{stat.value}</span>
+              <span className="text-slate-400 text-sm">{stat.label}</span>
+            </Card>
+          ))}
+        </section>
+
+        {/* --- Technical Skills --- */}
+        <section>
+          <SectionTitle icon={Cpu} title="Technical Skills" />
+          
+          <div className="space-y-8">
+            <Card>
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
+                <Globe size={18} className="text-cyan-400" /> Frontend
+              </h3>
+              {portfolioData.skills.frontend.map((skill, idx) => (
+                <ProgressBar key={idx} label={skill.name} percentage={skill.level} colorClass="bg-gradient-to-r from-emerald-500 to-emerald-300" />
+              ))}
+            </Card>
+
+            <Card>
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
+                <Database size={18} className="text-purple-400" /> Backend
+              </h3>
+              {portfolioData.skills.backend.map((skill, idx) => (
+                <ProgressBar key={idx} label={skill.name} percentage={skill.level} colorClass="bg-gradient-to-r from-purple-500 to-purple-300" />
+              ))}
+            </Card>
+
+            <Card>
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-white mb-4">
+                <Terminal size={18} className="text-orange-400" /> Tools & Others
+              </h3>
+              {portfolioData.skills.tools.map((skill, idx) => (
+                <ProgressBar key={idx} label={skill.name} percentage={skill.level} colorClass="bg-gradient-to-r from-orange-500 to-orange-300" />
+              ))}
+            </Card>
+          </div>
+        </section>
+
+        {/* --- Work Experience --- */}
+        <section>
+          <SectionTitle icon={Briefcase} title="Work Experience" />
+          <div className="space-y-4">
+            {portfolioData.experience.map((exp, idx) => (
+              <Card key={idx} className="relative overflow-hidden group">
+                 {/* Decorative glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-bold text-white text-lg">{exp.role}</h3>
+                    <span className="text-emerald-400 text-sm">{exp.company}</span>
+                  </div>
+                  <span className="text-xs font-mono text-slate-500 bg-slate-900 border border-slate-800 px-2 py-1 rounded">
+                    {exp.period}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm mt-3">
+                  {exp.description}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* --- Education --- */}
+        <section>
+          <SectionTitle icon={GraduationCap} title="Education" />
+          {portfolioData.education.map((edu, idx) => (
+            <Card key={idx} className="flex items-center gap-4">
+              <div className="p-3 rounded-full bg-slate-800 text-emerald-400">
+                <GraduationCap size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-white">{edu.school}</h3>
+                <p className="text-slate-400 text-sm">{edu.degree}</p>
+                <p className="text-slate-500 text-xs mt-1">{edu.period}</p>
+              </div>
+            </Card>
+          ))}
+        </section>
+
+        {/* --- Contact --- */}
+        <section>
+          <SectionTitle icon={Mail} title="Get In Touch" />
+          <Card>
+            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <div className="grid grid-cols-2 gap-4">
+                <input 
+                  type="text" 
+                  placeholder="Name" 
+                  className="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-3 outline-none transition-all"
+                />
+                <input 
+                  type="email" 
+                  placeholder="Email" 
+                  className="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-3 outline-none transition-all"
+                />
+              </div>
+              <textarea 
+                rows="4" 
+                placeholder="Message" 
+                className="bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-3 outline-none transition-all"
+              ></textarea>
+              <button className="w-full text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all transform active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                Send Message
+              </button>
+            </form>
+          </Card>
+        </section>
+
+      </div>
+    </div>
+  )
 }
 
-export default App;
-
-
+export default App
