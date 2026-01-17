@@ -6,16 +6,22 @@ export default {
   ],
   theme: {
     extend: {
-      fontFamily: {
-        // Sora is excellent for headings, Outfit for body text
-        sans: ['Outfit', 'sans-serif'],
-        heading: ['Sora', 'sans-serif'],
-      },
       colors: {
-        // The specific neon cyan/blue from the reference
-        primary: '#0ea5e9', 
-        secondary: '#64748b',
-        dark: '#0f172a',
+        // Custom neon colors to match the screenshot
+        neon: {
+          400: '#34d399', // emerald-400
+          500: '#10b981', // emerald-500
+          glow: 'rgba(52, 211, 153, 0.5)' 
+        },
+        dark: {
+          900: '#0f172a', // slate-900
+          800: '#1e293b', // slate-800
+          card: '#111827' // gray-900
+        }
+      },
+      animation: {
+        'spin-slow': 'spin 8s linear infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       }
     },
   },
