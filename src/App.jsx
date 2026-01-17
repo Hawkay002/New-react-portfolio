@@ -1,52 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
   Cpu, Globe, Smartphone, Award, Target, 
   Music, Mic, Headphones, Guitar,
-  BookOpen, GraduationCap, Terminal, Database, Layers
+  BookOpen, GraduationCap, Terminal, Database, Layers,
+  Plane, PenTool, Video, Box, Radio, Paperclip, Monitor
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// --- DATA ---//
+// --- DATA ---
 const data = {
   about: {
-    // NOTE: The problematic 'code snippet' section is completely gone from here.
-    bio: "I'm a passionate developer currently pursuing B.Tech in Data Science & IoT. My journey began with curiosity about how technology can solve real-world problems, leading me to develop innovative solutions that bridge the gap between digital and physical worlds.",
+    bio: "I’m a hobbyist AI developer by passion, fitting projects into whatever free time my busy schedule allows. My journey began with simple curiosity, how technology could be shaped to solve everyday problems. Being extremely picky about details, I often found myself imagining better alternatives, which eventually turned into building my own solutions. This mindset fuels my interest in connecting the digital and physical worlds. To unwind from my hectic routine, I practice origami, which helps refine my focus, precision, and hand control. And yes, somewhere along the way, I also completed a Master’s in Graphic Designing… lol.",
     highlights: [
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
       { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
       { icon: Smartphone, label: "Mobile Development", color: "text-blue-500" },
-      { icon: Globe, label: "Web Technologies", color: "text-purple-400" },
-      { icon: Award, label: "National Recognition", color: "text-yellow-400" },
-      { icon: Target, label: "Problem Solving", color: "text-pink-400" },
+      { icon: Paperclip, label: "Origami", color: "text-pink-400" },
+      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400" },
+      { icon: Target, label: "Problem Solving", color: "text-green-400" },
     ]
   },
   skills: {
     frontend: [
-      { name: "React.js", level: 90, color: "bg-cyan-400" },
-      { name: "TypeScript", level: 85, color: "bg-blue-500" },
+      { name: "Html & CSS", level: 95, color: "bg-orange-500" },
       { name: "JavaScript", level: 95, color: "bg-yellow-400" },
-      { name: "HTML/CSS", level: 95, color: "bg-orange-500" },
+      { name: "React.js", level: 90, color: "bg-cyan-400" },
       { name: "Tailwind CSS", level: 90, color: "bg-cyan-300" },
+      { name: "TypeScript", level: 85, color: "bg-blue-500" },
     ],
     backend: [
-      { name: "Node.js", level: 80, color: "bg-green-500" },
       { name: "Firebase", level: 85, color: "bg-yellow-500" },
+      { name: "Supabase", level: 80, color: "bg-green-400" },
       { name: "Python", level: 75, color: "bg-blue-400" },
+      { name: "Node.js", level: 80, color: "bg-green-500" },
       { name: "Express.js", level: 80, color: "bg-gray-400" },
     ],
     iot: [
       { name: "Arduino", level: 85, color: "bg-emerald-500" },
       { name: "Raspberry Pi", level: 75, color: "bg-pink-500" },
       { name: "Sensors & Actuators", level: 80, color: "bg-purple-500" },
-      { name: "Circuit Design", level: 70, color: "bg-indigo-500" },
+      { name: "Flipper Zero", level: 90, color: "bg-orange-500" },
+      { name: "Kode", level: 85, color: "bg-indigo-400" }, // As requested
     ],
     tools: [
+      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "bg-pink-500" },
+      { name: "Video (Pr, Ae)", level: 85, color: "bg-purple-500" },
+      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "bg-blue-500" },
       { name: "Git/GitHub", level: 90, color: "bg-gray-500" },
-      { name: "Figma", level: 75, color: "bg-pink-400" },
       { name: "VS Code", level: 95, color: "bg-blue-500" },
-      { name: "Postman", level: 80, color: "bg-orange-500" },
     ]
   },
   projects: [
@@ -121,6 +124,32 @@ const data = {
   ]
 };
 
+// --- TYPEWRITER COMPONENT ---
+const Typewriter = ({ text, speed = 50 }) => {
+  const [displayText, setDisplayText] = useState('');
+  
+  useEffect(() => {
+    let i = 0;
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayText((prev) => prev + text.charAt(i));
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span className="inline-block">
+      {displayText}
+      <span className="animate-blink ml-1">|</span>
+    </span>
+  );
+};
+
 // --- ANIMATION COMPONENTS ---
 const RevealCard = ({ children, delay = 0, className = "" }) => {
   return (
@@ -173,6 +202,11 @@ const ProgressBar = ({ name, level, color }) => (
 
 // --- MAIN APP ---
 function App() {
+  const scrollToContact = () => {
+    const element = document.getElementById('contact');
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black">
       
@@ -182,7 +216,7 @@ function App() {
           <div className="bg-neon-green/20 p-1.5 rounded-lg">
              <Code2 className="text-neon-green w-5 h-5" />
           </div>
-          <span className="font-bold text-neon-green tracking-tight">Bhavesh.dev</span>
+          <span className="font-bold text-neon-green tracking-tight">Shovith.dev</span>
         </div>
         <Menu className="text-slate-400 w-6 h-6" />
       </nav>
@@ -197,46 +231,56 @@ function App() {
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70"></div>
             <div className="absolute inset-1 bg-app-bg rounded-full flex items-center justify-center z-10">
-              <span className="text-4xl font-bold text-neon-green">B</span>
+              <span className="text-4xl font-bold text-neon-green">S</span>
             </div>
           </motion.div>
 
           <RevealCard>
             <h1 className="text-4xl font-bold text-white mb-3">
-              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Bhavesh</span>
+              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span>
             </h1>
-            <p className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2">
-              Full Stack Developer & IoT Engineer
-              <span className="w-0.5 h-5 bg-neon-green animate-blink"></span>
-            </p>
+            <div className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2 h-8">
+              <Typewriter text="Hobbyist Full Stack Developer & IoT Engineer" />
+            </div>
           </RevealCard>
           
           <RevealCard delay={0.1}>
             <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">
-              Passionate about creating innovative digital solutions with modern technologies. Currently pursuing B.Tech in Data Science & IoT while building impactful projects.
+              Passionate about creating innovative digital solutions with modern technologies. Currently on active duty under IDS HQ as JOO for India's MoD.
             </p>
           </RevealCard>
 
           <RevealCard delay={0.2} className="flex flex-col w-full gap-4">
-            <button className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+            <button 
+              onClick={scrollToContact}
+              className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:opacity-90 transition-opacity"
+            >
               Get In Touch
             </button>
             <div className="flex justify-center gap-4">
-              {[Mail, Send].map((Icon, i) => (
-                <div key={i} className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors">
-                  <Icon size={20} />
-                </div>
-              ))}
+              <a 
+                href="mailto:shovith2@gmail.com" 
+                className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"
+              >
+                <Mail size={20} />
+              </a>
+              <a 
+                href="https://t.me/X_o_x_o_002" 
+                target="_blank" 
+                rel="noreferrer"
+                className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"
+              >
+                <Send size={20} />
+              </a>
             </div>
           </RevealCard>
         </section>
 
         {/* --- ABOUT ME --- */}
-        <section>
+        <section id="about">
           <SectionTitle subtitle="" title="about_me" />
           
           <RevealCard className="mb-8">
-             {/* This Card replaces the old code snippet console. It is just bio text now. */}
             <Card>
               <div className="flex gap-1.5 mb-4">
                  <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
@@ -264,7 +308,7 @@ function App() {
         </section>
 
         {/* --- TECHNICAL SKILLS --- */}
-        <section>
+        <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           
           <div className="space-y-4">
@@ -298,7 +342,10 @@ function App() {
           </div>
           
           <RevealCard className="mt-8 flex flex-wrap justify-center gap-2">
-            {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "IoT", "Machine Learning"].map((tag, i) => (
+            {[
+              "React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", 
+              "IoT", "Flipper Zero", "Adobe", "3D Modeling"
+            ].map((tag, i) => (
               <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono">
                 {tag}
               </span>
@@ -307,7 +354,7 @@ function App() {
         </section>
 
         {/* --- FEATURED PROJECTS --- */}
-        <section>
+        <section id="projects">
           <SectionTitle subtitle="" title="featured_projects" />
           
           <div className="space-y-4">
@@ -344,7 +391,7 @@ function App() {
         </section>
 
         {/* --- EDUCATION --- */}
-        <section>
+        <section id="education">
           <SectionTitle subtitle="" title="education_achievements" />
           
           <div className="space-y-4">
@@ -386,7 +433,7 @@ function App() {
         </section>
 
         {/* --- MUSICAL JOURNEY --- */}
-        <section>
+        <section id="music">
           <SectionTitle subtitle="" title="musical_journey" />
           
           <RevealCard className="mb-8 text-center px-4">
@@ -424,14 +471,13 @@ function App() {
         </section>
 
         {/* --- CONTACT --- */}
-        <section>
+        <section id="contact">
           <SectionTitle subtitle="" title="get_in_touch" />
           
           <div className="space-y-3 mb-10">
             {[
-              { label: "Email", val: "workbhaveshpandey@gmail.com", icon: Mail },
-              { label: "Phone", val: "+91 6397498423", icon: Phone },
-              { label: "Telegram", val: "@bpandey007", icon: Send },
+              { label: "Email", val: "shovith2@gmail.com", icon: Mail },
+              { label: "Telegram", val: "@X_o_x_o_002", icon: Send },
               { label: "Location", val: "Based in India", icon: MapPin },
             ].map((contact, idx) => (
               <RevealCard key={idx} delay={idx * 0.1}>
@@ -453,21 +499,21 @@ function App() {
                <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
                  <Send size={20}/> Send Message
                </h3>
-               <form className="space-y-4">
+               <form 
+                 className="space-y-4"
+                 action="https://t.me/X_o_x_o_002"
+                 target="_blank"
+               >
                  <div>
                    <label className="text-xs text-slate-400 ml-1">Name</label>
                    <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your name" />
                  </div>
                  <div>
-                   <label className="text-xs text-slate-400 ml-1">Email</label>
-                   <input className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="your@email.com" />
-                 </div>
-                 <div>
                    <label className="text-xs text-slate-400 ml-1">Message</label>
                    <textarea rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
                  </div>
-                 <button className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
-                   Send Message
+                 <button type="submit" className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
+                   Send Message via Telegram
                  </button>
                </form>
             </Card>
@@ -477,7 +523,7 @@ function App() {
       </main>
 
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
-        <p>© 2025 Bhavesh Pandey. Crafted with <span className="text-red-500">♥</span> and React.js</p>
+        <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
     </div>
