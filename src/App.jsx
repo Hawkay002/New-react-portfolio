@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 // --- DATA ---
 const data = {
   about: {
-    // Console part removed as requested
+    // FIXED: Removed the invalid "code snippet" object entirely
     bio: "I'm a passionate developer currently pursuing B.Tech in Data Science & IoT. My journey began with curiosity about how technology can solve real-world problems, leading me to develop innovative solutions that bridge the gap between digital and physical worlds.",
     highlights: [
       { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
@@ -122,8 +122,6 @@ const data = {
 };
 
 // --- ANIMATION COMPONENTS ---
-
-// This renders the card with an entry animation when it scrolls into view
 const RevealCard = ({ children, delay = 0, className = "" }) => {
   return (
     <motion.div
@@ -139,7 +137,6 @@ const RevealCard = ({ children, delay = 0, className = "" }) => {
 };
 
 // --- UI COMPONENTS ---
-
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
     <span className="text-neon-green text-lg font-mono mb-2">{'>'} {subtitle}</span>
@@ -175,7 +172,6 @@ const ProgressBar = ({ name, level, color }) => (
 );
 
 // --- MAIN APP ---
-
 function App() {
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black">
@@ -199,7 +195,6 @@ function App() {
             initial={{ scale: 0 }} animate={{ scale: 1 }} 
             className="relative w-32 h-32 mb-8"
           >
-            {/* Spinning Gradient Ring */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-sm opacity-70"></div>
             <div className="absolute inset-1 bg-app-bg rounded-full flex items-center justify-center z-10">
               <span className="text-4xl font-bold text-neon-green">B</span>
@@ -246,7 +241,6 @@ function App() {
             </p>
           </RevealCard>
 
-          {/* Highlights Grid */}
           <div className="grid grid-cols-2 gap-3">
             {data.about.highlights.map((item, idx) => (
               <RevealCard key={idx} delay={idx * 0.1}>
@@ -295,7 +289,6 @@ function App() {
             </RevealCard>
           </div>
           
-          {/* Skill Tags */}
           <RevealCard className="mt-8 flex flex-wrap justify-center gap-2">
             {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "IoT", "Machine Learning"].map((tag, i) => (
               <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono">
@@ -364,7 +357,6 @@ function App() {
               </RevealCard>
             ))}
 
-            {/* National Recognition Special Card */}
             <RevealCard delay={0.2}>
               <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
