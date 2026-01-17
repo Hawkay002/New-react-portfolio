@@ -6,22 +6,25 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+      },
       colors: {
-        // Custom neon colors to match the screenshot
-        neon: {
-          400: '#34d399', // emerald-400
-          500: '#10b981', // emerald-500
-          glow: 'rgba(52, 211, 153, 0.5)' 
-        },
-        dark: {
-          900: '#0f172a', // slate-900
-          800: '#1e293b', // slate-800
-          card: '#111827' // gray-900
-        }
+        // The specific dark background from the screenshots
+        'app-dark': '#050505', 
+        'card-dark': '#0a0a0a',
+        // The neon accents
+        'neon-green': '#10b981', // emerald-500
+        'neon-cyan': '#06b6d4',  // cyan-500
       },
       animation: {
-        'spin-slow': 'spin 8s linear infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'blink': 'blink 1s step-end infinite',
+      },
+      keyframes: {
+        blink: {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0 },
+        }
       }
     },
   },
