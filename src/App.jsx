@@ -782,7 +782,7 @@ ${message}
             </div>
 
             {/* FLIP CONTAINER */}
-            <div className="relative perspective-1000 h-[650px] md:h-[600px]">
+            <div className="relative perspective-1000 h-[550px] md:h-[600px]">
               <motion.div
                 animate={{ rotateY: isTelegram ? 180 : 0 }}
                 transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
