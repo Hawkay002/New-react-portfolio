@@ -225,12 +225,10 @@ const Typewriter = ({ text, speed = 50 }) => {
   
   useEffect(() => {
     let i = 0;
-    setDisplayText(''); // Reset
+    setDisplayText('');
     
     const timer = setInterval(() => {
       if (i < text.length) {
-        // We use substring to ensure we get the exact character at the exact index
-        // This prevents the "missing letter" glitch
         setDisplayText(text.substring(0, i + 1));
         i++;
       } else {
@@ -758,7 +756,7 @@ function App() {
                    <textarea rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
                  </div>
                  <button type="submit" className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
-                   Send Message via Telegram
+                   Send Message via TG
                  </button>
                </form>
             </Card>
