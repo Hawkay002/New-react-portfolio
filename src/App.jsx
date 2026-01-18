@@ -209,7 +209,7 @@ const data = {
       status: "87%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
-  ],
+  ]
 };
 
 // --- TYPEWRITER COMPONENT ---
@@ -474,8 +474,6 @@ function App() {
         {/* --- ABOUT ME --- */}
         <section id="about">
           <SectionTitle subtitle="" title="about_me" />
-          
-          {/* Bio Card */}
           <RevealCard className="mb-8">
             <Card>
               <div className="flex gap-1.5 mb-4">
@@ -489,31 +487,6 @@ function App() {
             </Card>
           </RevealCard>
 
-          {/* Moved Quote & Vinyl Card */}
-          <RevealCard className="mb-8" delay={0.1}>
-            <Card className="flex flex-col items-center justify-center py-8 relative">
-              {/* VINYL RECORD CONTAINER */}
-              <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
-                
-                {/* Record (Rotating) */}
-                <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
-                  <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
-                  <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
-                  <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
-                  {/* Center Label */}
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
-                    <Music size={14} className="text-white" />
-                  </div>
-                </div>
-              </div>
-              
-              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
-                "Music and programming share the same foundation - patterns, rhythm, and harmony."
-              </p>
-            </Card>
-          </RevealCard>
-
-          {/* Highlights Grid */}
           <div className="grid grid-cols-2 gap-3">
             {data.about.highlights.map((item, idx) => (
               <ScaleRevealCard key={idx} delay={idx * 0.1}>
@@ -526,6 +499,29 @@ function App() {
               </ScaleRevealCard>
             ))}
           </div>
+
+          <RevealCard className="mt-8">
+            <Card className="flex flex-col items-center justify-center py-8 relative">
+              <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
+                
+                {/* Record (Rotating) */}
+                <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
+                  <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
+                  <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
+                  <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
+                  {/* Center Label */}
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
+                    <Music size={14} className="text-white" />
+                  </div>
+                </div>
+
+              </div>
+              
+              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
+                "Music and programming share the same foundation - patterns, rhythm, and harmony."
+              </p>
+            </Card>
+          </RevealCard>
         </section>
 
         {/* --- TECHNICAL SKILLS --- */}
@@ -675,7 +671,7 @@ function App() {
               </RevealCard>
             ))}
           </div>
-        </section>
+        </section> 
 
         {/* --- CONTACT --- */}
         <section id="contact">
