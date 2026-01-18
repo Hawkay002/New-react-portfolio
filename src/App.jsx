@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
@@ -9,13 +9,10 @@ import {
   Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 // --- CONFIGURATION ---
-// IMPORTANT: In Vercel, your environment variables MUST start with VITE_
-// Example: VITE_WEB3FORMS_ACCESS_KEY and VITE_HCAPTCHA_SITE_KEY
-const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "9377aed2-b9f3-4b70-a318-e6ba55c6d005";
-const SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY || "50b2fe65-b00b-4b9e-ad62-3ba471098be2"; 
+// Ensure you have VITE_WEB3FORMS_ACCESS_KEY in your Vercel Environment Variables
+const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 
 // --- DATA ---
 const data = {
@@ -353,8 +350,6 @@ function App() {
   // Contact Form States
   const [result, setResult] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(null);
-  const captchaRef = useRef(null);
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
@@ -364,8 +359,9 @@ function App() {
   const onSubmit = async (event) => {
     event.preventDefault();
     
-    if (!captchaToken) {
-      setResult("Please complete the captcha.");
+    // Validate Web3Forms Key
+    if (!ACCESS_KEY) {
+      setResult("Error: Missing Web3Forms Access Key. Please set VITE_WEB3FORMS_ACCESS_KEY in Vercel.");
       return;
     }
 
@@ -374,7 +370,6 @@ function App() {
 
     const formData = new FormData(event.target);
     formData.append("access_key", ACCESS_KEY);
-    formData.append("h-captcha-response", captchaToken);
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
@@ -387,14 +382,12 @@ function App() {
       if (data.success) {
         setResult("Message sent successfully!");
         event.target.reset();
-        setCaptchaToken(null);
-        if (captchaRef.current) captchaRef.current.resetCaptcha();
       } else {
-        console.error("Error", data);
-        setResult(data.message || "Something went wrong.");
+        console.error("Web3Forms Error:", data);
+        setResult(data.message || "Something went wrong. Please try again.");
       }
     } catch (error) {
-      console.error("Error", error);
+      console.error("Submission Error:", error);
       setResult("An error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -556,7 +549,25 @@ function App() {
           <RevealCard className="mt-8">
             <Card className="flex flex-col items-center justify-center py-8 relative">
               <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
-                {/* Record (Rotating) - No Tonearm */}
+                
+                {/* --- RESTORED: TONEARM --- */}
+                <div className="absolute -top-3 -right-5 z-20 w-16 h-24 pointer-events-none">
+                  {/* Pivot Base */}
+                  <div className="absolute top-3 right-4 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 shadow-xl flex items-center justify-center z-10">
+                      <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
+                  </div>
+                  
+                  {/* The Arm (Rotated to hit the record) */}
+                  <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top rotate-[25deg] rounded-full border-r border-zinc-600/50 shadow-lg">
+                    {/* The Headshell/Needle */}
+                    <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
+                      <div className="w-0.5 h-full bg-zinc-900/50"></div>
+                    </div>
+                  </div>
+                </div>
+                {/* ------------------------- */}
+
+                {/* Record (Rotating) */}
                 <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
                   <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
                   <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
@@ -720,24 +731,6 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-
-            <RevealCard delay={0.2}>
-              <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
-                <div className="flex items-center gap-4 mb-4 relative z-10">
-                   <div className="p-3 rounded-xl bg-neon-green/20 text-neon-green">
-                     <Award size={24} />
-                   </div>
-                   <div>
-                     <h3 className="font-bold text-lg text-white">National Recognition</h3>
-                     <p className="text-neon-green text-sm">Inspire Awards 2025</p>
-                   </div>
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed relative z-10">
-                  Achieved national selection for the project <span className="text-neon-green font-semibold">E-Rabin</span>, an innovative e-waste segregator.
-                </p>
-              </div>
-            </RevealCard>
           </div>
         </section>
 
@@ -790,16 +783,6 @@ function App() {
                    <textarea required name="message" rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
                  </div>
                  
-                 {/* HCaptcha Integration */}
-                 <div className="flex justify-center my-4">
-                   <HCaptcha
-                     sitekey={SITE_KEY}
-                     onVerify={(token) => setCaptchaToken(token)}
-                     ref={captchaRef}
-                     theme="dark"
-                   />
-                 </div>
-
                  <button 
                    type="submit" 
                    disabled={isSubmitting}
