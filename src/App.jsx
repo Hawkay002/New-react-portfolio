@@ -63,6 +63,9 @@ const data = {
       icon: Link, 
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
+      // New Styling Properties
+      cardBorder: "border-blue-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-blue-500/10 group-hover:via-blue-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-blue-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
     },
@@ -75,6 +78,8 @@ const data = {
       icon: Receipt, 
       color: "text-green-400", 
       bg: "bg-green-400/10",
+      cardBorder: "border-green-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-green-500/10 group-hover:via-green-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-green-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
     },
@@ -82,12 +87,13 @@ const data = {
       title: "Restaurant POS System",
       desc: "A multifunctional POS System for restaurants to take and serve orders.",
       tags: ["POS", "Management", "Real-time"],
-      // Updated image to a working restaurant POS visual
       image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Utensils, 
       color: "text-orange-400", 
       bg: "bg-orange-400/10",
+      cardBorder: "border-orange-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-orange-500/10 group-hover:via-orange-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-orange-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.2)]",
     },
@@ -100,6 +106,8 @@ const data = {
       icon: Gift, 
       color: "text-pink-400", 
       bg: "bg-pink-400/10",
+      cardBorder: "border-pink-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-pink-500/10 group-hover:via-pink-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-pink-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
     },
@@ -108,12 +116,13 @@ const data = {
       desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
       tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
-      // Download specific properties
       isDownload: true,
-      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", // Replace with actual file path if different
+      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
       icon: Eye, 
       color: "text-red-400", 
       bg: "bg-red-400/10",
+      cardBorder: "border-red-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-red-500/10 group-hover:via-red-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-red-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
@@ -126,6 +135,8 @@ const data = {
       icon: Ticket, 
       color: "text-purple-400", 
       bg: "bg-purple-400/10",
+      cardBorder: "border-purple-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-purple-500/10 group-hover:via-purple-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-purple-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
     },
@@ -138,6 +149,8 @@ const data = {
       icon: Globe, 
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
+      cardBorder: "border-indigo-500/20",
+      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-indigo-500/10 group-hover:via-indigo-500/5 group-hover:to-transparent",
       hoverBorder: "group-hover:border-indigo-400/50",
       hoverShadow: "group-hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
@@ -212,10 +225,12 @@ const Typewriter = ({ text, speed = 50 }) => {
   
   useEffect(() => {
     let i = 0;
-    setDisplayText('');
+    setDisplayText(''); // Reset
     
     const timer = setInterval(() => {
       if (i < text.length) {
+        // We use substring to ensure we get the exact character at the exact index
+        // This prevents the "missing letter" glitch
         setDisplayText(text.substring(0, i + 1));
         i++;
       } else {
@@ -567,7 +582,7 @@ function App() {
           <div className="space-y-6">
             {data.projects.map((project, idx) => (
               <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
-                <Card className={`group relative overflow-hidden hover:border-opacity-100 border-white/5 ${project.hoverBorder} ${project.hoverShadow}`}>
+                <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
                   
                   {/* Preview Image */}
                   <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
@@ -659,8 +674,6 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-
-            
           </div>
         </section>
 
