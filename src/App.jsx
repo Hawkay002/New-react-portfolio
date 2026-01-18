@@ -12,9 +12,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 // --- CONFIGURATION ---
-// Replace with your actual keys
-const WEB3FORMS_ACCESS_KEY = "9377aed2-b9f3-4b70-a318-e6ba55c6d005"; 
-const HCAPTCHA_SITE_KEY = "50b2fe65-b00b-4b9e-ad62-3ba471098be2"; // This is a test key. Replace with your real Site Key.
+// IMPORTANT: In Vercel, your environment variables MUST start with VITE_
+// Example: VITE_WEB3FORMS_ACCESS_KEY and VITE_HCAPTCHA_SITE_KEY
+const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "9377aed2-b9f3-4b70-a318-e6ba55c6d005";
+const SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY || "50b2fe65-b00b-4b9e-ad62-3ba471098be2"; 
 
 // --- DATA ---
 const data = {
@@ -363,7 +364,6 @@ function App() {
   const onSubmit = async (event) => {
     event.preventDefault();
     
-    // Check captcha first
     if (!captchaToken) {
       setResult("Please complete the captcha.");
       return;
@@ -373,7 +373,7 @@ function App() {
     setResult("");
 
     const formData = new FormData(event.target);
-    formData.append("access_key", WEB3FORMS_ACCESS_KEY);
+    formData.append("access_key", ACCESS_KEY);
     formData.append("h-captcha-response", captchaToken);
 
     try {
@@ -793,7 +793,7 @@ function App() {
                  {/* HCaptcha Integration */}
                  <div className="flex justify-center my-4">
                    <HCaptcha
-                     sitekey={HCAPTCHA_SITE_KEY}
+                     sitekey={SITE_KEY}
                      onVerify={(token) => setCaptchaToken(token)}
                      ref={captchaRef}
                      theme="dark"
