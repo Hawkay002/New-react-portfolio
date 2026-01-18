@@ -513,7 +513,8 @@ function App() {
         </div>
         
         {/* The Arm (Rotated to hit the record) */}
-        <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top -rotate-[30deg] rounded-full border-r border-zinc-600/50 shadow-lg">
+        {/* UPDATED: rotate-[25deg] places the needle on the vinyl */}
+        <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top rotate-[25deg] rounded-full border-r border-zinc-600/50 shadow-lg">
           {/* The Headshell/Needle */}
           <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
             <div className="w-0.5 h-full bg-zinc-900/50"></div>
@@ -522,7 +523,7 @@ function App() {
       </div>
       {/* --------------------- */}
 
-      {/* Record (Rotating) - No changes to this part, just context */}
+      {/* Record (Rotating) */}
       <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
         <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
         <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
