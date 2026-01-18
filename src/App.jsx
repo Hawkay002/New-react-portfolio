@@ -6,7 +6,8 @@ import {
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
   Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
-  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2
+  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2,
+  CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -409,7 +410,7 @@ function App() {
   const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; 
   
   // Contact Form States
-  const [result, setResult] = useState("");
+  const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
 
@@ -418,10 +419,17 @@ function App() {
     if (element) element.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
+
   const onSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-    setResult("");
 
     const formData = new FormData(event.target);
     const firstName = formData.get("firstName");
@@ -434,7 +442,7 @@ function App() {
       if (isTelegram) {
         // --- TELEGRAM SUBMISSION ---
         if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-           setResult("Error: Missing Telegram Config.");
+           showNotification("Error: Missing Telegram Config.", 'error');
            setIsSubmitting(false);
            return;
         }
@@ -456,22 +464,21 @@ ${message}
 
         const data = await response.json();
         if (data.ok) {
-          setResult("Message sent to Telegram successfully!");
+          showNotification("Message sent to Telegram successfully!");
           event.target.reset();
         } else {
-          setResult("Failed to send to Telegram.");
+          showNotification("Failed to send to Telegram.", 'error');
         }
 
       } else {
         // --- WEB3FORMS SUBMISSION ---
         if (!WEB3FORMS_KEY) {
-           setResult("Error: Missing Web3Forms Key.");
+           showNotification("Error: Missing Web3Forms Key.", 'error');
            setIsSubmitting(false);
            return;
         }
 
         formData.append("access_key", WEB3FORMS_KEY);
-        // Combine fields for Web3Forms standard view
         formData.append("name", `${firstName} ${lastName}`);
         formData.append("phone", phone);
 
@@ -482,15 +489,15 @@ ${message}
 
         const data = await response.json();
         if (data.success) {
-          setResult("Email sent successfully!");
+          showNotification("Email sent successfully!");
           event.target.reset();
         } else {
-          setResult(data.message || "Something went wrong.");
+          showNotification(data.message || "Something went wrong.", 'error');
         }
       }
     } catch (error) {
       console.error("Submission Error:", error);
-      setResult("An error occurred. Please try again.");
+      showNotification("An error occurred. Please try again.", 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -762,7 +769,7 @@ ${message}
           <RevealCard>
             {/* TOGGLE SLIDER */}
             <div className="flex justify-center mb-6">
-              <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" onClick={() => setIsTelegram(!isTelegram)}>
+              <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" onClick={() => { setIsTelegram(!isTelegram); setNotification(null); }}>
                 <motion.div 
                   className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50"
                   animate={{ left: isTelegram ? '50%' : '4px' }}
@@ -771,12 +778,12 @@ ${message}
                 <button 
                   className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
                 >
-                  Email
+                  Send Email
                 </button>
                 <button 
                   className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
                 >
-                  Telegram
+                  Direct Message
                 </button>
               </div>
             </div>
@@ -789,44 +796,55 @@ ${message}
                 className="relative w-full h-full transform-style-3d"
               >
                 {/* FRONT (WEB3FORMS) */}
-                <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden">
+                <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden relative">
+                   {/* FLASH NOTIFICATION OVERLAY */}
+                   <AnimatePresence>
+                     {notification && !isTelegram && (
+                       <motion.div 
+                         initial={{ opacity: 0 }} 
+                         animate={{ opacity: 1 }} 
+                         exit={{ opacity: 0 }}
+                         className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl"
+                       >
+                         <div className="flex flex-col items-center gap-2 p-6">
+                           {notification.type === 'success' ? <CheckCircle2 className="text-green-500 w-12 h-12" /> : <AlertCircle className="text-red-500 w-12 h-12" />}
+                           <p className="text-white font-medium text-center">{notification.message}</p>
+                         </div>
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
+
                    <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
                      <Mail size={20}/> Send Email
                    </h3>
                    
-                   {result && !isTelegram && (
-                     <div className={`mb-4 p-3 rounded-lg text-sm ${result.includes("success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                       {result}
-                     </div>
-                   )}
-
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
                        <div>
                          <label className="text-xs text-slate-400 ml-1">First Name</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="John" />
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="John" />
                        </div>
                        <div>
                          <label className="text-xs text-slate-400 ml-1">Last Name</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Doe" />
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
                        </div>
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="john@example.com" />
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
                      </div>
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
-                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24">
+                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="1234567890" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="1234567890" />
                         </div>
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Message</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
+                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
                      </div>
                      
                      <button 
@@ -840,44 +858,55 @@ ${message}
                 </Card>
 
                 {/* BACK (TELEGRAM) */}
-                <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
+                <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180 relative" style={{ transform: "rotateY(180deg)" }}>
+                   {/* FLASH NOTIFICATION OVERLAY */}
+                   <AnimatePresence>
+                     {notification && isTelegram && (
+                       <motion.div 
+                         initial={{ opacity: 0 }} 
+                         animate={{ opacity: 1 }} 
+                         exit={{ opacity: 0 }}
+                         className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl"
+                       >
+                         <div className="flex flex-col items-center gap-2 p-6">
+                           {notification.type === 'success' ? <CheckCircle2 className="text-green-500 w-12 h-12" /> : <AlertCircle className="text-red-500 w-12 h-12" />}
+                           <p className="text-white font-medium text-center">{notification.message}</p>
+                         </div>
+                       </motion.div>
+                     )}
+                   </AnimatePresence>
+
                    <h3 className="text-lg font-bold text-blue-400 mb-6 flex items-center gap-2">
-                     <Send size={20}/> Telegram Direct
+                     <Send size={20}/> Direct Message
                    </h3>
                    
-                   {result && isTelegram && (
-                     <div className={`mb-4 p-3 rounded-lg text-sm ${result.includes("success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                       {result}
-                     </div>
-                   )}
-
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
                        <div>
                          <label className="text-xs text-slate-400 ml-1">First Name</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Jane" />
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Jane" />
                        </div>
                        <div>
                          <label className="text-xs text-slate-400 ml-1">Last Name</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Doe" />
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
                        </div>
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="jane@example.com" />
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="jane@example.com" />
                      </div>
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
-                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24">
+                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="9876543210" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Message</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Direct message to Telegram..." />
+                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
                      </div>
                      
                      <button 
