@@ -15,49 +15,49 @@ const data = {
   about: {
     bio: "I’m a hobbyist AI developer by passion, fitting projects into whatever free time my busy schedule allows. My journey began with simple curiosity, how technology could be shaped to solve everyday problems. Being extremely picky about details, I often found myself imagining better alternatives, which eventually turned into building my own solutions. This mindset fuels my interest in connecting the digital and physical worlds. To unwind from my hectic routine, I practice origami, which helps refine my focus, precision, and hand control. And yes, somewhere along the way, I also completed a Master’s in Graphic Designing… lol.",
     highlights: [
-      { icon: Code2, label: "Full Stack Development", color: "text-blue-400" },
-      { icon: Database, label: "IoT Engineering", color: "text-cyan-400" },
-      { icon: Smartphone, label: "Mobile Development", color: "text-blue-500" },
-      { icon: Origami, label: "Origami", color: "text-pink-400" },
-      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400" },
-      { icon: Target, label: "Problem Solving", color: "text-green-400" },
+      { icon: Code2, label: "Full Stack Development", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-transparent border-blue-500/20" },
+      { icon: Database, label: "IoT Engineering", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-transparent border-cyan-500/20" },
+      { icon: Smartphone, label: "Mobile Development", color: "text-blue-500", bg: "bg-gradient-to-br from-blue-600/20 to-transparent border-blue-600/20" },
+      { icon: Origami, label: "Origami", color: "text-pink-400", bg: "bg-gradient-to-br from-pink-500/20 to-transparent border-pink-500/20" },
+      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400", bg: "bg-gradient-to-br from-orange-500/20 to-transparent border-orange-500/20" },
+      { icon: Target, label: "Problem Solving", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-transparent border-green-500/20" },
     ]
   },
   skills: {
     frontend: [
-      { name: "Html & CSS", level: 95, color: "bg-orange-500" },
-      { name: "JavaScript", level: 95, color: "bg-yellow-400" },
-      { name: "React.js", level: 90, color: "bg-cyan-400" },
-      { name: "Tailwind CSS", level: 90, color: "bg-cyan-300" },
-      { name: "TypeScript", level: 85, color: "bg-blue-500" },
+      { name: "Html & CSS", level: 95, color: "from-orange-500 to-red-500" },
+      { name: "JavaScript", level: 95, color: "from-yellow-400 to-yellow-600" },
+      { name: "React.js", level: 90, color: "from-cyan-400 to-blue-500" },
+      { name: "Tailwind CSS", level: 90, color: "from-cyan-300 to-teal-400" },
+      { name: "TypeScript", level: 85, color: "from-blue-500 to-indigo-600" },
     ],
     backend: [
-      { name: "Firebase", level: 85, color: "bg-yellow-500" },
-      { name: "Supabase", level: 80, color: "bg-green-400" },
-      { name: "Python", level: 75, color: "bg-blue-400" },
-      { name: "Node.js", level: 80, color: "bg-green-500" },
-      { name: "Express.js", level: 80, color: "bg-gray-400" },
+      { name: "Firebase", level: 85, color: "from-yellow-500 to-orange-600" },
+      { name: "Supabase", level: 80, color: "from-green-400 to-emerald-600" },
+      { name: "Python", level: 75, color: "from-blue-400 to-indigo-500" },
+      { name: "Node.js", level: 80, color: "from-green-500 to-emerald-700" },
+      { name: "Express.js", level: 80, color: "from-gray-400 to-gray-600" },
     ],
     iot: [
-      { name: "Arduino", level: 85, color: "bg-emerald-500" },
-      { name: "Raspberry Pi", level: 75, color: "bg-pink-500" },
-      { name: "Sensors & Actuators", level: 80, color: "bg-purple-500" },
-      { name: "Flipper Zero", level: 90, color: "bg-orange-500" },
-      { name: "Kode", level: 85, color: "bg-indigo-400" },
+      { name: "Arduino", level: 85, color: "from-emerald-500 to-teal-600" },
+      { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600" },
+      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600" },
+      { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600" },
+      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600" },
     ],
     tools: [
-      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "bg-pink-500" },
-      { name: "Video (Pr, Ae)", level: 85, color: "bg-purple-500" },
-      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "bg-blue-500" },
-      { name: "Git/GitHub", level: 90, color: "bg-gray-500" },
-      { name: "VS Code", level: 95, color: "bg-blue-500" },
+      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "from-pink-500 to-rose-600" },
+      { name: "Video (Pr, Ae)", level: 85, color: "from-purple-500 to-violet-600" },
+      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "from-blue-500 to-indigo-600" },
+      { name: "Git/GitHub", level: 90, color: "from-gray-500 to-slate-700" },
+      { name: "VS Code", level: 95, color: "from-blue-500 to-cyan-600" },
     ]
   },
   projects: [
     {
       title: "Connect - Link in Bio",
       desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
-      tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
+      tags: ["React", "Gaming", "Social"],
       image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", 
       link: "#", 
       icon: Link, 
@@ -69,7 +69,7 @@ const data = {
     {
       title: "Rent Invoicing App",
       desc: "Fast and reliable way to create and send rent invoices to tenants.",
-      tags: ["Web App", "Offline", "Local Storage"],
+      tags: ["React", "Fintech", "Automation"],
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Receipt, 
@@ -105,7 +105,7 @@ const data = {
     {
       title: "Unredactor",
       desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
-      tags: ["Python", "Security", "Forensics"],
+      tags: ["AI", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Eye, 
@@ -117,7 +117,7 @@ const data = {
     {
       title: "Event Ticketing System",
       desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
-      tags: ["Management", "Admin", "Firestore"],
+      tags: ["Management", "Admin", "Scanner"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Ticket, 
@@ -129,7 +129,7 @@ const data = {
     {
       title: "Portfolio Website",
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
-      tags: ["React", "Showcase", "Hobby"],
+      tags: ["React", "Showcase", "Design"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Globe, 
@@ -141,57 +141,21 @@ const data = {
   ],
   education: [
     {
-      title: "Master’s Degree in Criminology",
-      place: "Edinburgh, United Kingdom",
-      status: "96%",
+      title: "B.Tech in Data Science and IoT",
+      place: "Amrapali University",
+      status: "Currently Studying",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Master’s Degree in International Relations",
-      place: "Edinburgh, United Kingdom",
-      status: "92%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Master’s Degree in Graphic Designing",
-      place: "West Bengal, India",
-      status: "96%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Master’s Degree in Computer Science",
-      place: "Delhi, India",
-      status: "90%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Business Administration",
-      place: "West Bengal, India",
-      status: "85%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Science",
-      place: "West Bengal, India",
-      status: "88%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Commerce",
-      place: "West Bengal, India",
-      status: "95%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Higher Secondary (WBCHSE)",
-      place: "West Bengal, India",
-      status: "92%",
+      title: "Senior Secondary (CBSE)",
+      place: "PCM, Computer Science",
+      status: "75.2%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Secondary (WBBSE)",
-      place: "West Bengal, India",
-      status: "87%",
+      title: "Secondary (CBSE)",
+      place: "CBSE Board",
+      status: "85.2%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
   ],
@@ -203,18 +167,16 @@ const data = {
   ]
 };
 
-// --- TYPEWRITER COMPONENT (FIXED) ---
+// --- TYPEWRITER COMPONENT ---
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   
   useEffect(() => {
     let i = 0;
-    setDisplayText(''); // Reset
+    setDisplayText('');
     
     const timer = setInterval(() => {
       if (i < text.length) {
-        // We use substring to ensure we get the exact character at the exact index
-        // This prevents the "missing letter" glitch
         setDisplayText(text.substring(0, i + 1));
         i++;
       } else {
@@ -262,6 +224,18 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
+// Special Reveal for About Cards (Scale Up)
+const ScaleRevealCard = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ scale: 0.5, opacity: 0 }}
+    whileInView={{ scale: 1, opacity: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 60 }}
+  >
+    {children}
+  </motion.div>
+);
+
 // --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
@@ -279,20 +253,34 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
+// Updated Progress Bar with Moving Effect & Liquid Bubble
 const ProgressBar = ({ name, level, color }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between mb-2">
       <span className="text-sm font-medium text-slate-200">{name}</span>
       <span className="text-xs text-slate-400">{level}%</span>
     </div>
-    <div className="w-full bg-slate-800 rounded-full h-2">
+    <div className="w-full bg-slate-800 rounded-full h-2.5 relative overflow-visible">
+       {/* Background of the bar */}
       <motion.div 
         initial={{ width: 0 }}
         whileInView={{ width: `${level}%` }}
         viewport={{ once: true }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        className={`h-2 rounded-full ${color}`}
-      />
+        className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative`}
+      >
+        {/* Moving Stripes Effect */}
+        <div 
+          className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]"
+          style={{
+            backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)',
+            backgroundSize: '1rem 1rem'
+          }}
+        ></div>
+
+        {/* Liquid Bubble Effect at the End */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)] z-10"></div>
+      </motion.div>
     </div>
   </div>
 );
@@ -300,7 +288,7 @@ const ProgressBar = ({ name, level, color }) => (
 // --- MAIN APP ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; // Replace with your Raw GitHub URL
+  const profileImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"; // Replace with your Raw GitHub URL
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
@@ -310,6 +298,14 @@ function App() {
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
       
+      {/* Global Style for Stripe Animation */}
+      <style>{`
+        @keyframes progress-stripes {
+          from { background-position: 1rem 0; }
+          to { background-position: 0 0; }
+        }
+      `}</style>
+
       {/* Profile Image Modal (Lightbox) */}
       <AnimatePresence>
         {isProfileOpen && (
@@ -440,14 +436,14 @@ function App() {
 
           <div className="grid grid-cols-2 gap-3">
             {data.about.highlights.map((item, idx) => (
-              <RevealCard key={idx} delay={idx * 0.1}>
+              <ScaleRevealCard key={idx} delay={idx * 0.1}>
                 <Card className="flex flex-col items-center justify-center p-4 h-full text-center hover:bg-slate-900/80">
-                  <div className={`p-2.5 rounded-lg bg-slate-900 border border-white/5 mb-3 ${item.color}`}>
+                  <div className={`p-3 rounded-xl mb-3 border ${item.bg} ${item.color}`}>
                     <item.icon size={22} />
                   </div>
                   <span className="text-xs font-medium text-slate-300">{item.label}</span>
                 </Card>
-              </RevealCard>
+              </ScaleRevealCard>
             ))}
           </div>
         </section>
@@ -486,16 +482,24 @@ function App() {
             </RevealCard>
           </div>
           
-          <RevealCard className="mt-8 flex flex-wrap justify-center gap-2">
+          {/* Staggered Pills Reveal */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
             {[
               "React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", 
               "IoT", "Flipper Zero", "Adobe", "3D Modeling"
             ].map((tag, i) => (
-              <span key={i} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">
+              <motion.span 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }}
+                className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all"
+              >
                 {tag}
-              </span>
+              </motion.span>
             ))}
-          </RevealCard>
+          </div>
         </section>
 
         {/* --- FEATURED PROJECTS --- */}
@@ -583,6 +587,24 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
+
+            <RevealCard delay={0.2}>
+              <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
+                <div className="flex items-center gap-4 mb-4 relative z-10">
+                   <div className="p-3 rounded-xl bg-neon-green/20 text-neon-green">
+                     <Award size={24} />
+                   </div>
+                   <div>
+                     <h3 className="font-bold text-lg text-white">National Recognition</h3>
+                     <p className="text-neon-green text-sm">Inspire Awards 2025</p>
+                   </div>
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed relative z-10">
+                  Achieved national selection for the project <span className="text-neon-green font-semibold">E-Rabin</span>, an innovative e-waste segregator.
+                </p>
+              </div>
+            </RevealCard>
           </div>
         </section>
 
