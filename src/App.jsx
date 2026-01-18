@@ -64,7 +64,6 @@ const data = {
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       cardBorder: "border-blue-500/20",
-      // CHANGED: group-hover -> hover (Apply directly to the card on hover)
       hoverBg: "hover:bg-gradient-to-br hover:from-blue-500/20 hover:via-blue-500/5 hover:to-transparent",
       hoverBorder: "hover:border-blue-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
@@ -219,13 +218,13 @@ const data = {
   ]
 };
 
-// --- TYPEWRITER COMPONENT (FIXED) ---
+// --- TYPEWRITER COMPONENT ---
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   
   useEffect(() => {
     let i = 0;
-    setDisplayText(''); // Reset
+    setDisplayText('');
     
     const timer = setInterval(() => {
       if (i < text.length) {
@@ -686,8 +685,31 @@ function App() {
           </RevealCard>
 
           <div className="space-y-4">
+            <RevealCard key="vinyl" delay={0.1}>
+              <Card className="flex flex-col items-center justify-center py-8">
+                {/* VINYL RECORD ANIMATION */}
+                <div className="mb-6 relative">
+                  <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg">
+                    {/* Decorative Grooves */}
+                    <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
+                    <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
+                    <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
+                    
+                    {/* Center Label with Icon */}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
+                      <Music size={14} className="text-white" />
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
+                  "Music and programming share the same foundation - patterns, rhythm, and harmony."
+                </p>
+              </Card>
+            </RevealCard> 
+
             {data.music.map((item, idx) => (
-              <RevealCard key={idx} delay={idx * 0.1}>
+              <RevealCard key={idx} delay={0.2 + idx * 0.1}>
                 <Card className="flex flex-col items-center justify-center py-8">
                   <div className="p-4 rounded-2xl bg-slate-900 border border-white/5 text-slate-300 mb-4">
                     <item.icon size={28} />
@@ -700,17 +722,6 @@ function App() {
               </RevealCard>
             ))}
           </div>
-
-          <RevealCard className="mt-6">
-            <Card className="flex flex-col items-center text-center py-8 border-neon-green/20">
-              <div className="w-12 h-12 rounded-full bg-cyan-400/20 flex items-center justify-center text-cyan-400 mb-4 animate-pulse">
-                <Music size={24} />
-              </div>
-              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs">
-                "Music and programming share the same foundation - patterns, rhythm, and harmony."
-              </p>
-            </Card>
-          </RevealCard>
         </section>
 
         {/* --- CONTACT --- */}
@@ -769,7 +780,7 @@ function App() {
         <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
-    </div> 
+    </div>
   )
 }
 
