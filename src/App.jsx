@@ -500,28 +500,46 @@ function App() {
             ))}
           </div>
 
-          <RevealCard className="mt-8">
-            <Card className="flex flex-col items-center justify-center py-8 relative">
-              <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
-                
-                {/* Record (Rotating) */}
-                <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
-                  <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
-                  <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
-                  <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
-                  {/* Center Label */}
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
-                    <Music size={14} className="text-white" />
-                  </div>
-                </div>
+<RevealCard className="mt-8">
+  <Card className="flex flex-col items-center justify-center py-8 relative">
+    {/* Record Container with Tonearm */}
+    <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
+      
+      {/* --- NEW: TONEARM --- */}
+      <div className="absolute -top-3 -right-5 z-20 w-16 h-24 pointer-events-none">
+        {/* Pivot Base */}
+        <div className="absolute top-3 right-4 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 shadow-xl flex items-center justify-center z-10">
+            <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
+        </div>
+        
+        {/* The Arm (Rotated to hit the record) */}
+        <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top -rotate-[30deg] rounded-full border-r border-zinc-600/50 shadow-lg">
+          {/* The Headshell/Needle */}
+          <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
+            <div className="w-0.5 h-full bg-zinc-900/50"></div>
+          </div>
+        </div>
+      </div>
+      {/* --------------------- */}
 
-              </div>
-              
-              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
-                "Music and programming share the same foundation - patterns, rhythm, and harmony."
-              </p>
-            </Card>
-          </RevealCard>
+      {/* Record (Rotating) - No changes to this part, just context */}
+      <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
+        <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
+        <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
+        <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
+        {/* Center Label */}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
+          <Music size={14} className="text-white" />
+        </div>
+      </div>
+
+    </div>
+    
+    <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
+      "Music and programming share the same foundation - patterns, rhythm, and harmony."
+    </p>
+  </Card>
+</RevealCard>
         </section>
 
         {/* --- TECHNICAL SKILLS --- */}
