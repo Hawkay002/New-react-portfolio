@@ -15,7 +15,7 @@ const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
-// --- COUNTRY DATA (Simulating a library fetch) ---
+// --- COUNTRY DATA ---
 const countries = [
   { name: "Afghanistan", code: "+93" }, { name: "Albania", code: "+355" }, { name: "Algeria", code: "+213" }, 
   { name: "Andorra", code: "+376" }, { name: "Angola", code: "+244" }, { name: "Argentina", code: "+54" }, 
@@ -284,6 +284,7 @@ const Typewriter = ({ text, speed = 50 }) => {
   useEffect(() => {
     let i = 0;
     setDisplayText('');
+    
     const timer = setInterval(() => {
       if (i < text.length) {
         setDisplayText(text.substring(0, i + 1));
@@ -292,6 +293,7 @@ const Typewriter = ({ text, speed = 50 }) => {
         clearInterval(timer);
       }
     }, speed);
+
     return () => clearInterval(timer);
   }, [text, speed]);
 
@@ -304,6 +306,7 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 // --- ANIMATION COMPONENTS ---
+
 const ScaleRevealCard = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ scale: 0.5, opacity: 0 }}
@@ -649,6 +652,7 @@ ${message}
             ))}
           </div>
 
+          {/* VINYL RECORD & QUOTE */}
           <RevealCard className="mt-8">
             <Card className="flex flex-col items-center justify-center py-8 relative">
               <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
@@ -778,7 +782,7 @@ ${message}
             </div>
 
             {/* FLIP CONTAINER */}
-            <div className="relative perspective-1000 h-[500px]">
+            <div className="relative perspective-1000 h-[650px] md:h-[600px]">
               <motion.div
                 animate={{ rotateY: isTelegram ? 180 : 0 }}
                 transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
