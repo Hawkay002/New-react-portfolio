@@ -15,12 +15,12 @@ const data = {
   about: {
     bio: "I’m a hobbyist AI developer by passion, fitting projects into whatever free time my busy schedule allows. My journey began with simple curiosity, how technology could be shaped to solve everyday problems. Being extremely picky about details, I often found myself imagining better alternatives, which eventually turned into building my own solutions. This mindset fuels my interest in connecting the digital and physical worlds. To unwind from my hectic routine, I practice origami, which helps refine my focus, precision, and hand control. And yes, somewhere along the way, I also completed a Master’s in Graphic Designing… lol.",
     highlights: [
-      { icon: Code2, label: "Full Stack Development", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-transparent border-blue-500/20" },
-      { icon: Database, label: "IoT Engineering", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-transparent border-cyan-500/20" },
-      { icon: Smartphone, label: "Mobile Development", color: "text-blue-500", bg: "bg-gradient-to-br from-blue-600/20 to-transparent border-blue-600/20" },
-      { icon: Origami, label: "Origami", color: "text-pink-400", bg: "bg-gradient-to-br from-pink-500/20 to-transparent border-pink-500/20" },
-      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400", bg: "bg-gradient-to-br from-orange-500/20 to-transparent border-orange-500/20" },
-      { icon: Target, label: "Problem Solving", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-transparent border-green-500/20" },
+      { icon: Code2, label: "Full Stack Development", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-transparent border border-blue-500/20" },
+      { icon: Database, label: "IoT Engineering", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-transparent border border-cyan-500/20" },
+      { icon: Smartphone, label: "Mobile Development", color: "text-blue-500", bg: "bg-gradient-to-br from-blue-600/20 to-transparent border border-blue-600/20" },
+      { icon: Origami, label: "Origami", color: "text-pink-400", bg: "bg-gradient-to-br from-pink-500/20 to-transparent border border-pink-500/20" },
+      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400", bg: "bg-gradient-to-br from-orange-500/20 to-transparent border border-orange-500/20" },
+      { icon: Target, label: "Problem Solving", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-transparent border border-green-500/20" },
     ]
   },
   skills: {
@@ -57,7 +57,7 @@ const data = {
     {
       title: "Connect - Link in Bio",
       desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
-      tags: ["React", "Gaming", "Social"],
+      tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", 
       link: "#", 
       icon: Link, 
@@ -69,7 +69,7 @@ const data = {
     {
       title: "Rent Invoicing App",
       desc: "Fast and reliable way to create and send rent invoices to tenants.",
-      tags: ["React", "Fintech", "Automation"],
+      tags: ["Web App", "Offline", "Local Storage"],
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Receipt, 
@@ -105,7 +105,7 @@ const data = {
     {
       title: "Unredactor",
       desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
-      tags: ["AI", "Security", "Forensics"],
+      tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Eye, 
@@ -117,7 +117,7 @@ const data = {
     {
       title: "Event Ticketing System",
       desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
-      tags: ["Management", "Admin", "Scanner"],
+      tags: ["Management", "Admin", "Firestore"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Ticket, 
@@ -129,7 +129,7 @@ const data = {
     {
       title: "Portfolio Website",
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
-      tags: ["React", "Showcase", "Design"],
+      tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Globe, 
@@ -141,21 +141,57 @@ const data = {
   ],
   education: [
     {
-      title: "B.Tech in Data Science and IoT",
-      place: "Amrapali University",
-      status: "Currently Studying",
+      title: "Master’s Degree in Criminology",
+      place: "Edinburgh, United Kingdom",
+      status: "96%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Senior Secondary (CBSE)",
-      place: "PCM, Computer Science",
-      status: "75.2%",
+      title: "Master’s Degree in International Relations",
+      place: "Edinburgh, United Kingdom",
+      status: "92%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Master’s Degree in Graphic Designing",
+      place: "West Bengal, India",
+      status: "96%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Master’s Degree in Computer Science",
+      place: "Delhi, India",
+      status: "90%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Business Administration",
+      place: "West Bengal, India",
+      status: "85%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Science",
+      place: "West Bengal, India",
+      status: "88%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Bachelor's Degree in Commerce",
+      place: "West Bengal, India",
+      status: "95%",
+      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
+    },
+    {
+      title: "Higher Secondary (WBCHSE)",
+      place: "West Bengal, India",
+      status: "92%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "Secondary (CBSE)",
-      place: "CBSE Board",
-      status: "85.2%",
+      title: "Secondary (WBBSE)",
+      place: "West Bengal, India",
+      status: "87%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
   ],
@@ -167,35 +203,20 @@ const data = {
   ]
 };
 
-// --- TYPEWRITER COMPONENT ---
-const Typewriter = ({ text, speed = 50 }) => {
-  const [displayText, setDisplayText] = useState('');
-  
-  useEffect(() => {
-    let i = 0;
-    setDisplayText('');
-    
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayText(text.substring(0, i + 1));
-        i++;
-      } else {
-        clearInterval(timer);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [text, speed]);
-
-  return (
-    <span className="inline-block">
-      {displayText}
-      <span className="animate-blink ml-1">|</span>
-    </span>
-  );
-};
-
 // --- ANIMATION COMPONENTS ---
+
+// Updated Reveal for About Cards (Scale Up)
+const ScaleRevealCard = ({ children, delay = 0 }) => (
+  <motion.div
+    initial={{ scale: 0.5, opacity: 0 }}
+    whileInView={{ scale: 1, opacity: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 60 }}
+  >
+    {children}
+  </motion.div>
+);
+
 const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" }) => {
   const variants = {
     hidden: { 
@@ -224,18 +245,6 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// Special Reveal for About Cards (Scale Up)
-const ScaleRevealCard = ({ children, delay = 0 }) => (
-  <motion.div
-    initial={{ scale: 0.5, opacity: 0 }}
-    whileInView={{ scale: 1, opacity: 1 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 60 }}
-  >
-    {children}
-  </motion.div>
-);
-
 // --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
@@ -253,21 +262,21 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
-// Updated Progress Bar with Moving Effect & Liquid Bubble
+// Updated Progress Bar with Moving Effect & Rising Liquid Bubbles
 const ProgressBar = ({ name, level, color }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between mb-2">
       <span className="text-sm font-medium text-slate-200">{name}</span>
       <span className="text-xs text-slate-400">{level}%</span>
     </div>
-    <div className="w-full bg-slate-800 rounded-full h-2.5 relative overflow-visible">
+    <div className="w-full bg-slate-800 rounded-full h-3 relative overflow-hidden">
        {/* Background of the bar */}
       <motion.div 
         initial={{ width: 0 }}
         whileInView={{ width: `${level}%` }}
         viewport={{ once: true }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative`}
+        className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
       >
         {/* Moving Stripes Effect */}
         <div 
@@ -278,17 +287,58 @@ const ProgressBar = ({ name, level, color }) => (
           }}
         ></div>
 
-        {/* Liquid Bubble Effect at the End */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)] z-10"></div>
+        {/* Rising Bubble Effect (Liquid Tank Feel) */}
+        {[...Array(5)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute rounded-full bg-white/40 animate-[bubble-rise_3s_infinite_ease-in]"
+            style={{
+              width: Math.random() * 4 + 2 + 'px',
+              height: Math.random() * 4 + 2 + 'px',
+              left: Math.random() * 100 + '%',
+              bottom: '-5px',
+              animationDelay: Math.random() * 2 + 's',
+              animationDuration: Math.random() * 2 + 2 + 's'
+            }}
+          />
+        ))}
       </motion.div>
     </div>
   </div>
 );
 
+// --- TYPEWRITER COMPONENT (FIXED) ---
+const Typewriter = ({ text, speed = 50 }) => {
+  const [displayText, setDisplayText] = useState('');
+  
+  useEffect(() => {
+    let i = 0;
+    setDisplayText(''); // Reset
+    
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayText(text.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span className="inline-block">
+      {displayText}
+      <span className="animate-blink ml-1">|</span>
+    </span>
+  );
+};
+
 // --- MAIN APP ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"; // Replace with your Raw GitHub URL
+  const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; 
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
@@ -298,11 +348,16 @@ function App() {
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
       
-      {/* Global Style for Stripe Animation */}
+      {/* Global Style for Animations */}
       <style>{`
         @keyframes progress-stripes {
           from { background-position: 1rem 0; }
           to { background-position: 0 0; }
+        }
+        @keyframes bubble-rise {
+          0% { transform: translateY(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(-20px); opacity: 0; }
         }
       `}</style>
 
