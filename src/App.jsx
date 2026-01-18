@@ -6,7 +6,7 @@ import {
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
   Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
-  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X
+  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -58,7 +58,7 @@ const data = {
       title: "Connect - Link in Bio",
       desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
       tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
-      image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800", 
+      image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "#", 
       icon: Link, 
       color: "text-blue-400", 
@@ -82,7 +82,8 @@ const data = {
       title: "Restaurant POS System",
       desc: "A multifunctional POS System for restaurants to take and serve orders.",
       tags: ["POS", "Management", "Real-time"],
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=800",
+      // Updated image to a working restaurant POS visual
+      image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
       link: "#",
       icon: Utensils, 
       color: "text-orange-400", 
@@ -107,7 +108,9 @@ const data = {
       desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
       tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
-      link: "#",
+      // Download specific properties
+      isDownload: true,
+      link: "https://github.com/Hawkay002/React-portfolio/raw/main/unredactor.zip", // Replace with actual file path if different
       icon: Eye, 
       color: "text-red-400", 
       bg: "bg-red-400/10",
@@ -201,6 +204,34 @@ const data = {
     { role: "Harmonium Player", time: "4+ years", icon: Headphones },
     { role: "Ukulele Player", time: "4+ years", icon: Guitar },
   ]
+};
+
+// --- TYPEWRITER COMPONENT ---
+const Typewriter = ({ text, speed = 50 }) => {
+  const [displayText, setDisplayText] = useState('');
+  
+  useEffect(() => {
+    let i = 0;
+    setDisplayText('');
+    
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayText(text.substring(0, i + 1));
+        i++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <span className="inline-block">
+      {displayText}
+      <span className="animate-blink ml-1">|</span>
+    </span>
+  );
 };
 
 // --- ANIMATION COMPONENTS ---
@@ -306,34 +337,6 @@ const ProgressBar = ({ name, level, color }) => (
     </div>
   </div>
 );
-
-// --- TYPEWRITER COMPONENT (FIXED) ---
-const Typewriter = ({ text, speed = 50 }) => {
-  const [displayText, setDisplayText] = useState('');
-  
-  useEffect(() => {
-    let i = 0;
-    setDisplayText(''); // Reset
-    
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayText(text.substring(0, i + 1));
-        i++;
-      } else {
-        clearInterval(timer);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [text, speed]);
-
-  return (
-    <span className="inline-block">
-      {displayText}
-      <span className="animate-blink ml-1">|</span>
-    </span>
-  );
-};
 
 // --- MAIN APP ---
 function App() {
@@ -586,14 +589,28 @@ function App() {
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>
                       {project.title}
                     </h3>
-                    <a 
-                      href={project.link}
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                    >
-                      <ExternalLink size={16} />
-                    </a>
+                    
+                    {/* Check if Download or Link */}
+                    {project.isDownload ? (
+                      <a 
+                        href={project.link}
+                        download
+                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                        title="Download File"
+                      >
+                        <Download size={16} />
+                      </a>
+                    ) : (
+                      <a 
+                        href={project.link}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                        title="Visit Website"
+                      >
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
                   </div>
 
                   {/* Description */}
