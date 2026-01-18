@@ -682,11 +682,14 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Tonearm (Static Overlay) */}
-                  <div className="absolute top-0 right-0 z-20 pointer-events-none">
-                    <div className="w-3 h-3 rounded-full bg-zinc-600 absolute right-1 top-1 shadow-md border border-zinc-500"></div>
-                    <div className="w-12 h-1 bg-zinc-500 absolute right-2 top-2 origin-right rotate-[25deg] rounded-full shadow-sm"></div>
-                    <div className="w-2 h-3 bg-zinc-400 absolute right-[2.8rem] top-[1.4rem] rotate-[25deg] rounded-sm"></div>
+                  {/* Tonearm (Static Overlay) - Fixed Positioning */}
+                  <div className="absolute top-2 right-4 z-20 pointer-events-none">
+                    {/* Pivot Base */}
+                    <div className="w-4 h-4 rounded-full bg-zinc-700 absolute -right-1 -top-1 shadow-md border border-zinc-600"></div>
+                    {/* Arm */}
+                    <div className="w-10 h-1 bg-zinc-500 absolute right-1 top-0.5 origin-right rotate-[30deg] rounded-full shadow-sm"></div>
+                    {/* Head/Needle */}
+                    <div className="w-2.5 h-3.5 bg-zinc-400 absolute right-[2.2rem] top-[1.1rem] rotate-[30deg] rounded-sm shadow-sm"></div>
                   </div>
 
                 </div>
