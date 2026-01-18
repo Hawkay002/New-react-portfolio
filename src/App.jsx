@@ -248,7 +248,6 @@ const Typewriter = ({ text, speed = 50 }) => {
 
 // --- ANIMATION COMPONENTS ---
 
-// Updated Reveal for About Cards (Scale Up)
 const ScaleRevealCard = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ scale: 0.5, opacity: 0 }}
@@ -305,7 +304,6 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
-// Updated Progress Bar with Moving Effect & Rising Liquid Bubbles
 const ProgressBar = ({ name, level, color }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between mb-2">
@@ -313,7 +311,6 @@ const ProgressBar = ({ name, level, color }) => (
       <span className="text-xs text-slate-400">{level}%</span>
     </div>
     <div className="w-full bg-slate-800 rounded-full h-3 relative overflow-hidden">
-       {/* Background of the bar */}
       <motion.div 
         initial={{ width: 0 }}
         whileInView={{ width: `${level}%` }}
@@ -321,7 +318,6 @@ const ProgressBar = ({ name, level, color }) => (
         transition={{ duration: 1.5, ease: "easeOut" }}
         className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
       >
-        {/* Moving Stripes Effect */}
         <div 
           className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]"
           style={{
@@ -329,8 +325,6 @@ const ProgressBar = ({ name, level, color }) => (
             backgroundSize: '1rem 1rem'
           }}
         ></div>
-
-        {/* Rising Bubble Effect (Liquid Tank Feel) */}
         {[...Array(5)].map((_, i) => (
           <div 
             key={i}
@@ -376,7 +370,7 @@ function App() {
         }
       `}</style>
 
-      {/* Profile Image Modal (Lightbox) */}
+      {/* Profile Image Modal */}
       <AnimatePresence>
         {isProfileOpen && (
           <motion.div 
@@ -429,17 +423,13 @@ function App() {
             className="relative w-32 h-32 mb-8 group cursor-pointer"
             onClick={() => setIsProfileOpen(true)}
           >
-            {/* Glow Ring */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70 group-hover:opacity-100 transition-opacity"></div>
-            
-            {/* Image Container */}
             <div className="absolute inset-1 rounded-full overflow-hidden z-10 relative">
               <img 
                 src={profileImage} 
                 alt="Profile" 
                 className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
               />
-              {/* Overlay with Magnifying Glass */}
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <ZoomIn className="text-neon-green w-8 h-8" />
               </div>
@@ -490,7 +480,6 @@ function App() {
         {/* --- ABOUT ME --- */}
         <section id="about">
           <SectionTitle subtitle="" title="about_me" />
-          
           <RevealCard className="mb-8">
             <Card>
               <div className="flex gap-1.5 mb-4">
@@ -521,7 +510,6 @@ function App() {
         {/* --- TECHNICAL SKILLS --- */}
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
-          
           <div className="space-y-4">
             <RevealCard>
               <Card>
@@ -529,21 +517,18 @@ function App() {
                 {data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
-
             <RevealCard>
               <Card>
                 <h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>
                 {data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
-
             <RevealCard>
               <Card>
                 <h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>
                 {data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
-
             <RevealCard>
               <Card>
                 <h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>
@@ -552,7 +537,6 @@ function App() {
             </RevealCard>
           </div>
           
-          {/* Staggered Pills Reveal */}
           <div className="mt-8 flex flex-wrap justify-center gap-2">
             {[
               "React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", 
@@ -575,7 +559,6 @@ function App() {
         {/* --- FEATURED PROJECTS --- */}
         <section id="projects">
           <SectionTitle subtitle="" title="featured_projects" />
-          
           <div className="space-y-6">
             {data.projects.map((project, idx) => (
               <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
@@ -653,7 +636,6 @@ function App() {
         {/* --- EDUCATION --- */}
         <section id="education">
           <SectionTitle subtitle="" title="education_achievements" />
-          
           <div className="space-y-4">
             {data.education.map((edu, idx) => (
               <RevealCard key={idx}>
@@ -677,7 +659,6 @@ function App() {
         {/* --- MUSICAL JOURNEY --- */}
         <section id="music">
           <SectionTitle subtitle="" title="musical_journey" />
-          
           <RevealCard className="mb-8 text-center px-4">
              <p className="text-slate-400 text-sm">
                Beyond code and circuits, music flows through my veins. Here's my harmonious side that balances logic with creativity.
@@ -686,27 +667,35 @@ function App() {
 
           <div className="space-y-4">
             <RevealCard key="vinyl" delay={0.1}>
-              <Card className="flex flex-col items-center justify-center py-8">
-                {/* VINYL RECORD ANIMATION */}
-                <div className="mb-6 relative">
-                  <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg">
-                    {/* Decorative Grooves */}
+              <Card className="flex flex-col items-center justify-center py-8 relative">
+                {/* VINYL RECORD CONTAINER */}
+                <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
+                  
+                  {/* Record (Rotating) */}
+                  <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
                     <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
                     <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
                     <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
-                    
-                    {/* Center Label with Icon */}
+                    {/* Center Label */}
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
                       <Music size={14} className="text-white" />
                     </div>
                   </div>
+
+                  {/* Tonearm (Static Overlay) */}
+                  <div className="absolute top-0 right-0 z-20 pointer-events-none">
+                    <div className="w-3 h-3 rounded-full bg-zinc-600 absolute right-1 top-1 shadow-md border border-zinc-500"></div>
+                    <div className="w-12 h-1 bg-zinc-500 absolute right-2 top-2 origin-right rotate-[25deg] rounded-full shadow-sm"></div>
+                    <div className="w-2 h-3 bg-zinc-400 absolute right-[2.8rem] top-[1.4rem] rotate-[25deg] rounded-sm"></div>
+                  </div>
+
                 </div>
                 
                 <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
                   "Music and programming share the same foundation - patterns, rhythm, and harmony."
                 </p>
               </Card>
-            </RevealCard> 
+            </RevealCard>
 
             {data.music.map((item, idx) => (
               <RevealCard key={idx} delay={0.2 + idx * 0.1}>
@@ -727,7 +716,6 @@ function App() {
         {/* --- CONTACT --- */}
         <section id="contact">
           <SectionTitle subtitle="" title="get_in_touch" />
-          
           <div className="space-y-3 mb-10">
             {[
               { label: "Email", val: "shovith2@gmail.com", icon: Mail },
