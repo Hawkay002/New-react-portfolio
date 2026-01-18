@@ -110,7 +110,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       // Download specific properties
       isDownload: true,
-      link: "https://github.com/Hawkay002/React-portfolio/raw/main/unredactor.zip", // Replace with actual file path if different
+      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", // Replace with actual file path if different
       icon: Eye, 
       color: "text-red-400", 
       bg: "bg-red-400/10",
@@ -660,23 +660,7 @@ function App() {
               </RevealCard>
             ))}
 
-            <RevealCard delay={0.2}>
-              <div className="relative overflow-hidden rounded-2xl bg-card-bg border border-neon-green/30 p-6 glow-border-green">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-neon-green/10 blur-[50px] rounded-full"></div>
-                <div className="flex items-center gap-4 mb-4 relative z-10">
-                   <div className="p-3 rounded-xl bg-neon-green/20 text-neon-green">
-                     <Award size={24} />
-                   </div>
-                   <div>
-                     <h3 className="font-bold text-lg text-white">National Recognition</h3>
-                     <p className="text-neon-green text-sm">Inspire Awards 2025</p>
-                   </div>
-                </div>
-                <p className="text-sm text-slate-300 leading-relaxed relative z-10">
-                  Achieved national selection for the project <span className="text-neon-green font-semibold">E-Rabin</span>, an innovative e-waste segregator.
-                </p>
-              </div>
-            </RevealCard>
+            
           </div>
         </section>
 
