@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
   Github, Linkedin, Twitter, 
@@ -6,13 +6,16 @@ import {
   Music, Mic, Headphones, Guitar,
   BookOpen, GraduationCap, Terminal, Database, Layers,
   Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
-  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2
+  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2,
+  ToggleLeft, ToggleRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- CONFIGURATION ---
-// Ensure you have VITE_WEB3FORMS_ACCESS_KEY in your Vercel Environment Variables
-const ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+// In Vercel, use VITE_ prefix for env variables. Fallbacks provided for demo.
+const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
 // --- DATA ---
 const data = {
@@ -216,6 +219,17 @@ const data = {
   ]
 };
 
+const countryCodes = [
+  { code: "+91", country: "India" },
+  { code: "+1", country: "USA" },
+  { code: "+44", country: "UK" },
+  { code: "+971", country: "UAE" },
+  { code: "+61", country: "Australia" },
+  { code: "+81", country: "Japan" },
+  { code: "+49", country: "Germany" },
+  { code: "+33", country: "France" },
+];
+
 // --- TYPEWRITER COMPONENT ---
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
@@ -223,7 +237,6 @@ const Typewriter = ({ text, speed = 50 }) => {
   useEffect(() => {
     let i = 0;
     setDisplayText('');
-    
     const timer = setInterval(() => {
       if (i < text.length) {
         setDisplayText(text.substring(0, i + 1));
@@ -232,7 +245,6 @@ const Typewriter = ({ text, speed = 50 }) => {
         clearInterval(timer);
       }
     }, speed);
-
     return () => clearInterval(timer);
   }, [text, speed]);
 
@@ -245,7 +257,6 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 // --- ANIMATION COMPONENTS ---
-
 const ScaleRevealCard = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ scale: 0.5, opacity: 0 }}
@@ -350,6 +361,7 @@ function App() {
   // Contact Form States
   const [result, setResult] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTelegram, setIsTelegram] = useState(false); // Toggle state
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
@@ -358,33 +370,61 @@ function App() {
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    
-    // Validate Web3Forms Key
-    if (!ACCESS_KEY) {
-      setResult("Error: Missing Web3Forms Access Key. Please set VITE_WEB3FORMS_ACCESS_KEY in Vercel.");
-      return;
-    }
-
     setIsSubmitting(true);
     setResult("");
 
     const formData = new FormData(event.target);
-    formData.append("access_key", ACCESS_KEY);
+    const firstName = formData.get("firstName");
+    const lastName = formData.get("lastName");
+    const email = formData.get("email");
+    const phone = `${formData.get("countryCode")} ${formData.get("phone")}`;
+    const message = formData.get("message");
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        body: formData
-      });
+      if (isTelegram) {
+        // --- TELEGRAM SUBMISSION ---
+        const text = `
+📩 *New Portfolio Contact*
+👤 *Name:* ${firstName} ${lastName}
+📧 *Email:* ${email}
+📱 *Phone:* ${phone}
+📝 *Message:*
+${message}
+        `;
+        
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" })
+        });
 
-      const data = await response.json();
+        const data = await response.json();
+        if (data.ok) {
+          setResult("Message sent to Telegram successfully!");
+          event.target.reset();
+        } else {
+          setResult("Failed to send to Telegram.");
+        }
 
-      if (data.success) {
-        setResult("Message sent successfully!");
-        event.target.reset();
       } else {
-        console.error("Web3Forms Error:", data);
-        setResult(data.message || "Something went wrong. Please try again.");
+        // --- WEB3FORMS SUBMISSION ---
+        formData.append("access_key", WEB3FORMS_KEY);
+        // Combine names for Web3Forms or send as custom
+        formData.append("name", `${firstName} ${lastName}`);
+        formData.append("phone", phone);
+
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setResult("Email sent successfully!");
+          event.target.reset();
+        } else {
+          setResult(data.message || "Something went wrong.");
+        }
       }
     } catch (error) {
       console.error("Submission Error:", error);
@@ -546,33 +586,28 @@ function App() {
             ))}
           </div>
 
+          {/* VINYL RECORD & QUOTE */}
           <RevealCard className="mt-8">
             <Card className="flex flex-col items-center justify-center py-8 relative">
               <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
                 
-                {/* --- RESTORED: TONEARM --- */}
+                {/* TONEARM */}
                 <div className="absolute -top-3 -right-5 z-20 w-16 h-24 pointer-events-none">
-                  {/* Pivot Base */}
                   <div className="absolute top-3 right-4 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 shadow-xl flex items-center justify-center z-10">
                       <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
                   </div>
-                  
-                  {/* The Arm (Rotated to hit the record) */}
                   <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top rotate-[25deg] rounded-full border-r border-zinc-600/50 shadow-lg">
-                    {/* The Headshell/Needle */}
                     <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
                       <div className="w-0.5 h-full bg-zinc-900/50"></div>
                     </div>
                   </div>
                 </div>
-                {/* ------------------------- */}
 
-                {/* Record (Rotating) */}
+                {/* RECORD */}
                 <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
                   <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
                   <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
                   <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
-                  {/* Center Label */}
                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
                     <Music size={14} className="text-white" />
                   </div>
@@ -589,47 +624,14 @@ function App() {
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           <div className="space-y-4">
-            <RevealCard>
-              <Card>
-                <h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>
-                {data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}
-              </Card>
-            </RevealCard>
-            <RevealCard>
-              <Card>
-                <h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>
-                {data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}
-              </Card>
-            </RevealCard>
-            <RevealCard>
-              <Card>
-                <h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>
-                {data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}
-              </Card>
-            </RevealCard>
-            <RevealCard>
-              <Card>
-                <h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>
-                {data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}
-              </Card>
-            </RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
           </div>
-          
           <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {[
-              "React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", 
-              "IoT", "Flipper Zero", "Adobe", "3D Modeling"
-            ].map((tag, i) => (
-              <motion.span 
-                key={i} 
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }}
-                className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all"
-              >
-                {tag}
-              </motion.span>
+            {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
+              <motion.span key={i} initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">{tag}</motion.span>
             ))}
           </div>
         </section>
@@ -641,73 +643,25 @@ function App() {
             {data.projects.map((project, idx) => (
               <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
                 <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                  
-                  {/* Preview Image */}
                   <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                    <img 
-                      src={project.image} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                    />
+                    <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                   </div>
-
-                  {/* Icon */}
-                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}>
-                    <project.icon size={24} />
-                  </div>
-
-                  {/* Title & Link */}
+                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}><project.icon size={24} /></div>
                   <div className="flex justify-between items-center mb-3 relative z-10">
-                    <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>
-                      {project.title}
-                    </h3>
-                    
-                    {/* Check if Download or Link */}
+                    <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
                     {project.isDownload ? (
-                      <a 
-                        href={project.link}
-                        download
-                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                        title="Download File"
-                      >
-                        <Download size={16} />
-                      </a>
+                      <a href={project.link} download className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Download File"><Download size={16} /></a>
                     ) : (
-                      <a 
-                        href={project.link}
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                        title="Visit Website"
-                      >
-                        <ExternalLink size={16} />
-                      </a>
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Visit Website"><ExternalLink size={16} /></a>
                     )}
                   </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">
-                    {project.desc}
-                  </p>
-
-                  {/* Pills */}
-                  <div className="flex flex-wrap gap-2 relative z-10">
-                    {project.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
+                  <div className="flex flex-wrap gap-2 relative z-10">{project.tags.map((tag, tIdx) => (<span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>))}</div>
                 </Card>
               </RevealCard>
             ))}
-            
-            <RevealCard className="mt-8">
-              <div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">
-                More projects coming soon...
-              </div>
-            </RevealCard>
+            <RevealCard className="mt-8"><div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">More projects coming soon...</div></RevealCard>
           </div>
         </section>
 
@@ -716,20 +670,7 @@ function App() {
           <SectionTitle subtitle="" title="education_achievements" />
           <div className="space-y-4">
             {data.education.map((edu, idx) => (
-              <RevealCard key={idx}>
-                <Card className="flex gap-4 items-center">
-                  <div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}>
-                    <edu.icon size={24} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-base text-white">{edu.title}</h3>
-                    <p className="text-sm text-slate-400 mt-0.5">{edu.place}</p>
-                    <span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>
-                      {edu.status}
-                    </span>
-                  </div>
-                </Card>
-              </RevealCard>
+              <RevealCard key={idx}><Card className="flex gap-4 items-center"><div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}><edu.icon size={24} /></div><div className="flex-1"><h3 className="font-bold text-base text-white">{edu.title}</h3><p className="text-sm text-slate-400 mt-0.5">{edu.place}</p><span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>{edu.status}</span></div></Card></RevealCard>
             ))}
           </div>
         </section>
@@ -738,67 +679,154 @@ function App() {
         <section id="contact">
           <SectionTitle subtitle="" title="get_in_touch" />
           <div className="space-y-3 mb-10">
-            {[
-              { label: "Email", val: "shovith2@gmail.com", icon: Mail },
-              { label: "Telegram", val: "@X_o_x_o_002", icon: Send },
-              { label: "Location", val: "Based in India", icon: MapPin },
-            ].map((contact, idx) => (
-              <RevealCard key={idx} delay={idx * 0.1}>
-                <Card className="flex items-center gap-4 py-4">
-                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-neon-green">
-                    <contact.icon size={18} />
-                  </div>
-                  <div className="overflow-hidden">
-                    <p className="text-xs text-slate-500 mb-0.5">{contact.label}</p>
-                    <p className="text-sm font-medium text-white truncate">{contact.val}</p>
-                  </div>
-                </Card>
-              </RevealCard>
-            ))}
+            {/* ONLY Location Card Remains */}
+            <RevealCard delay={0.1}>
+              <Card className="flex items-center gap-4 py-4">
+                <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-neon-green">
+                  <MapPin size={18} />
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-xs text-slate-500 mb-0.5">Location</p>
+                  <p className="text-sm font-medium text-white truncate">Based in India</p>
+                </div>
+              </Card>
+            </RevealCard>
           </div>
 
           <RevealCard>
-            <Card className="border-t-4 border-t-neon-green">
-               <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
-                 <Send size={20}/> Send Message
-               </h3>
-               
-               {result && (
-                 <div className={`mb-4 p-3 rounded-lg text-sm ${result.includes("success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
-                   {result}
-                 </div>
-               )}
+            {/* TOGGLE SLIDER */}
+            <div className="flex justify-center mb-6">
+              <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64">
+                <motion.div 
+                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50"
+                  animate={{ left: isTelegram ? '50%' : '4px' }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+                <button 
+                  onClick={() => setIsTelegram(false)}
+                  className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
+                >
+                  Email
+                </button>
+                <button 
+                  onClick={() => setIsTelegram(true)}
+                  className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
+                >
+                  Telegram
+                </button>
+              </div>
+            </div>
 
-               <form onSubmit={onSubmit} className="space-y-4">
-                 <div>
-                   <label className="text-xs text-slate-400 ml-1">Name</label>
-                   <input required name="name" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your name" />
-                 </div>
-                 <div>
-                   <label className="text-xs text-slate-400 ml-1">Email</label>
-                   <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="your@email.com" />
-                 </div>
-                 <div>
-                   <label className="text-xs text-slate-400 ml-1">Message</label>
-                   <textarea required name="message" rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
-                 </div>
-                 
-                 <button 
-                   type="submit" 
-                   disabled={isSubmitting}
-                   className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                 >
-                   {isSubmitting ? (
-                     <>
-                       <Loader2 className="animate-spin" size={18} />
-                       Sending...
-                     </>
-                   ) : (
-                     "Send Message"
+            {/* FLIP CONTAINER */}
+            <div className="relative perspective-1000">
+              <motion.div
+                animate={{ rotateY: isTelegram ? 180 : 0 }}
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+                className="relative transform-style-3d"
+              >
+                {/* FRONT (WEB3FORMS) */}
+                <Card className={`border-t-4 border-t-neon-green ${isTelegram ? 'hidden' : 'block'}`}>
+                   <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
+                     <Mail size={20}/> Send Email
+                   </h3>
+                   
+                   {result && !isTelegram && (
+                     <div className={`mb-4 p-3 rounded-lg text-sm ${result.includes("success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                       {result}
+                     </div>
                    )}
-                 </button>
-               </form>
-            </Card>
+
+                   <form onSubmit={onSubmit} className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                       <div>
+                         <label className="text-xs text-slate-400 ml-1">First Name</label>
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="John" />
+                       </div>
+                       <div>
+                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Doe" />
+                       </div>
+                     </div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Email</label>
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="john@example.com" />
+                     </div>
+                     <div>
+                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                        <div className="flex gap-2 mt-1">
+                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24">
+                            {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code} {c.country}</option>)}
+                          </select>
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="1234567890" />
+                        </div>
+                     </div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Message</label>
+                       <textarea required name="message" rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
+                     </div>
+                     
+                     <button 
+                       type="submit" 
+                       disabled={isSubmitting}
+                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                     >
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
+                     </button>
+                   </form>
+                </Card>
+
+                {/* BACK (TELEGRAM) - Rotated 180deg to face correct way when flipped */}
+                <Card className={`border-t-4 border-t-blue-500 absolute inset-0 rotate-y-180 backface-hidden ${!isTelegram ? 'hidden' : 'block'}`} style={{ transform: "rotateY(180deg)" }}>
+                   <h3 className="text-lg font-bold text-blue-400 mb-6 flex items-center gap-2">
+                     <Send size={20}/> Telegram Direct
+                   </h3>
+                   
+                   {result && isTelegram && (
+                     <div className={`mb-4 p-3 rounded-lg text-sm ${result.includes("success") ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                       {result}
+                     </div>
+                   )}
+
+                   <form onSubmit={onSubmit} className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                       <div>
+                         <label className="text-xs text-slate-400 ml-1">First Name</label>
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Jane" />
+                       </div>
+                       <div>
+                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Doe" />
+                       </div>
+                     </div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Email</label>
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="jane@example.com" />
+                     </div>
+                     <div>
+                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                        <div className="flex gap-2 mt-1">
+                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24">
+                            {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code} {c.country}</option>)}
+                          </select>
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="9876543210" />
+                        </div>
+                     </div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Message</label>
+                       <textarea required name="message" rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Direct message to Telegram..." />
+                     </div>
+                     
+                     <button 
+                       type="submit" 
+                       disabled={isSubmitting}
+                       className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                     >
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Telegram"}
+                     </button>
+                   </form>
+                </Card>
+              </motion.div>
+            </div>
           </RevealCard>
         </section>
 
