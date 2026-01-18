@@ -796,7 +796,7 @@ ${message}
                 className="relative w-full h-full transform-style-3d"
               >
                 {/* FRONT (WEB3FORMS) */}
-                <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden relative">
+                <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden">
                    {/* FLASH NOTIFICATION OVERLAY */}
                    <AnimatePresence>
                      {notification && !isTelegram && (
@@ -858,7 +858,7 @@ ${message}
                 </Card>
 
                 {/* BACK (TELEGRAM) */}
-                <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180 relative" style={{ transform: "rotateY(180deg)" }}>
+                <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
                    {/* FLASH NOTIFICATION OVERLAY */}
                    <AnimatePresence>
                      {notification && isTelegram && (
