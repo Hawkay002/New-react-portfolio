@@ -63,11 +63,11 @@ const data = {
       icon: Link, 
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
-      // New Styling Properties
       cardBorder: "border-blue-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-blue-500/10 group-hover:via-blue-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-blue-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
+      // CHANGED: group-hover -> hover (Apply directly to the card on hover)
+      hoverBg: "hover:bg-gradient-to-br hover:from-blue-500/20 hover:via-blue-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-blue-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
     },
     {
       title: "Rent Invoicing App",
@@ -79,9 +79,9 @@ const data = {
       color: "text-green-400", 
       bg: "bg-green-400/10",
       cardBorder: "border-green-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-green-500/10 group-hover:via-green-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-green-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-green-500/20 hover:via-green-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-green-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
     },
     {
       title: "Restaurant POS System",
@@ -93,9 +93,9 @@ const data = {
       color: "text-orange-400", 
       bg: "bg-orange-400/10",
       cardBorder: "border-orange-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-orange-500/10 group-hover:via-orange-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-orange-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-orange-500/20 hover:via-orange-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-orange-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(251,146,60,0.2)]",
     },
     {
       title: "Birthday & Shagun Bot",
@@ -107,9 +107,9 @@ const data = {
       color: "text-pink-400", 
       bg: "bg-pink-400/10",
       cardBorder: "border-pink-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-pink-500/10 group-hover:via-pink-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-pink-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-pink-500/20 hover:via-pink-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-pink-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
     },
     {
       title: "Unredactor",
@@ -117,14 +117,14 @@ const data = {
       tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
-      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
+      link: "https://github.com/Hawkay002/React-portfolio/raw/main/unredactor.zip", 
       icon: Eye, 
       color: "text-red-400", 
       bg: "bg-red-400/10",
       cardBorder: "border-red-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-red-500/10 group-hover:via-red-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-red-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-red-500/20 hover:via-red-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-red-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
     {
       title: "Event Ticketing System",
@@ -136,9 +136,9 @@ const data = {
       color: "text-purple-400", 
       bg: "bg-purple-400/10",
       cardBorder: "border-purple-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-purple-500/10 group-hover:via-purple-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-purple-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-purple-500/20 hover:via-purple-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-purple-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
     },
     {
       title: "Portfolio Website",
@@ -150,9 +150,9 @@ const data = {
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
       cardBorder: "border-indigo-500/20",
-      hoverBg: "group-hover:bg-gradient-to-br group-hover:from-indigo-500/10 group-hover:via-indigo-500/5 group-hover:to-transparent",
-      hoverBorder: "group-hover:border-indigo-400/50",
-      hoverShadow: "group-hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
+      hoverBg: "hover:bg-gradient-to-br hover:from-indigo-500/20 hover:via-indigo-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-indigo-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
   ],
   education: [
@@ -219,13 +219,13 @@ const data = {
   ]
 };
 
-// --- TYPEWRITER COMPONENT ---
+// --- TYPEWRITER COMPONENT (FIXED) ---
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   
   useEffect(() => {
     let i = 0;
-    setDisplayText('');
+    setDisplayText(''); // Reset
     
     const timer = setInterval(() => {
       if (i < text.length) {
@@ -756,7 +756,7 @@ function App() {
                    <textarea rows={4} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors" placeholder="Your message..." />
                  </div>
                  <button type="submit" className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
-                   Send Message via TG
+                   Send Message via Telegram
                  </button>
                </form>
             </Card>
@@ -769,7 +769,7 @@ function App() {
         <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
-    </div>
+    </div> 
   )
 }
 
