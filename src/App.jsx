@@ -448,12 +448,11 @@ function App() {
         }
 
         const text = `
-📩 *New Portfolio Contact*
+📩 *New Message Reveived from Portfolio Contact form*
 👤 *Name:* ${firstName} ${lastName}
 📧 *Email:* ${email}
 📱 *Phone:* ${phone}
-📝 *Message:*
-${message}
+📝 *Message:* ${message}
         `;
         
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -464,10 +463,10 @@ ${message}
 
         const data = await response.json();
         if (data.ok) {
-          showNotification("Message sent to Telegram successfully!");
+          showNotification("Message sent successfully!");
           event.target.reset();
         } else {
-          showNotification("Failed to send to Telegram.", 'error');
+          showNotification("Failed to send.", 'error');
         }
 
       } else {
@@ -489,7 +488,7 @@ ${message}
 
         const data = await response.json();
         if (data.success) {
-          showNotification("Email sent successfully!");
+          showNotification("Message sent successfully!");
           event.target.reset();
         } else {
           showNotification(data.message || "Something went wrong.", 'error');
@@ -815,7 +814,7 @@ ${message}
                    </AnimatePresence>
 
                    <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
-                     <Mail size={20}/> Send Email
+                     <Mail size={20}/> Send
                    </h3>
                    
                    <form onSubmit={onSubmit} className="space-y-4">
@@ -852,7 +851,7 @@ ${message}
                        disabled={isSubmitting}
                        className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
-                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
                    </form>
                 </Card>
@@ -914,7 +913,7 @@ ${message}
                        disabled={isSubmitting}
                        className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
-                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Telegram"}
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
                    </form>
                 </Card>
