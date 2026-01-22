@@ -5,9 +5,8 @@ import {
   GraduationCap, BookOpen, Database, Smartphone, Target, Plane, Origami
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-// --- NEW IMPORTS FOR 3D CLOUD ---
 import { Cloud } from "react-icon-cloud";
-// SAFE IMPORTS ONLY - Removed Adobe/VSCode to prevent build errors
+// SAFE IMPORTS (Removed problem icons)
 import { 
   siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
   siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -350,9 +349,8 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Uses <a> tags to show cloud) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Pill Design + Visible Icons) ---
 const TechCluster = () => {
-  // SAFE IMPORTS (Removed problematic ones)
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
     siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -365,21 +363,35 @@ const TechCluster = () => {
       key={icon.slug}
       href="#"
       onClick={(e) => e.preventDefault()}
-      // Changed to 'a' tag so the cloud library renders it. 
-      // Added 'flex' to keep icon+text aligned side-by-side.
-      className="flex items-center justify-center gap-2 p-2 cursor-pointer pointer-events-auto select-none bg-slate-900/60 backdrop-blur-sm rounded-lg border border-white/5 hover:bg-slate-800 hover:border-neon-green/50 transition-all shadow-sm no-underline"
-      style={{ flexDirection: "row", display: "flex" }} 
+      // PILL STYLING:
+      // - borderRadius: 9999px (pill shape)
+      // - dynamic backgroundColor/borderColor based on icon.hex
+      // - flex layout for icon + text
+      className="pointer-events-auto select-none no-underline transition-all duration-300 hover:scale-110"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "6px",
+        padding: "6px 12px",
+        borderRadius: "9999px",
+        backgroundColor: `#${icon.hex}20`, // 20% opacity background
+        border: `1px solid #${icon.hex}40`, // 40% opacity border
+        color: `#${icon.hex}`
+      }} 
     >
       <svg
         viewBox="0 0 24 24"
-        fill={`#${icon.hex}`}
+        fill="currentColor"
         width={16}
         height={16}
         xmlns="http://www.w3.org/2000/svg"
+        // Force dimensions so it doesn't shrink to 0
+        style={{ minWidth: '16px', flexShrink: 0 }}
       >
         <path d={icon.path} />
       </svg>
-      <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">
+      <span className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
         {icon.title}
       </span>
     </a>
@@ -755,24 +767,21 @@ function App() {
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           
-          {/* 3D Tech Cluster */}
-          <RevealCard>
-            <div className="mb-12"> 
-              <TechCluster />
-            </div>
-          </RevealCard>
-
           <div className="space-y-4">
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
           </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
-              <motion.span key={i} initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">{tag}</motion.span>
-            ))}
-          </div>
+          
+          {/* 3D Tech Cluster (Moved to Bottom) */}
+          <RevealCard>
+            <div className="mt-12 mb-6"> 
+              <TechCluster />
+            </div>
+            {/* Removed the static pill list since TechCluster now serves that purpose */}
+          </RevealCard>
+
         </section>
 
         {/* --- FEATURED PROJECTS --- */}
@@ -927,7 +936,7 @@ function App() {
                 <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
                    {/* FLASH NOTIFICATION OVERLAY */}
                    <AnimatePresence>
-                     {notification && isTelegram && ( 
+                     {notification && isTelegram && (
                        <motion.div 
                          initial={{ opacity: 0 }} 
                          animate={{ opacity: 1 }} 
@@ -986,7 +995,7 @@ function App() {
                 </Card>
               </motion.div>
             </div>
-          </RevealCard>
+          </RevealCard> 
         </section>
 
       </main>
