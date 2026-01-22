@@ -5,7 +5,7 @@ import {
   GraduationCap, BookOpen, Download, Loader2,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
-  Home, Briefcase, Cpu, User, Wrench
+  Home, Briefcase, Cpu, User
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -415,11 +415,11 @@ const Navbar = () => {
     { name: 'Contact', href: '#contact' },
   ];
 
-  // Mobile Dock Items - EXACT ORDER: Home, About, Skills, Projects, Education, Contact
+  // Mobile Dock Items - Slimmer and Wider
   const mobileDockItems = [
     { id: 'home', icon: Home, href: '#home' },
     { id: 'about', icon: User, href: '#about' },
-    { id: 'skills', icon: Cpu, href: '#skills' }, // CPU for Technical Skills/IoT
+    { id: 'skills', icon: Cpu, href: '#skills' }, 
     { id: 'projects', icon: Briefcase, href: '#projects' },
     { id: 'education', icon: GraduationCap, href: '#education' },
     { id: 'contact', icon: Mail, href: '#contact' },
@@ -429,7 +429,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['home', 'about', 'skills', 'projects', 'education', 'contact'];
-      const scrollPosition = window.scrollY + 300; // Offset for better detection
+      const scrollPosition = window.scrollY + 300; 
 
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -448,7 +448,7 @@ const Navbar = () => {
 
   return (
     <>
-      {/* --- DESKTOP NAVBAR (Hidden on Mobile) --- */}
+      {/* --- DESKTOP NAVBAR --- */}
       <nav className="hidden md:flex fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center justify-between h-16">
@@ -477,14 +477,17 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* --- MOBILE LOGO (Top Left) --- */}
-      <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5">
-         <Code2 className="text-neon-green w-6 h-6" />
+      {/* --- MOBILE LOGO WITH BRANDING --- */}
+      <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5 flex items-center gap-2">
+         <Code2 className="text-neon-green w-5 h-5" />
+         <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">
+           Shovith.dev
+         </span>
       </div>
 
-      {/* --- MOBILE FLOATING DOCK (Bottom Center) --- */}
+      {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide) --- */}
       <div className="md:hidden fixed bottom-6 inset-x-0 flex justify-center z-50 pointer-events-none">
-        <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-2 shadow-2xl flex items-center gap-1">
+        <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => {
              const isActive = activeTab === item.id;
              return (
@@ -492,17 +495,26 @@ const Navbar = () => {
                 key={item.id}
                 href={item.href}
                 onClick={() => setActiveTab(item.id)}
-                className={`relative p-3 rounded-full transition-all duration-300 flex items-center justify-center ${
-                  isActive 
-                    ? 'bg-slate-800 text-white shadow-lg' 
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                className={`relative p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${
+                  isActive ? 'text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {/* Top Edge Highlight for Active State */}
+                {/* SMOOTH GLIDING HIGHLIGHTER */}
                 {isActive && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
+                  <motion.div 
+                    layoutId="active-dock-pill"
+                    className="absolute inset-0 bg-slate-800 rounded-full"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                     {/* Top Active Indicator Line */}
+                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
+                  </motion.div>
                 )}
-                <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                
+                {/* Icon (Smaller size: 18px for breathing room) */}
+                <span className="relative z-10">
+                   <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                </span>
               </a>
              );
           })}
