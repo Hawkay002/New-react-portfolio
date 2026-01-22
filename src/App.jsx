@@ -5,8 +5,9 @@ import {
   GraduationCap, BookOpen, Database, Smartphone, Target, Plane, Origami
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+// --- NEW IMPORTS FOR 3D CLOUD ---
 import { Cloud } from "react-icon-cloud";
-// SAFE IMPORTS (Removed problem icons)
+// SAFE IMPORTS (Ensured no missing icons)
 import { 
   siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
   siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -349,7 +350,7 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Pill Design + Visible Icons) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pills) ---
 const TechCluster = () => {
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
@@ -360,45 +361,50 @@ const TechCluster = () => {
 
   const customIcons = icons.map((icon) => (
     <a
-      key={icon.slug}
+      key={icon.slug || icon.title}
       href="#"
       onClick={(e) => e.preventDefault()}
-      // PILL STYLING:
-      // - borderRadius: 9999px (pill shape)
-      // - dynamic backgroundColor/borderColor based on icon.hex
-      // - flex layout for icon + text
-      className="pointer-events-auto select-none no-underline transition-all duration-300 hover:scale-110"
+      // Forced Styles: We use a specific class and explicit styles to prevent overriding
+      // Pill shape: rounded-full (9999px)
+      // Colors: Fallback provided if hex is missing
+      className="tech-pill-link"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         gap: "6px",
-        padding: "6px 12px",
+        padding: "6px 14px",
         borderRadius: "9999px",
-        backgroundColor: `#${icon.hex}20`, // 20% opacity background
-        border: `1px solid #${icon.hex}40`, // 40% opacity border
-        color: `#${icon.hex}`
-      }} 
+        backgroundColor: icon.hex ? `#${icon.hex}25` : '#ffffff20', 
+        border: `1px solid ${icon.hex ? `#${icon.hex}50` : '#ffffff40'}`,
+        textDecoration: "none",
+        cursor: "pointer",
+        whiteSpace: "nowrap"
+      }}
     >
       <svg
         viewBox="0 0 24 24"
-        fill="currentColor"
-        width={16}
-        height={16}
+        fill={icon.hex ? `#${icon.hex}` : '#ffffff'}
         xmlns="http://www.w3.org/2000/svg"
-        // Force dimensions so it doesn't shrink to 0
-        style={{ minWidth: '16px', flexShrink: 0 }}
+        // Force minimum size so flexbox doesn't crush it
+        style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
       >
         <path d={icon.path} />
       </svg>
-      <span className="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+      <span style={{
+        fontSize: '11px',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: icon.hex ? `#${icon.hex}` : '#ffffff'
+      }}>
         {icon.title}
       </span>
     </a>
   ));
 
   return (
-    <div className="flex justify-center items-center h-80 w-full overflow-visible">
+    <div className="flex justify-center items-center h-80 w-full overflow-visible relative">
       <Cloud
         options={{
           clickToFront: 500,
@@ -767,6 +773,7 @@ function App() {
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           
+          {/* Progress Bars First */}
           <div className="space-y-4">
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
@@ -779,7 +786,6 @@ function App() {
             <div className="mt-12 mb-6"> 
               <TechCluster />
             </div>
-            {/* Removed the static pill list since TechCluster now serves that purpose */}
           </RevealCard>
 
         </section>
@@ -995,7 +1001,7 @@ function App() {
                 </Card>
               </motion.div>
             </div>
-          </RevealCard> 
+          </RevealCard>
         </section>
 
       </main>
