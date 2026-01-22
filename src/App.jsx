@@ -547,7 +547,8 @@ const Navbar = () => {
                   <motion.div 
                     layoutId="active-dock-pill"
                     className="absolute inset-0 bg-slate-800 rounded-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    // UPDATED: Smooth bouncy transition
+                    transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
                   >
                      {/* Top Active Indicator Line */}
                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
@@ -1050,20 +1051,20 @@ function App() {
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
                      </div>
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
-                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24 placeholder:text-slate-600">
+                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Message</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
+                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
                      </div>
                      
                      <button 
