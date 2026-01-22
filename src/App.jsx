@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Code2, Mail, Send, MapPin, ExternalLink, 
+  Code2, Menu, Mail, Send, MapPin, ExternalLink, 
   Link, Receipt, Utensils, Gift, Eye, Ticket, Globe, 
   GraduationCap, BookOpen, Download, Loader2,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
@@ -364,10 +364,13 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- ANIMATED COUNTER COMPONENT (NEW) ---
+// --- ANIMATED COUNTER COMPONENT (Dynamically Resizing) ---
 const AnimatedCounter = ({ value, color }) => {
   return (
-    <div className="relative h-4 w-7 overflow-hidden inline-flex items-center justify-center">
+    <div className="relative h-4 overflow-hidden inline-flex items-center justify-center">
+      {/* Ghost element: Invisible but sets the exact width needed for the current number */}
+      <span className="invisible font-mono text-[10px] px-px">{value}</span>
+      
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
@@ -375,7 +378,7 @@ const AnimatedCounter = ({ value, color }) => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 15, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className={`absolute font-mono text-[10px] ${color}`}
+          className={`absolute font-mono text-[10px] ${color} left-0 right-0 text-center`}
         >
           {value}
         </motion.span>
@@ -1024,7 +1027,7 @@ function App() {
                      {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) - ANIMATED */}
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span>Used: </span>
+                          <span>Limit: </span>
                           <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
                           <span>/250</span>
                        </div>
@@ -1047,7 +1050,7 @@ function App() {
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
                      </div>
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
