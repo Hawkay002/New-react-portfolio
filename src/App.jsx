@@ -529,7 +529,7 @@ const Navbar = () => {
       </div>
 
       {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide, MOVED UP) --- */}
-      <div className="md:hidden fixed bottom-15 inset-x-0 flex justify-center z-50 pointer-events-none">
+      <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => {
              const isActive = activeTab === item.id;
