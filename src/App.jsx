@@ -5,14 +5,34 @@ import {
   GraduationCap, BookOpen, Download, Loader2,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
-  Home, Briefcase, Cpu, User
+  Home, Briefcase, Cpu, User, Infinity, Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// --- FIREBASE IMPORTS ---
+import { initializeApp } from "firebase/app";
+import { 
+  getFirestore, doc, getDoc, setDoc, updateDoc, increment 
+} from "firebase/firestore";
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
+
+// --- FIREBASE CONFIG ---
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // --- COUNTRY DATA ---
 const countries = [
@@ -533,6 +553,44 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
+  
+  // Real-time Database Quota (Default to 6 until DB loads)
+  const [dbQuota, setDbQuota] = useState(6); 
+
+  // SYNC QUOTA WITH FIREBASE & AUTO-RESET LOGIC (Month + Year)
+  useEffect(() => {
+    const fetchQuota = async () => {
+      try {
+        const docRef = doc(db, "stats", "email_quota");
+        const docSnap = await getDoc(docRef);
+        
+        const now = new Date();
+        const currentMonth = now.getMonth(); // 0-11
+        const currentYear = now.getFullYear(); // e.g., 2026
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          
+          // Reset if Month OR Year is different (OR if year was previously undefined)
+          if (data.month !== currentMonth || data.year !== currentYear) {
+            // New Month/Year Detected -> Reset to 0 and update timestamps
+            await updateDoc(docRef, { count: 0, month: currentMonth, year: currentYear });
+            setDbQuota(0);
+          } else {
+            // Same Month & Year -> Use Database Value
+            setDbQuota(data.count);
+          }
+        } else {
+          // Initialize if doc missing (First time ever)
+          await setDoc(docRef, { count: 6, month: currentMonth, year: currentYear });
+          setDbQuota(6);
+        }
+      } catch (error) {
+        console.error("Error fetching quota:", error);
+      }
+    };
+    fetchQuota();
+  }, []);
 
   const scrollToContact = () => {
     const element = document.getElementById('contact');
@@ -597,6 +655,13 @@ function App() {
            return;
         }
 
+        // Check Quota
+        if (dbQuota >= 250) {
+           showNotification("Monthly email limit reached. Please use Telegram.", 'error');
+           setIsSubmitting(false);
+           return;
+        }
+
         formData.append("access_key", WEB3FORMS_KEY);
         formData.append("name", `${firstName} ${lastName}`);
         formData.append("phone", phone);
@@ -609,6 +674,12 @@ function App() {
         const data = await response.json();
         if (data.success) {
           showNotification("Message sent successfully!");
+          
+          // Increment Firestore Count
+          const docRef = doc(db, "stats", "email_quota");
+          await updateDoc(docRef, { count: increment(1) });
+          setDbQuota(prev => prev + 1);
+
           event.target.reset();
         } else {
           showNotification(data.message || "Something went wrong.", 'error');
@@ -925,9 +996,21 @@ function App() {
                      )}
                    </AnimatePresence>
 
-                   <h3 className="text-lg font-bold text-neon-green mb-6 flex items-center gap-2">
-                     <Mail size={20}/> Send
-                   </h3>
+                   <div className="flex justify-between items-start mb-6">
+                     <h3 className="text-lg font-bold text-neon-green flex items-center gap-2">
+                       <Mail size={20}/> Send
+                     </h3>
+                     
+                     {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) */}
+                     <div className="group relative">
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
+                          <span className={dbQuota >= 250 ? "text-red-500" : "text-neon-green"}>{dbQuota}</span>/250
+                       </div>
+                       <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
+                          Monthly free limit. Resets on the 1st of every month.
+                       </div>
+                     </div>
+                   </div>
                    
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
@@ -950,7 +1033,7 @@ function App() {
                           <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="1234567890" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
@@ -960,10 +1043,10 @@ function App() {
                      
                      <button 
                        type="submit" 
-                       disabled={isSubmitting}
-                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                       disabled={isSubmitting || dbQuota >= 250}
+                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                      >
-                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
                      </button>
                    </form>
                 </Card>
@@ -987,9 +1070,20 @@ function App() {
                      )}
                    </AnimatePresence>
 
-                   <h3 className="text-lg font-bold text-blue-400 mb-6 flex items-center gap-2">
-                     <Send size={20}/> Direct Message
-                   </h3>
+                   <div className="flex justify-between items-start mb-6">
+                     <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
+                       <Send size={20}/> Direct Message
+                     </h3>
+                     {/* TELEGRAM INFINITY BADGE */}
+                     <div className="group relative">
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-blue-400 cursor-help flex items-center justify-center w-8 h-6">
+                          <Infinity size={14} />
+                       </div>
+                       <div className="absolute bottom-full right-0 mb-2 w-40 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
+                          No limits. Send as many messages as you want.
+                       </div>
+                     </div>
+                   </div>
                    
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
