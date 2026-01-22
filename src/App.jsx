@@ -364,6 +364,26 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
+// --- ANIMATED COUNTER COMPONENT (NEW) ---
+const AnimatedCounter = ({ value, color }) => {
+  return (
+    <div className="relative h-4 w-7 overflow-hidden inline-flex items-center justify-center">
+      <AnimatePresence mode="popLayout">
+        <motion.span
+          key={value}
+          initial={{ y: -15, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 15, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={`absolute font-mono text-[10px] ${color}`}
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+};
+
 // --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
@@ -1001,10 +1021,12 @@ function App() {
                        <Mail size={20}/> Send Email
                      </h3>
                      
-                     {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) */}
+                     {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) - ANIMATED */}
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span className={dbQuota >= 250 ? "text-red-500" : "text-neon-green"}>{dbQuota}</span>/250
+                          <span>Used: </span>
+                          <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
+                          <span>/250</span>
                        </div>
                        <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
                           Monthly free limit. Resets on the 1st of every month.
@@ -1138,4 +1160,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
