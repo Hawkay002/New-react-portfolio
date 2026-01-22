@@ -998,7 +998,7 @@ function App() {
 
                    <div className="flex justify-between items-start mb-6">
                      <h3 className="text-lg font-bold text-neon-green flex items-center gap-2">
-                       <Mail size={20}/> Send
+                       <Mail size={20}/> Send Email
                      </h3>
                      
                      {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) */}
