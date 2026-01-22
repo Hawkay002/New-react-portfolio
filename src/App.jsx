@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Code2, Menu, Mail, Send, MapPin, ExternalLink, ZoomIn, X, Download, Loader2,
-  CheckCircle2, AlertCircle, Music, Ticket, Globe, Receipt, Utensils, Gift, Eye,
-  GraduationCap, BookOpen, Database, Smartphone, Target, Plane, Origami
+  Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
+  Github, Linkedin, Twitter, 
+  Cpu, Globe, Smartphone, Award, Target, 
+  Music, Mic, Headphones, Guitar,
+  BookOpen, GraduationCap, Terminal, Database, Layers,
+  Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
+  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2,
+  CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-// --- NEW IMPORTS FOR 3D CLOUD ---
-import { Cloud } from "react-icon-cloud";
-// SAFE IMPORTS (Removed problem icons like Adobe/VSCode to fix build)
-import { 
-  siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
-  siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
-  siGit, siGithub, siRaspberrypi
-} from 'simple-icons/icons';
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
@@ -129,7 +126,7 @@ const data = {
       tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "#", 
-      icon: Globe, 
+      icon: Link, 
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       cardBorder: "border-blue-500/20",
@@ -350,84 +347,6 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pill Shape + Sizing) ---
-const TechCluster = () => {
-  // SAFE IMPORTS from 'simple-icons/icons'
-  const icons = [
-    siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
-    siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
-    siGit, siGithub, siRaspberrypi
-  ];
-
-  const customIcons = icons.map((icon) => (
-    <a
-      key={icon.slug}
-      href="#"
-      onClick={(e) => e.preventDefault()}
-      // PILL STYLING:
-      // - inline-flex: Keeps items together
-      // - white-space-nowrap: Prevents wrapping
-      // - Dynamic background/border based on icon.hex
-      className="pointer-events-auto cursor-pointer select-none transition-all duration-200 hover:scale-110 no-underline"
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "10px", // Increased gap
-        padding: "8px 14px", // Increased padding
-        borderRadius: "100px", 
-        backgroundColor: `#${icon.hex}15`, 
-        border: `1px solid #${icon.hex}`, 
-        boxShadow: `0 0 10px #${icon.hex}40`, 
-        color: `#${icon.hex}`, 
-        whiteSpace: "nowrap", 
-        minWidth: "fit-content"
-      }} 
-    >
-      {/* WRAPPER SPAN: Forces icon size to prevent shrinking */}
-      <span style={{ display: "block", width: "24px", height: "24px" }}>
-        <svg
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          width="24px"
-          height="24px"
-          xmlns="http://www.w3.org/2000/svg"
-          // Force sizing with minWidth and flexShrink
-          style={{ minWidth: '24px', flexShrink: 0 }}
-        >
-          <path d={icon.path} />
-        </svg>
-      </span>
-      
-      {/* Text Size Increased to text-sm (approx 14px) */}
-      <span className="text-sm font-bold uppercase tracking-wider">
-        {icon.title}
-      </span>
-    </a>
-  ));
-
-  return (
-    // Increased container height to h-96 to accommodate larger tags
-    <div className="flex justify-center items-center h-96 w-full overflow-visible py-10">
-      <Cloud
-        options={{
-          clickToFront: 500,
-          depth: 1,
-          imageScale: 2,
-          initial: [0.1, -0.1],
-          outlineColour: "#0000",
-          reverse: true,
-          tooltip: "native",
-          tooltipDelay: 0,
-          wheelZoom: false,
-        }}
-      >
-        {customIcons}
-      </Cloud>
-    </div>
-  );
-};
-
 // --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
@@ -529,7 +448,7 @@ function App() {
         }
 
         const text = `
-📩 *New Message Received from Portfolio Contact form*
+📩 *New Message Reveived from Portfolio Contact form*
 👤 *Name:* ${firstName} ${lastName}
 📧 *Email:* ${email}
 📱 *Phone:* ${phone}
@@ -776,20 +695,17 @@ function App() {
         {/* --- TECHNICAL SKILLS --- */}
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
-          
           <div className="space-y-4">
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
           </div>
-          
-          {/* 3D Tech Cluster (Moved to Bottom) */}
-          <RevealCard>
-            <div className="mt-16 mb-6"> 
-              <TechCluster />
-            </div>
-          </RevealCard>
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
+              <motion.span key={i} initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">{tag}</motion.span>
+            ))}
+          </div>
         </section>
 
         {/* --- FEATURED PROJECTS --- */}
@@ -922,7 +838,7 @@ function App() {
                           <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="1234567890" />
                         </div>
                      </div>
                      <div>
@@ -933,7 +849,7 @@ function App() {
                      <button 
                        type="submit" 
                        disabled={isSubmitting}
-                       className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
                        {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
@@ -1012,7 +928,7 @@ function App() {
         <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
-    </div> 
+    </div>
   )
 }
 
