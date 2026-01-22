@@ -5,8 +5,14 @@ import {
   GraduationCap, BookOpen, Database, Smartphone, Target, Plane, Origami
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-// NEW IMPORT FOR CLOUD
-import { Cloud, fetchSimpleIcons } from "react-icon-cloud";
+// --- NEW IMPORTS FOR 3D CLOUD ---
+import { Cloud } from "react-icon-cloud";
+import { 
+  siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
+  siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
+  siGit, siGithub, siVisualstudiocode, siAdobephotoshop, siAdobeillustrator,
+  siRaspberrypi
+} from 'simple-icons/icons';
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
@@ -344,61 +350,41 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (3D Cloud) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Static Imports) ---
 const TechCluster = () => {
-  const slugs = [
-    "javascript",
-    "typescript",
-    "react",
-    "html5",
-    "css3",
-    "tailwindcss",
-    "nodedotjs",
-    "express",
-    "python",
-    "firebase",
-    "supabase",
-    "arduino",
-    "git",
-    "github",
-    "visualstudiocode",
-    "adobephotoshop",
-    "adobeillustrator",
-    "raspberrypi"
+  // Using direct import objects guarantees data is always available
+  const icons = [
+    siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
+    siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
+    siGit, siGithub, siVisualstudiocode, siAdobephotoshop, siAdobeillustrator,
+    siRaspberrypi
   ];
 
-  const [icons, setIcons] = useState(null);
-
-  useEffect(() => {
-    fetchSimpleIcons({ slugs }).then(setIcons);
-  }, []);
-
-  if (!icons) return null;
-
-  const customIcons = Object.values(icons.simpleIcons).map((icon) => (
+  const customIcons = icons.map((icon) => (
     <div
       key={icon.slug}
       onClick={(e) => e.preventDefault()}
-      className="flex items-center justify-center gap-1.5 p-1 cursor-pointer pointer-events-auto select-none"
-      style={{ flexDirection: "row" }}
+      // Styled for visibility: flex row, background, border
+      className="flex items-center justify-center gap-2 p-2 cursor-pointer pointer-events-auto select-none bg-slate-900/60 backdrop-blur-sm rounded-lg border border-white/5 hover:bg-slate-800 hover:border-neon-green/50 transition-all shadow-sm"
+      style={{ flexDirection: "row" }} 
     >
       <svg
         viewBox="0 0 24 24"
         fill={`#${icon.hex}`}
-        width={18}
-        height={18}
+        width={16}
+        height={16}
         xmlns="http://www.w3.org/2000/svg"
       >
         <path d={icon.path} />
       </svg>
-      <span className="text-[9px] font-bold text-slate-200 uppercase tracking-wider">
+      <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">
         {icon.title}
       </span>
     </div>
   ));
 
   return (
-    <div className="flex justify-center items-center h-64 w-full overflow-visible">
+    <div className="flex justify-center items-center h-80 w-full overflow-visible">
       <Cloud
         options={{
           clickToFront: 500,
@@ -769,7 +755,7 @@ function App() {
           
           {/* 3D Tech Cluster */}
           <RevealCard>
-            <div className="mb-10 -mt-6"> 
+            <div className="mb-12"> 
               <TechCluster />
             </div>
           </RevealCard>
