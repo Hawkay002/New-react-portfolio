@@ -7,7 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 // --- NEW IMPORTS FOR 3D CLOUD ---
 import { Cloud } from "react-icon-cloud";
-// SAFE IMPORTS (Ensured no missing icons)
+// SAFE IMPORTS (Removed problem icons like Adobe/VSCode to fix build)
 import { 
   siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
   siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -350,61 +350,62 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pills) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pill Shape) ---
 const TechCluster = () => {
+  // 1. SAFE IMPORTS ONLY from 'simple-icons/icons'
+  // Removed problematic icons (Adobe/VSCode) to prevent build failures
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
     siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
-    siGit, siGithub,
-    siRaspberrypi
+    siGit, siGithub, siRaspberrypi
   ];
 
   const customIcons = icons.map((icon) => (
     <a
-      key={icon.slug || icon.title}
+      key={icon.slug}
       href="#"
       onClick={(e) => e.preventDefault()}
-      // Forced Styles: We use a specific class and explicit styles to prevent overriding
-      // Pill shape: rounded-full (9999px)
-      // Colors: Fallback provided if hex is missing
-      className="tech-pill-link"
+      // PILL STYLING:
+      // - inline-flex: Best for 3D clouds to keep elements cohesive
+      // - white-space-nowrap: Prevents text wrapping
+      // - background/border: Uses the icon's hex color
+      className="pointer-events-auto cursor-pointer select-none transition-all duration-200 hover:scale-110 no-underline"
       style={{
-        display: "flex",
+        display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "6px",
-        padding: "6px 14px",
-        borderRadius: "9999px",
-        backgroundColor: icon.hex ? `#${icon.hex}25` : '#ffffff20', 
-        border: `1px solid ${icon.hex ? `#${icon.hex}50` : '#ffffff40'}`,
-        textDecoration: "none",
-        cursor: "pointer",
-        whiteSpace: "nowrap"
-      }}
+        gap: "8px",
+        padding: "8px 16px",
+        borderRadius: "100px", // Full pill shape
+        backgroundColor: `#${icon.hex}15`, // 15% opacity background
+        border: `1px solid #${icon.hex}`, // Solid border
+        boxShadow: `0 0 10px #${icon.hex}40`, // Soft glow
+        color: `#${icon.hex}`, // Text color
+        whiteSpace: "nowrap", // Critical for pill shape
+        minWidth: "fit-content"
+      }} 
     >
-      <svg
-        viewBox="0 0 24 24"
-        fill={icon.hex ? `#${icon.hex}` : '#ffffff'}
-        xmlns="http://www.w3.org/2000/svg"
-        // Force minimum size so flexbox doesn't crush it
-        style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
-      >
-        <path d={icon.path} />
-      </svg>
-      <span style={{
-        fontSize: '11px',
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        color: icon.hex ? `#${icon.hex}` : '#ffffff'
-      }}>
+      {/* WRAPPER SPAN: Protects the SVG from being squashed to 0px */}
+      <span style={{ display: "block", width: "20px", height: "20px" }}>
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          width="20px"
+          height="20px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d={icon.path} />
+        </svg>
+      </span>
+      
+      <span className="text-[12px] font-bold uppercase tracking-widest">
         {icon.title}
       </span>
     </a>
   ));
 
   return (
-    <div className="flex justify-center items-center h-80 w-full overflow-visible relative">
+    <div className="flex justify-center items-center h-96 w-full overflow-visible py-10">
       <Cloud
         options={{
           clickToFront: 500,
@@ -773,7 +774,6 @@ function App() {
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           
-          {/* Progress Bars First */}
           <div className="space-y-4">
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
@@ -783,11 +783,10 @@ function App() {
           
           {/* 3D Tech Cluster (Moved to Bottom) */}
           <RevealCard>
-            <div className="mt-12 mb-6"> 
+            <div className="mt-16 mb-6"> 
               <TechCluster />
             </div>
           </RevealCard>
-
         </section>
 
         {/* --- FEATURED PROJECTS --- */}
@@ -929,7 +928,7 @@ function App() {
                      </div>
                      
                      <button 
-                       type="submit" 
+                       type="submit"  
                        disabled={isSubmitting}
                        className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
