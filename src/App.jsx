@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Code2, Menu, Mail, Send, MapPin, Phone, ExternalLink, 
-  Github, Linkedin, Twitter, 
-  Cpu, Globe, Smartphone, Award, Target, 
-  Music, Mic, Headphones, Guitar,
-  BookOpen, GraduationCap, Terminal, Database, Layers,
-  Plane, PenTool, Video, Box, Radio, Paperclip, Monitor,
-  Origami, Folder, Link, Receipt, Utensils, Gift, Eye, Ticket, ZoomIn, X, Download, Loader2,
-  CheckCircle2, AlertCircle
+  Code2, Menu, Mail, Send, MapPin, ExternalLink, ZoomIn, X, Download, Loader2,
+  CheckCircle2, AlertCircle, Music, Ticket, Globe, Receipt, Utensils, Gift, Eye,
+  GraduationCap, BookOpen, Database, Smartphone, Target, Plane, Origami
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+// NEW IMPORT FOR CLOUD
+import { Cloud, fetchSimpleIcons } from "react-icon-cloud";
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
@@ -126,7 +123,7 @@ const data = {
       tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "#", 
-      icon: Link, 
+      icon: Globe, 
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       cardBorder: "border-blue-500/20",
@@ -347,6 +344,80 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
+// --- TECH CLUSTER COMPONENT (3D Cloud) ---
+const TechCluster = () => {
+  const slugs = [
+    "javascript",
+    "typescript",
+    "react",
+    "html5",
+    "css3",
+    "tailwindcss",
+    "nodedotjs",
+    "express",
+    "python",
+    "firebase",
+    "supabase",
+    "arduino",
+    "git",
+    "github",
+    "visualstudiocode",
+    "adobephotoshop",
+    "adobeillustrator",
+    "raspberrypi"
+  ];
+
+  const [icons, setIcons] = useState(null);
+
+  useEffect(() => {
+    fetchSimpleIcons({ slugs }).then(setIcons);
+  }, []);
+
+  if (!icons) return null;
+
+  const customIcons = Object.values(icons.simpleIcons).map((icon) => (
+    <div
+      key={icon.slug}
+      onClick={(e) => e.preventDefault()}
+      className="flex items-center justify-center gap-1.5 p-1 cursor-pointer pointer-events-auto select-none"
+      style={{ flexDirection: "row" }}
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill={`#${icon.hex}`}
+        width={18}
+        height={18}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d={icon.path} />
+      </svg>
+      <span className="text-[9px] font-bold text-slate-200 uppercase tracking-wider">
+        {icon.title}
+      </span>
+    </div>
+  ));
+
+  return (
+    <div className="flex justify-center items-center h-64 w-full overflow-visible">
+      <Cloud
+        options={{
+          clickToFront: 500,
+          depth: 1,
+          imageScale: 2,
+          initial: [0.1, -0.1],
+          outlineColour: "#0000",
+          reverse: true,
+          tooltip: "native",
+          tooltipDelay: 0,
+          wheelZoom: false,
+        }}
+      >
+        {customIcons}
+      </Cloud>
+    </div>
+  );
+};
+
 // --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
@@ -448,7 +519,7 @@ function App() {
         }
 
         const text = `
-📩 *New Message Reveived from Portfolio Contact form*
+📩 *New Message Received from Portfolio Contact form*
 👤 *Name:* ${firstName} ${lastName}
 📧 *Email:* ${email}
 📱 *Phone:* ${phone}
@@ -695,6 +766,14 @@ function App() {
         {/* --- TECHNICAL SKILLS --- */}
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
+          
+          {/* 3D Tech Cluster */}
+          <RevealCard>
+            <div className="mb-10 -mt-6"> 
+              <TechCluster />
+            </div>
+          </RevealCard>
+
           <div className="space-y-4">
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
             <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
