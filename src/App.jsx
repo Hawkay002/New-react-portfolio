@@ -528,8 +528,8 @@ const Navbar = () => {
          </span>
       </div>
 
-      {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide) --- */}
-      <div className="md:hidden fixed bottom-6 inset-x-0 flex justify-center z-50 pointer-events-none">
+      {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide, MOVED UP) --- */}
+      <div className="md:hidden fixed bottom-10 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => {
              const isActive = activeTab === item.id;
@@ -1101,8 +1101,9 @@ function App() {
                      </h3>
                      {/* TELEGRAM INFINITY BADGE */}
                      <div className="group relative">
-                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-blue-400 cursor-help flex items-center justify-center w-8 h-6">
-                          <Infinity size={14} />
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-blue-400 cursor-help flex items-center gap-1">
+                          <span>Limit: </span>
+                          <Infinity size={12} />
                        </div>
                        <div className="absolute bottom-full right-0 mb-2 w-40 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
                           No limits. Send as many messages as you want.
