@@ -7,12 +7,11 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 // --- NEW IMPORTS FOR 3D CLOUD ---
 import { Cloud } from "react-icon-cloud";
-// REMOVED siVisualstudiocode to fix build error
+// SAFE IMPORTS ONLY - Removed Adobe/VSCode to prevent build errors
 import { 
   siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
   siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
-  siGit, siGithub, siAdobephotoshop, siAdobeillustrator,
-  siRaspberrypi
+  siGit, siGithub, siRaspberrypi
 } from 'simple-icons/icons';
 
 // --- CONFIGURATION ---
@@ -354,11 +353,11 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
 // --- TECH CLUSTER COMPONENT (FIXED: Static Imports) ---
 const TechCluster = () => {
   // Using direct import objects guarantees data is always available
-  // REMOVED siVisualstudiocode because it is missing in the package
+  // REMOVED siVisualstudiocode, siAdobephotoshop, siAdobeillustrator to fix build errors
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
     siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
-    siGit, siGithub, siAdobephotoshop, siAdobeillustrator,
+    siGit, siGithub,
     siRaspberrypi
   ];
 
@@ -986,7 +985,7 @@ function App() {
                 </Card>
               </motion.div>
             </div>
-          </RevealCard>
+          </RevealCard> 
         </section>
 
       </main>
