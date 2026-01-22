@@ -350,10 +350,9 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pill Shape) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Visible Icons + Pill Shape + Sizing) ---
 const TechCluster = () => {
-  // 1. SAFE IMPORTS ONLY from 'simple-icons/icons'
-  // Removed problematic icons (Adobe/VSCode) to prevent build failures
+  // SAFE IMPORTS from 'simple-icons/icons'
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
     siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -366,45 +365,49 @@ const TechCluster = () => {
       href="#"
       onClick={(e) => e.preventDefault()}
       // PILL STYLING:
-      // - inline-flex: Best for 3D clouds to keep elements cohesive
-      // - white-space-nowrap: Prevents text wrapping
-      // - background/border: Uses the icon's hex color
+      // - inline-flex: Keeps items together
+      // - white-space-nowrap: Prevents wrapping
+      // - Dynamic background/border based on icon.hex
       className="pointer-events-auto cursor-pointer select-none transition-all duration-200 hover:scale-110 no-underline"
       style={{
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: "8px",
-        padding: "8px 16px",
-        borderRadius: "100px", // Full pill shape
-        backgroundColor: `#${icon.hex}15`, // 15% opacity background
-        border: `1px solid #${icon.hex}`, // Solid border
-        boxShadow: `0 0 10px #${icon.hex}40`, // Soft glow
-        color: `#${icon.hex}`, // Text color
-        whiteSpace: "nowrap", // Critical for pill shape
+        gap: "10px", // Increased gap
+        padding: "8px 14px", // Increased padding
+        borderRadius: "100px", 
+        backgroundColor: `#${icon.hex}15`, 
+        border: `1px solid #${icon.hex}`, 
+        boxShadow: `0 0 10px #${icon.hex}40`, 
+        color: `#${icon.hex}`, 
+        whiteSpace: "nowrap", 
         minWidth: "fit-content"
       }} 
     >
-      {/* WRAPPER SPAN: Protects the SVG from being squashed to 0px */}
-      <span style={{ display: "block", width: "20px", height: "20px" }}>
+      {/* WRAPPER SPAN: Forces icon size to prevent shrinking */}
+      <span style={{ display: "block", width: "24px", height: "24px" }}>
         <svg
           viewBox="0 0 24 24"
           fill="currentColor"
-          width="20px"
-          height="20px"
+          width="24px"
+          height="24px"
           xmlns="http://www.w3.org/2000/svg"
+          // Force sizing with minWidth and flexShrink
+          style={{ minWidth: '24px', flexShrink: 0 }}
         >
           <path d={icon.path} />
         </svg>
       </span>
       
-      <span className="text-[12px] font-bold uppercase tracking-widest">
+      {/* Text Size Increased to text-sm (approx 14px) */}
+      <span className="text-sm font-bold uppercase tracking-wider">
         {icon.title}
       </span>
     </a>
   ));
 
   return (
+    // Increased container height to h-96 to accommodate larger tags
     <div className="flex justify-center items-center h-96 w-full overflow-visible py-10">
       <Cloud
         options={{
@@ -919,7 +922,7 @@ function App() {
                           <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="1234567890" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
@@ -928,9 +931,9 @@ function App() {
                      </div>
                      
                      <button 
-                       type="submit"  
+                       type="submit" 
                        disabled={isSubmitting}
-                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                       className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
                        {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
@@ -1009,7 +1012,7 @@ function App() {
         <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
-    </div>
+    </div> 
   )
 }
 
