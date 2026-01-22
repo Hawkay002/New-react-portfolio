@@ -350,10 +350,9 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- TECH CLUSTER COMPONENT (FIXED: Static Imports) ---
+// --- TECH CLUSTER COMPONENT (FIXED: Uses <a> tags to show cloud) ---
 const TechCluster = () => {
-  // Using direct import objects guarantees data is always available
-  // REMOVED siVisualstudiocode, siAdobephotoshop, siAdobeillustrator to fix build errors
+  // SAFE IMPORTS (Removed problematic ones)
   const icons = [
     siJavascript, siTypescript, siReact, siHtml5, siCss3, siTailwindcss,
     siNodedotjs, siExpress, siPython, siFirebase, siSupabase, siArduino,
@@ -362,12 +361,14 @@ const TechCluster = () => {
   ];
 
   const customIcons = icons.map((icon) => (
-    <div
+    <a
       key={icon.slug}
+      href="#"
       onClick={(e) => e.preventDefault()}
-      // Styled for visibility: flex row, background, border
-      className="flex items-center justify-center gap-2 p-2 cursor-pointer pointer-events-auto select-none bg-slate-900/60 backdrop-blur-sm rounded-lg border border-white/5 hover:bg-slate-800 hover:border-neon-green/50 transition-all shadow-sm"
-      style={{ flexDirection: "row" }} 
+      // Changed to 'a' tag so the cloud library renders it. 
+      // Added 'flex' to keep icon+text aligned side-by-side.
+      className="flex items-center justify-center gap-2 p-2 cursor-pointer pointer-events-auto select-none bg-slate-900/60 backdrop-blur-sm rounded-lg border border-white/5 hover:bg-slate-800 hover:border-neon-green/50 transition-all shadow-sm no-underline"
+      style={{ flexDirection: "row", display: "flex" }} 
     >
       <svg
         viewBox="0 0 24 24"
@@ -381,7 +382,7 @@ const TechCluster = () => {
       <span className="text-[10px] font-bold text-slate-200 uppercase tracking-wider">
         {icon.title}
       </span>
-    </div>
+    </a>
   ));
 
   return (
@@ -926,7 +927,7 @@ function App() {
                 <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
                    {/* FLASH NOTIFICATION OVERLAY */}
                    <AnimatePresence>
-                     {notification && isTelegram && (
+                     {notification && isTelegram && ( 
                        <motion.div 
                          initial={{ opacity: 0 }} 
                          animate={{ opacity: 1 }} 
@@ -985,7 +986,7 @@ function App() {
                 </Card>
               </motion.div>
             </div>
-          </RevealCard> 
+          </RevealCard>
         </section>
 
       </main>
