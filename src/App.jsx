@@ -529,7 +529,7 @@ const Navbar = () => {
       </div>
 
       {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide, MOVED UP) --- */}
-      <div className="md:hidden fixed bottom-10 inset-x-0 flex justify-center z-50 pointer-events-none">
+      <div className="md:hidden fixed bottom-15 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => {
              const isActive = activeTab === item.id;
@@ -1050,7 +1050,7 @@ function App() {
                      </div>
                      <div>
                        <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
                      </div>
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
@@ -1099,11 +1099,11 @@ function App() {
                      <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
                        <Send size={20}/> Direct Message
                      </h3>
-                     {/* TELEGRAM INFINITY BADGE */}
+                     {/* TELEGRAM INFINITY BADGE (MATCHED STYLE) */}
                      <div className="group relative">
-                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-blue-400 cursor-help flex items-center gap-1">
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
                           <span>Limit: </span>
-                          <Infinity size={12} />
+                          <Infinity size={12} className="text-blue-400" />
                        </div>
                        <div className="absolute bottom-full right-0 mb-2 w-40 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
                           No limits. Send as many messages as you want.
