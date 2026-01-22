@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Code2, Menu, Mail, Send, MapPin, ExternalLink, 
+  Code2, Mail, Send, MapPin, ExternalLink, 
   Link, Receipt, Utensils, Gift, Eye, Ticket, Globe, 
   GraduationCap, BookOpen, Download, Loader2,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
-  Database, Smartphone, Origami, Plane, Target
+  Database, Smartphone, Origami, Plane, Target,
+  Home, Briefcase, Cpu, User, Wrench
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -304,7 +305,6 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 // --- ANIMATION COMPONENTS ---
-
 const ScaleRevealCard = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ scale: 0.5, opacity: 0 }}
@@ -403,9 +403,9 @@ const ProgressBar = ({ name, level, color }) => (
 
 // --- NAVBAR COMPONENT ---
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
-  // Links mapped to existing App IDs
+  // Desktop Links
   const navLinks = [
     { name: 'Home', href: '#home' },
     { name: 'About', href: '#about' },
@@ -415,24 +415,53 @@ const Navbar = () => {
     { name: 'Contact', href: '#contact' },
   ];
 
-  return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo Section */}
-          <div className="flex-shrink-0 cursor-pointer flex items-center gap-2">
-            <a href="#home" className="flex items-center gap-2">
-              <div className="bg-neon-green/20 p-1.5 rounded-lg">
-                <Code2 className="text-neon-green w-5 h-5" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">
-                Shovith.dev
-              </span>
-            </a>
-          </div>
+  // Mobile Dock Items - EXACT ORDER: Home, About, Skills, Projects, Education, Contact
+  const mobileDockItems = [
+    { id: 'home', icon: Home, href: '#home' },
+    { id: 'about', icon: User, href: '#about' },
+    { id: 'skills', icon: Cpu, href: '#skills' }, // CPU for Technical Skills/IoT
+    { id: 'projects', icon: Briefcase, href: '#projects' },
+    { id: 'education', icon: GraduationCap, href: '#education' },
+    { id: 'contact', icon: Mail, href: '#contact' },
+  ];
 
-          {/* Desktop Menu */}
-          <div className="hidden md:block">
+  // Scroll Spy Logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'about', 'skills', 'projects', 'education', 'contact'];
+      const scrollPosition = window.scrollY + 300; // Offset for better detection
+
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveTab(section);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <>
+      {/* --- DESKTOP NAVBAR (Hidden on Mobile) --- */}
+      <nav className="hidden md:flex fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex-shrink-0 cursor-pointer flex items-center gap-2">
+              <a href="#home" className="flex items-center gap-2">
+                <div className="bg-neon-green/20 p-1.5 rounded-lg">
+                  <Code2 className="text-neon-green w-5 h-5" />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">
+                  Shovith.dev
+                </span>
+              </a>
+            </div>
             <div className="ml-10 flex items-baseline space-x-8">
               {navLinks.map((link) => (
                 <a
@@ -445,45 +474,41 @@ const Navbar = () => {
               ))}
             </div>
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="-mr-2 flex md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-neon-green transition-colors"
-            >
-              <span className="sr-only">Open main menu</span>
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
         </div>
+      </nav>
+
+      {/* --- MOBILE LOGO (Top Left) --- */}
+      <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5">
+         <Code2 className="text-neon-green w-6 h-6" />
       </div>
 
-      {/* Mobile Menu Dropdown */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-black/90 backdrop-blur-xl border-t border-gray-700 overflow-hidden"
-          >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-gray-300 hover:text-neon-green hover:bg-gray-800 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+      {/* --- MOBILE FLOATING DOCK (Bottom Center) --- */}
+      <div className="md:hidden fixed bottom-6 inset-x-0 flex justify-center z-50 pointer-events-none">
+        <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full p-2 shadow-2xl flex items-center gap-1">
+          {mobileDockItems.map((item) => {
+             const isActive = activeTab === item.id;
+             return (
+              <a 
+                key={item.id}
+                href={item.href}
+                onClick={() => setActiveTab(item.id)}
+                className={`relative p-3 rounded-full transition-all duration-300 flex items-center justify-center ${
+                  isActive 
+                    ? 'bg-slate-800 text-white shadow-lg' 
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                {/* Top Edge Highlight for Active State */}
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
+                )}
+                <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              </a>
+             );
+          })}
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -638,10 +663,10 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* NEW NAVBAR */}
+      {/* NAVBAR (Includes Desktop Top Bar & Mobile Bottom Dock) */}
       <Navbar />
 
-      <main className="max-w-md mx-auto px-5 pt-28 pb-20">
+      <main className="max-w-md mx-auto px-5 pt-28 pb-32 md:pb-20">
         
         {/* --- HERO --- */}
         <section id="home" className="flex flex-col items-center text-center mb-16">
