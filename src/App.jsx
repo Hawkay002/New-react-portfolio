@@ -1087,7 +1087,7 @@ function App() {
                          animate={{ opacity: 1 }} 
                          exit={{ opacity: 0 }}
                          className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl"
-                       >
+                       > 
                          <div className="flex flex-col items-center gap-2 p-6">
                            {notification.type === 'success' ? <CheckCircle2 className="text-green-500 w-12 h-12" /> : <AlertCircle className="text-red-500 w-12 h-12" />}
                            <p className="text-white font-medium text-center">{notification.message}</p>
