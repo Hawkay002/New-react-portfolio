@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, ExternalLink, 
   Link, Receipt, Utensils, Gift, Eye, Ticket, Globe, 
@@ -466,6 +466,8 @@ const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
 // --- NAVBAR COMPONENT ---
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
+  // --- LOCK STATE FOR MANUAL SCROLL ---
+  const isManualScroll = useRef(false);
 
   // Desktop Links
   const navLinks = [
@@ -487,32 +489,48 @@ const Navbar = () => {
     { id: 'contact', icon: Mail, href: '#contact' },
   ];
 
-  // SMOOTH SCROLL HANDLER
+  // SMOOTH SCROLL HANDLER (WITH LOCK)
   const scrollToSection = (e, id) => {
     e.preventDefault();
-    const element = document.getElementById(id.replace('#', ''));
+    const targetId = id.replace('#', '');
+    const element = document.getElementById(targetId);
+    
     if (element) {
-      const offset = 80; // Navbar height + buffer
+      // 1. ENGAGE LOCK
+      isManualScroll.current = true;
+      
+      // 2. IMMEDIATE UI UPDATE
+      setActiveTab(targetId);
+      
+      const offset = 80; 
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
       const offsetPosition = elementPosition - offset;
 
+      // 3. SCROLL
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       });
       
-      setActiveTab(id.replace('#', ''));
-      
-      // Update URL hash without jumping
+      // 4. UPDATE URL
       history.pushState(null, null, id);
+
+      // 5. RELEASE LOCK AFTER ANIMATION
+      // 1000ms is usually enough for smooth scroll to finish
+      setTimeout(() => {
+        isManualScroll.current = false;
+      }, 1000);
     }
   };
 
-  // Scroll Spy Logic
+  // Scroll Spy Logic (RESPECTS LOCK)
   useEffect(() => {
     const handleScroll = () => {
+      // IF LOCKED, DO NOTHING
+      if (isManualScroll.current) return;
+
       const sections = ['home', 'about', 'skills', 'projects', 'education', 'contact'];
       const scrollPosition = window.scrollY + 300; 
 
