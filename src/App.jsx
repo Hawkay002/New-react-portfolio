@@ -5,9 +5,18 @@ import {
   GraduationCap, BookOpen, Download, Loader2,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
-  Home, Briefcase, Cpu, User, Infinity, Info
+  Home, Briefcase, Cpu, User, Infinity, Info,
+  Radio, Film
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// --- NEW ICON IMPORTS (Simple Icons) ---
+import { 
+  SiHtml5, SiCss3, SiJavascript, SiReact, SiTailwindcss, SiTypescript,
+  SiFirebase, SiSupabase, SiPython, SiNodedotjs, SiExpress,
+  SiArduino, SiRaspberrypi, SiAdobecreativecloud,
+  SiGithub, SiVisualstudiocode, SiAutodesk
+} from 'react-icons/si';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "firebase/app";
@@ -34,7 +43,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- COUNTRY DATA (Kept in English for international standard) ---
+// --- COUNTRY DATA ---
 const countries = [
   { name: "Afghanistan", code: "+93" }, { name: "Albania", code: "+355" }, { name: "Algeria", code: "+213" }, 
   { name: "Andorra", code: "+376" }, { name: "Angola", code: "+244" }, { name: "Argentina", code: "+54" }, 
@@ -94,54 +103,54 @@ const countries = [
   { name: "Zimbabwe", code: "+263" }
 ];
 
-// --- DATA (TRANSLATED) ---
+// --- DATA ---
 const data = {
   about: {
-    bio: "私は情熱を持った趣味のAI開発者であり、忙しいスケジュールの合間を縫ってプロジェクトに取り組んでいます。私の旅は、テクノロジーをどのように形作れば日常の問題を解決できるかという単純な好奇心から始まりました。細部に非常にこだわりがあるため、より良い代替案を想像することが多く、それが結局、独自のソリューションを構築することにつながりました。この考え方が、デジタルと物理的な世界をつなぐことへの関心を掻き立てています。忙しい日常から離れてリラックスするために、折り紙を折っています。これは集中力、精密さ、そして手先のコントロールを磨くのに役立ちます。そしてはい、途中でグラフィックデザインの修士号も取得しました...（笑）。",
+    bio: "I’m a hobbyist AI developer by passion, fitting projects into whatever free time my busy schedule allows. My journey began with simple curiosity, how technology could be shaped to solve everyday problems. Being extremely picky about details, I often found myself imagining better alternatives, which eventually turned into building my own solutions. This mindset fuels my interest in connecting the digital and physical worlds. To unwind from my hectic routine, I practice origami, which helps refine my focus, precision, and hand control. And yes, somewhere along the way, I also completed a Master’s in Graphic Designing… lol.",
     highlights: [
-      { icon: Code2, label: "フルスタック開発", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-transparent border border-blue-500/20" },
-      { icon: Database, label: "IoTエンジニアリング", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-transparent border border-cyan-500/20" },
-      { icon: Smartphone, label: "モバイル開発", color: "text-blue-500", bg: "bg-gradient-to-br from-blue-600/20 to-transparent border border-blue-600/20" },
-      { icon: Origami, label: "折り紙", color: "text-pink-400", bg: "bg-gradient-to-br from-pink-500/20 to-transparent border border-pink-500/20" },
-      { icon: Plane, label: "旅行愛好家", color: "text-orange-400", bg: "bg-gradient-to-br from-orange-500/20 to-transparent border border-orange-500/20" },
-      { icon: Target, label: "問題解決", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-transparent border border-green-500/20" },
+      { icon: Code2, label: "Full Stack Development", color: "text-blue-400", bg: "bg-gradient-to-br from-blue-500/20 to-transparent border border-blue-500/20" },
+      { icon: Database, label: "IoT Engineering", color: "text-cyan-400", bg: "bg-gradient-to-br from-cyan-500/20 to-transparent border border-cyan-500/20" },
+      { icon: Smartphone, label: "Mobile Development", color: "text-blue-500", bg: "bg-gradient-to-br from-blue-600/20 to-transparent border border-blue-600/20" },
+      { icon: Origami, label: "Origami", color: "text-pink-400", bg: "bg-gradient-to-br from-pink-500/20 to-transparent border border-pink-500/20" },
+      { icon: Plane, label: "Travel Enthusiast", color: "text-orange-400", bg: "bg-gradient-to-br from-orange-500/20 to-transparent border border-orange-500/20" },
+      { icon: Target, label: "Problem Solving", color: "text-green-400", bg: "bg-gradient-to-br from-green-500/20 to-transparent border border-green-500/20" },
     ]
   },
   skills: {
     frontend: [
-      { name: "Html & CSS", level: 95, color: "from-orange-500 to-red-500" },
-      { name: "JavaScript", level: 95, color: "from-yellow-400 to-yellow-600" },
-      { name: "React.js", level: 90, color: "from-cyan-400 to-blue-500" },
-      { name: "Tailwind CSS", level: 90, color: "from-cyan-300 to-teal-400" },
-      { name: "TypeScript", level: 85, color: "from-blue-500 to-indigo-600" },
+      { name: "Html & CSS", level: 95, color: "from-[#E34F26] to-[#1572B6]", icon: SiHtml5, iconColor: "#E34F26" },
+      { name: "JavaScript", level: 95, color: "from-[#F7DF1E] to-[#F7DF1E]", icon: SiJavascript, iconColor: "#F7DF1E" },
+      { name: "React.js", level: 90, color: "from-[#61DAFB] to-[#00B4D8]", icon: SiReact, iconColor: "#61DAFB" },
+      { name: "Tailwind CSS", level: 90, color: "from-[#06B6D4] to-[#38BDF8]", icon: SiTailwindcss, iconColor: "#06B6D4" },
+      { name: "TypeScript", level: 85, color: "from-[#3178C6] to-[#5C9CE6]", icon: SiTypescript, iconColor: "#3178C6" },
     ],
     backend: [
-      { name: "Firebase", level: 85, color: "from-yellow-500 to-orange-600" },
-      { name: "Supabase", level: 80, color: "from-green-400 to-emerald-600" },
-      { name: "Python", level: 75, color: "from-blue-400 to-indigo-500" },
-      { name: "Node.js", level: 80, color: "from-green-500 to-emerald-700" },
-      { name: "Express.js", level: 80, color: "from-gray-400 to-gray-600" },
+      { name: "Firebase", level: 85, color: "from-[#FFCA28] to-[#FFA000]", icon: SiFirebase, iconColor: "#FFCA28" },
+      { name: "Supabase", level: 80, color: "from-[#3ECF8E] to-[#33B078]", icon: SiSupabase, iconColor: "#3ECF8E" },
+      { name: "Python", level: 75, color: "from-[#3776AB] to-[#5A9FD4]", icon: SiPython, iconColor: "#3776AB" },
+      { name: "Node.js", level: 80, color: "from-[#339933] to-[#539E43]", icon: SiNodedotjs, iconColor: "#339933" },
+      { name: "Express.js", level: 80, color: "from-gray-400 to-white", icon: SiExpress, iconColor: "#ffffff" },
     ],
     iot: [
-      { name: "Arduino", level: 85, color: "from-emerald-500 to-teal-600" },
-      { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600" },
-      { name: "センサー & アクチュエータ", level: 80, color: "from-purple-500 to-violet-600" },
-      { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600" },
-      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600" },
+      { name: "Arduino", level: 85, color: "from-[#00979D] to-[#008184]", icon: SiArduino, iconColor: "#00979D" },
+      { name: "Raspberry Pi", level: 75, color: "from-[#C51A4A] to-[#A5153D]", icon: SiRaspberrypi, iconColor: "#C51A4A" },
+      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600", icon: Cpu, iconColor: "#A78BFA" },
+      { name: "Flipper Zero", level: 90, color: "from-[#E88C30] to-[#D97706]", icon: Radio, iconColor: "#E88C30" },
+      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600", icon: Code2, iconColor: "#818CF8" },
     ],
     tools: [
-      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "from-pink-500 to-rose-600" },
-      { name: "Video (Pr, Ae)", level: 85, color: "from-purple-500 to-violet-600" },
-      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "from-blue-500 to-indigo-600" },
-      { name: "Git/GitHub", level: 90, color: "from-gray-500 to-slate-700" },
-      { name: "VS Code", level: 95, color: "from-blue-500 to-cyan-600" },
+      { name: "Adobe Suite", level: 95, color: "from-[#DA4943] to-[#FF0000]", icon: SiAdobecreativecloud, iconColor: "#DA4943" },
+      { name: "Video (Pr, Ae)", level: 85, color: "from-[#9999FF] to-[#00005B]", icon: Film, iconColor: "#9999FF" },
+      { name: "3D & CAD", level: 80, color: "from-[#0696D7] to-[#057FB9]", icon: SiAutodesk, iconColor: "#0696D7" },
+      { name: "Git/GitHub", level: 90, color: "from-[#F05032] to-[#181717]", icon: SiGithub, iconColor: "#ffffff" },
+      { name: "VS Code", level: 95, color: "from-[#007ACC] to-[#0065A9]", icon: SiVisualstudiocode, iconColor: "#007ACC" },
     ]
   },
   projects: [
     {
-      title: "Connect - リンクインバイオ",
-      desc: "私とつながるための最も簡単な方法。一緒にプレイして競うためのゲーム統計も掲載しています。",
-      tags: ["HTML", "CSS", "JS", "ゲーム", "ソーシャル"],
+      title: "Connect - Link in Bio",
+      desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
+      tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "https://sdconnect.netlify.app/", 
       icon: Link, 
@@ -153,9 +162,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]",
     },
     {
-      title: "家賃請求アプリ",
-      desc: "テナント向けの家賃請求書を迅速かつ確実に作成・送信する方法。",
-      tags: ["Webアプリ", "オフライン", "ローカルストレージ"],
+      title: "Rent Invoicing App",
+      desc: "Fast and reliable way to create and send rent invoices to tenants.",
+      tags: ["Web App", "Offline", "Local Storage"],
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "https://inv-henna.vercel.app/",
       icon: Receipt, 
@@ -167,9 +176,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(74,222,128,0.2)]",
     },
     {
-      title: "レストランPOSシステム",
-      desc: "注文の受付と提供を行うための多機能なレストラン向けPOSシステム。",
-      tags: ["POS", "管理", "リアルタイム"],
+      title: "Restaurant POS System",
+      desc: "A multifunctional POS System for restaurants to take and serve orders.",
+      tags: ["POS", "Management", "Real-time"],
       image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
       link: "https://new-pos-ten.vercel.app/",
       icon: Utensils, 
@@ -181,9 +190,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(251,146,60,0.2)]",
     },
     {
-      title: "誕生日 & お祝いボット",
-      desc: "運が良ければお祝い金（Shagun）付きの誕生日メッセージカードを送信する、ユーザー参加型の初のTelegramボット。",
-      tags: ["Telegram", "ボット", "自動化"],
+      title: "Birthday & Shagun Bot",
+      desc: "User interact first telegram bot for send birthday wish cards along with a shagun if you're lucky.",
+      tags: ["Telegram", "Bot", "Automation"],
       image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800",
       link: "https://t.me/Wish_ind_bot",
       icon: Gift, 
@@ -195,9 +204,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(244,114,182,0.2)]",
     },
     {
-      title: "Unredactor (黒塗り解除)",
-      desc: "あらゆる文書や画像の黒塗りを解除します。黒塗り後に再スキャンされていない文書またはファイルでのみ機能します。",
-      tags: ["Python", "セキュリティ", "フォレンジック"],
+      title: "Unredactor",
+      desc: "Unredact any document or image. Works only if the document or file wasn't rescanned after the redaction.",
+      tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
       link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
@@ -210,9 +219,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
     {
-      title: "イベントチケットシステム",
-      desc: "イベント管理、チケット発行、ゲストリストの確認、オフラインでの入場スキャンを行うための高速で信頼性の高いソース。",
-      tags: ["管理", "管理者", "Firestore"],
+      title: "Event Ticketing System",
+      desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
+      tags: ["Management", "Admin", "Firestore"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
       link: "https://entryticket.netlify.app/",
       icon: Ticket, 
@@ -224,9 +233,9 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
     },
     {
-      title: "ポートフォリオウェブサイト",
-      desc: "AIフルスタック開発者としてのスキルを紹介するためのウェブサイト。",
-      tags: ["React", "ショーケース", "趣味"],
+      title: "Portfolio Website",
+      desc: "A website to showcase my developer skills as an AI full-stack developer.",
+      tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
       link: "https://react-portfolio-nine-wine.vercel.app/#home",
       icon: Globe, 
@@ -240,56 +249,56 @@ const data = {
   ],
   education: [
     {
-      title: "犯罪学 修士号",
-      place: "エディンバラ、イギリス",
+      title: "Master’s Degree in Criminology",
+      place: "Edinburgh, United Kingdom",
       status: "96%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "国際関係学 修士号",
-      place: "エディンバラ、イギリス",
+      title: "Master’s Degree in International Relations",
+      place: "Edinburgh, United Kingdom",
       status: "92%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "グラフィックデザイン 修士号",
-      place: "西ベンガル、インド",
+      title: "Master’s Degree in Graphic Designing",
+      place: "West Bengal, India",
       status: "96%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "コンピュータサイエンス 修士号",
-      place: "デリー、インド",
+      title: "Master’s Degree in Computer Science",
+      place: "Delhi, India",
       status: "90%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "経営学 学士号",
-      place: "西ベンガル、インド",
+      title: "Bachelor's Degree in Business Administration",
+      place: "West Bengal, India",
       status: "85%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "理学 学士号",
-      place: "西ベンガル、インド",
+      title: "Bachelor's Degree in Science",
+      place: "West Bengal, India",
       status: "88%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "商学 学士号",
-      place: "西ベンガル、インド",
+      title: "Bachelor's Degree in Commerce",
+      place: "West Bengal, India",
       status: "95%",
       icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "高等中等教育 (WBCHSE)",
-      place: "西ベンガル、インド",
+      title: "Higher Secondary (WBCHSE)",
+      place: "West Bengal, India",
       status: "92%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
     {
-      title: "中等教育 (WBBSE)",
-      place: "西ベンガル、インド",
+      title: "Secondary (WBBSE)",
+      place: "West Bengal, India",
       status: "87%",
       icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
     },
@@ -404,11 +413,19 @@ const Card = ({ children, className = "", style }) => (
   </div>
 );
 
-const ProgressBar = ({ name, level, color }) => (
+// --- UPDATED PROGRESS BAR WITH ICONS ---
+const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
   <div className="mb-5 last:mb-0">
-    <div className="flex justify-between mb-2">
-      <span className="text-sm font-medium text-slate-200">{name}</span>
-      <span className="text-xs text-slate-400">{level}%</span>
+    <div className="flex justify-between items-end mb-2">
+      <div className="flex items-center gap-2">
+        {Icon && (
+          <div className="p-1.5 rounded-md bg-white/5 border border-white/5 shadow-sm">
+            <Icon size={16} style={{ color: iconColor }} /> 
+          </div>
+        )}
+        <span className="text-sm font-medium text-slate-200">{name}</span>
+      </div>
+      <span className="text-xs text-slate-400 font-mono">{level}%</span>
     </div>
     <div className="w-full bg-slate-800 rounded-full h-3 relative overflow-hidden">
       <motion.div 
@@ -448,14 +465,14 @@ const ProgressBar = ({ name, level, color }) => (
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
 
-  // Desktop Links (Translated)
+  // Desktop Links
   const navLinks = [
-    { name: 'ホーム', href: '#home' },
-    { name: 'プロフィール', href: '#about' },
-    { name: 'スキル', href: '#skills' },
-    { name: 'プロジェクト', href: '#projects' },
-    { name: '学歴', href: '#education' },
-    { name: 'お問い合わせ', href: '#contact' },
+    { name: 'Home', href: '#home' },
+    { name: 'About', href: '#about' },
+    { name: 'Skills', href: '#skills' },
+    { name: 'Projects', href: '#projects' },
+    { name: 'Education', href: '#education' },
+    { name: 'Contact', href: '#contact' },
   ];
 
   // Mobile Dock Items - Slimmer and Wider
@@ -550,8 +567,8 @@ const Navbar = () => {
                     // UPDATED: Smooth bouncy transition
                     transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
                   >
-                      {/* Top Active Indicator Line */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
+                     {/* Top Active Indicator Line */}
+                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
                   </motion.div>
                 )}
                 
@@ -644,7 +661,7 @@ function App() {
       if (isTelegram) {
         // --- TELEGRAM SUBMISSION ---
         if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-           showNotification("エラー: Telegramの設定が見つかりません。", 'error');
+           showNotification("Error: Missing Telegram Config.", 'error');
            setIsSubmitting(false);
            return;
         }
@@ -665,23 +682,23 @@ function App() {
 
         const data = await response.json();
         if (data.ok) {
-          showNotification("メッセージが正常に送信されました！");
+          showNotification("Message sent successfully!");
           event.target.reset();
         } else {
-          showNotification("送信に失敗しました。", 'error');
+          showNotification("Failed to send.", 'error');
         }
 
       } else {
         // --- WEB3FORMS SUBMISSION ---
         if (!WEB3FORMS_KEY) {
-           showNotification("エラー: Web3Formsキーが見つかりません。", 'error');
+           showNotification("Error: Missing Web3Forms Key.", 'error');
            setIsSubmitting(false);
            return;
         }
 
         // Check Quota
         if (dbQuota >= 250) {
-           showNotification("月間メール制限に達しました。Telegramを使用してください。", 'error');
+           showNotification("Monthly email limit reached. Please use Telegram.", 'error');
            setIsSubmitting(false);
            return;
         }
@@ -697,7 +714,7 @@ function App() {
 
         const data = await response.json();
         if (data.success) {
-          showNotification("メッセージが正常に送信されました！");
+          showNotification("Message sent successfully!");
           
           // Increment Firestore Count
           const docRef = doc(db, "stats", "email_quota");
@@ -706,12 +723,12 @@ function App() {
 
           event.target.reset();
         } else {
-          showNotification(data.message || "何らかの問題が発生しました。", 'error');
+          showNotification(data.message || "Something went wrong.", 'error');
         }
       }
     } catch (error) {
       console.error("Submission Error:", error);
-      showNotification("エラーが発生しました。もう一度お試しください。", 'error');
+      showNotification("An error occurred. Please try again.", 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -797,16 +814,16 @@ function App() {
 
           <RevealCard>
             <h1 className="text-4xl font-bold text-white mb-3">
-              こんにちは、<span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span> です
+              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span>
             </h1>
             <div className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2 h-8">
-              <Typewriter text="趣味のフルスタック開発者 & IoTエンジニア" />
+              <Typewriter text="Hobbyist Full Stack Developer & IoT Engineer" />
             </div>
           </RevealCard>
           
           <RevealCard delay={0.1}>
             <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">
-              最新技術を使って革新的なデジタルソリューションを作成することに情熱を注いでいます。現在、インド国防省(MoD)のIDS本部でJOOとして現役勤務中。
+              Passionate about creating innovative digital solutions with modern technologies. Currently on active duty under IDS HQ as JOO for India's MoD.
             </p>
           </RevealCard>
 
@@ -815,7 +832,7 @@ function App() {
               onClick={scrollToContact}
               className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:opacity-90 transition-opacity"
             >
-              お問い合わせ
+              Get In Touch
             </button>
             <div className="flex justify-center gap-4">
               <a 
@@ -838,7 +855,7 @@ function App() {
 
         {/* --- ABOUT ME --- */}
         <section id="about">
-          <SectionTitle subtitle="" title="自己紹介" />
+          <SectionTitle subtitle="" title="about_me" />
           <RevealCard className="mb-8">
             <Card>
               <div className="flex gap-1.5 mb-4">
@@ -893,7 +910,7 @@ function App() {
                 </div>
               </div>
               <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
-                "音楽とプログラミングは同じ基盤を共有している。パターン、リズム、そしてハーモニーだ。"
+                "Music and programming share the same foundation - patterns, rhythm, and harmony."
               </p>
             </Card>
           </RevealCard>
@@ -901,12 +918,12 @@ function App() {
 
         {/* --- TECHNICAL SKILLS --- */}
         <section id="skills">
-          <SectionTitle subtitle="" title="技術スキル" />
+          <SectionTitle subtitle="" title="technical_skills" />
           <div className="space-y-4">
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">フロントエンド</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">バックエンド</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & ハードウェア</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">ツール & その他</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-2">
             {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
@@ -917,7 +934,7 @@ function App() {
 
         {/* --- FEATURED PROJECTS --- */}
         <section id="projects">
-          <SectionTitle subtitle="" title="主なプロジェクト" />
+          <SectionTitle subtitle="" title="featured_projects" />
           <div className="space-y-6">
             {data.projects.map((project, idx) => (
               <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
@@ -930,9 +947,9 @@ function App() {
                   <div className="flex justify-between items-center mb-3 relative z-10">
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
                     {project.isDownload ? (
-                      <a href={project.link} download className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="ファイルをダウンロード"><Download size={16} /></a>
+                      <a href={project.link} download className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Download File"><Download size={16} /></a>
                     ) : (
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="ウェブサイトへ"><ExternalLink size={16} /></a>
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Visit Website"><ExternalLink size={16} /></a>
                     )}
                   </div>
                   <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
@@ -940,13 +957,13 @@ function App() {
                 </Card>
               </RevealCard>
             ))}
-            <RevealCard className="mt-8"><div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">その他のプロジェクトも近日公開予定...</div></RevealCard>
+            <RevealCard className="mt-8"><div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">More projects coming soon...</div></RevealCard>
           </div>
         </section>
 
         {/* --- EDUCATION --- */}
         <section id="education">
-          <SectionTitle subtitle="" title="学歴 & 実績" />
+          <SectionTitle subtitle="" title="education_achievements" />
           <div className="space-y-4">
             {data.education.map((edu, idx) => (
               <RevealCard key={idx}><Card className="flex gap-4 items-center"><div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}><edu.icon size={24} /></div><div className="flex-1"><h3 className="font-bold text-base text-white">{edu.title}</h3><p className="text-sm text-slate-400 mt-0.5">{edu.place}</p><span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>{edu.status}</span></div></Card></RevealCard>
@@ -956,7 +973,7 @@ function App() {
 
         {/* --- CONTACT --- */}
         <section id="contact">
-          <SectionTitle subtitle="" title="ご連絡はこちら" />
+          <SectionTitle subtitle="" title="get_in_touch" />
           <div className="space-y-3 mb-10">
             {/* ONLY Location Card Remains */}
             <RevealCard delay={0.1}>
@@ -965,8 +982,8 @@ function App() {
                   <MapPin size={18} />
                 </div>
                 <div className="overflow-hidden">
-                  <p className="text-xs text-slate-500 mb-0.5">所在地</p>
-                  <p className="text-sm font-medium text-white truncate">インド在住</p>
+                  <p className="text-xs text-slate-500 mb-0.5">Location</p>
+                  <p className="text-sm font-medium text-white truncate">Based in India</p>
                 </div>
               </Card>
             </RevealCard>
@@ -984,12 +1001,12 @@ function App() {
                 <button 
                   className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
                 >
-                  メール送信
+                  Send Email
                 </button>
                 <button 
                   className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
                 >
-                  ダイレクトメッセージ
+                  Direct Message
                 </button>
               </div>
             </div>
@@ -1022,18 +1039,18 @@ function App() {
 
                    <div className="flex justify-between items-start mb-6">
                      <h3 className="text-lg font-bold text-neon-green flex items-center gap-2">
-                       <Mail size={20}/> メール送信
+                       <Mail size={20}/> Send Email
                      </h3>
                      
                      {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) - ANIMATED */}
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span>リミット: </span>
+                          <span>Limit: </span>
                           <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
                           <span>/250</span>
                        </div>
                        <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
-                          毎月の無料枠です。毎月1日にリセットされます。
+                          Monthly free limit. Resets on the 1st of every month.
                        </div>
                      </div>
                    </div>
@@ -1041,30 +1058,30 @@ function App() {
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
                        <div>
-                         <label className="text-xs text-slate-400 ml-1">名</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="太郎" />
+                         <label className="text-xs text-slate-400 ml-1">First Name</label>
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="John" />
                        </div>
                        <div>
-                         <label className="text-xs text-slate-400 ml-1">姓</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="山田" />
+                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
                        </div>
                      </div>
                      <div>
-                       <label className="text-xs text-slate-400 ml-1">メールアドレス</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="taro@example.com" />
+                       <label className="text-xs text-slate-400 ml-1">Email</label>
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
                      </div>
                      <div>
-                        <label className="text-xs text-slate-400 ml-1">電話番号</label>
+                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
                           <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="09012345678" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
-                       <label className="text-xs text-slate-400 ml-1">メッセージ</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="メッセージを入力してください..." />
+                       <label className="text-xs text-slate-400 ml-1">Message</label>
+                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
                      </div>
                      
                      <button 
@@ -1072,7 +1089,7 @@ function App() {
                        disabled={isSubmitting || dbQuota >= 250}
                        className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                      >
-                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> 送信中...</> : "メールを送信"}
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
                      </button>
                    </form>
                 </Card>
@@ -1098,16 +1115,16 @@ function App() {
 
                    <div className="flex justify-between items-start mb-6">
                      <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
-                       <Send size={20}/> ダイレクトメッセージ
+                       <Send size={20}/> Direct Message
                      </h3>
                      {/* TELEGRAM INFINITY BADGE (MATCHED STYLE) */}
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span>リミット: </span>
+                          <span>Limit: </span>
                           <Infinity size={12} className="text-blue-400" />
                        </div>
                        <div className="absolute bottom-full right-0 mb-2 w-40 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
-                          制限なし。何度でもメッセージを送信できます。
+                          No limits. Send as many messages as you want.
                        </div>
                      </div>
                    </div>
@@ -1115,30 +1132,30 @@ function App() {
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
                        <div>
-                         <label className="text-xs text-slate-400 ml-1">名</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="花子" />
+                         <label className="text-xs text-slate-400 ml-1">First Name</label>
+                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Jane" />
                        </div>
                        <div>
-                         <label className="text-xs text-slate-400 ml-1">姓</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="田中" />
+                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
+                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
                        </div>
                      </div>
                      <div>
-                       <label className="text-xs text-slate-400 ml-1">メールアドレス</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="hanako@example.com" />
+                       <label className="text-xs text-slate-400 ml-1">Email</label>
+                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="jane@example.com" />
                      </div>
                      <div>
-                        <label className="text-xs text-slate-400 ml-1">電話番号</label>
+                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
                           <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
                             {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
                           </select>
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="09012345678" />
+                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
                      <div>
-                       <label className="text-xs text-slate-400 ml-1">メッセージ</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="メッセージを入力してください..." />
+                       <label className="text-xs text-slate-400 ml-1">Message</label>
+                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
                      </div>
                      
                      <button 
@@ -1146,7 +1163,7 @@ function App() {
                        disabled={isSubmitting}
                        className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                      >
-                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> 送信中...</> : "送信"}
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
                    </form>
                 </Card>
@@ -1158,7 +1175,7 @@ function App() {
       </main>
 
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
-        <p>© 2025 Shovith Debnath. React.jsと<span className="text-red-500">♥</span>を込めて作成されました。</p>
+        <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
 
     </div>
