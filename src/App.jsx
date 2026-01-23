@@ -594,7 +594,8 @@ const Navbar = () => {
                   <motion.div 
                     layoutId="active-dock-pill"
                     className="absolute inset-0 bg-slate-800 rounded-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
+                    // UPDATED: Standard Magnetic Spring (No Bounce)
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
                 
@@ -606,7 +607,8 @@ const Navbar = () => {
                     style={{
                       clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' // Trapezoid: Wide Bottom, Narrow Top
                     }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
+                    // UPDATED: Sync exact transition with Pill
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
                 
