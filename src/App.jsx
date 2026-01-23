@@ -10,13 +10,17 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- NEW ICON IMPORTS (Simple Icons) ---
+// --- NEW ICON IMPORTS (Simple Icons + VSC) ---
+// Removed SiVisualstudiocode to prevent build error
 import { 
   SiHtml5, SiCss3, SiJavascript, SiReact, SiTailwindcss, SiTypescript,
   SiFirebase, SiSupabase, SiPython, SiNodedotjs, SiExpress,
   SiArduino, SiRaspberrypi, SiAdobecreativecloud,
-  SiGithub, SiVisualstudiocode, SiAutodesk
+  SiGithub, SiAutodesk
 } from 'react-icons/si';
+
+// Import VS Code icon from VSC library for safety
+import { VscVscode } from 'react-icons/vsc';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "firebase/app";
@@ -143,7 +147,7 @@ const data = {
       { name: "Video (Pr, Ae)", level: 85, color: "from-[#9999FF] to-[#00005B]", icon: Film, iconColor: "#9999FF" },
       { name: "3D & CAD", level: 80, color: "from-[#0696D7] to-[#057FB9]", icon: SiAutodesk, iconColor: "#0696D7" },
       { name: "Git/GitHub", level: 90, color: "from-[#F05032] to-[#181717]", icon: SiGithub, iconColor: "#ffffff" },
-      { name: "VS Code", level: 95, color: "from-[#007ACC] to-[#0065A9]", icon: SiVisualstudiocode, iconColor: "#007ACC" },
+      { name: "VS Code", level: 95, color: "from-[#007ACC] to-[#0065A9]", icon: VscVscode, iconColor: "#007ACC" },
     ]
   },
   projects: [
