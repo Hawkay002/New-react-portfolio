@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, ExternalLink, 
   Link, Receipt, Utensils, Gift, Eye, Ticket, Globe, 
@@ -6,7 +6,7 @@ import {
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
-  Radio, Film
+  Radio, Film, Search, ChevronDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,65 +45,399 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- COUNTRY DATA ---
-const countries = [
-  { name: "Afghanistan", code: "+93" }, { name: "Albania", code: "+355" }, { name: "Algeria", code: "+213" }, 
-  { name: "Andorra", code: "+376" }, { name: "Angola", code: "+244" }, { name: "Argentina", code: "+54" }, 
-  { name: "Armenia", code: "+374" }, { name: "Australia", code: "+61" }, { name: "Austria", code: "+43" }, 
-  { name: "Azerbaijan", code: "+994" }, { name: "Bahrain", code: "+973" }, { name: "Bangladesh", code: "+880" }, 
-  { name: "Belarus", code: "+375" }, { name: "Belgium", code: "+32" }, { name: "Belize", code: "+501" }, 
-  { name: "Benin", code: "+229" }, { name: "Bhutan", code: "+975" }, { name: "Bolivia", code: "+591" }, 
-  { name: "Bosnia & Herzegovina", code: "+387" }, { name: "Botswana", code: "+267" }, { name: "Brazil", code: "+55" }, 
-  { name: "Bulgaria", code: "+359" }, { name: "Burkina Faso", code: "+226" }, { name: "Burundi", code: "+257" }, 
-  { name: "Cambodia", code: "+855" }, { name: "Cameroon", code: "+237" }, { name: "Canada", code: "+1" }, 
-  { name: "Central African Republic", code: "+236" }, { name: "Chile", code: "+56" }, { name: "China", code: "+86" }, 
-  { name: "Colombia", code: "+57" }, { name: "Comoros", code: "+269" }, { name: "Congo", code: "+242" }, 
-  { name: "Costa Rica", code: "+506" }, { name: "Croatia", code: "+385" }, { name: "Cuba", code: "+53" }, 
-  { name: "Cyprus", code: "+357" }, { name: "Czech Republic", code: "+420" }, { name: "Denmark", code: "+45" }, 
-  { name: "Djibouti", code: "+253" }, { name: "Ecuador", code: "+593" }, { name: "Egypt", code: "+20" }, 
-  { name: "El Salvador", code: "+503" }, { name: "Equatorial Guinea", code: "+240" }, { name: "Eritrea", code: "+291" }, 
-  { name: "Estonia", code: "+372" }, { name: "Ethiopia", code: "+251" }, { name: "Fiji", code: "+679" }, 
-  { name: "Finland", code: "+358" }, { name: "France", code: "+33" }, { name: "Gabon", code: "+241" }, 
-  { name: "Gambia", code: "+220" }, { name: "Georgia", code: "+995" }, { name: "Germany", code: "+49" }, 
-  { name: "Ghana", code: "+233" }, { name: "Greece", code: "+30" }, { name: "Greenland", code: "+299" }, 
-  { name: "Guatemala", code: "+502" }, { name: "Guinea", code: "+224" }, { name: "Guyana", code: "+592" }, 
-  { name: "Haiti", code: "+509" }, { name: "Honduras", code: "+504" }, { name: "Hong Kong", code: "+852" }, 
-  { name: "Hungary", code: "+36" }, { name: "Iceland", code: "+354" }, { name: "India", code: "+91" }, 
-  { name: "Indonesia", code: "+62" }, { name: "Iran", code: "+98" }, { name: "Iraq", code: "+964" }, 
-  { name: "Ireland", code: "+353" }, { name: "Israel", code: "+972" }, { name: "Italy", code: "+39" }, 
-  { name: "Jamaica", code: "+1876" }, { name: "Japan", code: "+81" }, { name: "Jordan", code: "+962" }, 
-  { name: "Kazakhstan", code: "+7" }, { name: "Kenya", code: "+254" }, { name: "Kuwait", code: "+965" }, 
-  { name: "Kyrgyzstan", code: "+996" }, { name: "Laos", code: "+856" }, { name: "Latvia", code: "+371" }, 
-  { name: "Lebanon", code: "+961" }, { name: "Lesotho", code: "+266" }, { name: "Liberia", code: "+231" }, 
-  { name: "Libya", code: "+218" }, { name: "Liechtenstein", code: "+423" }, { name: "Lithuania", code: "+370" }, 
-  { name: "Luxembourg", code: "+352" }, { name: "Macao", code: "+853" }, { name: "Macedonia", code: "+389" }, 
-  { name: "Madagascar", code: "+261" }, { name: "Malawi", code: "+265" }, { name: "Malaysia", code: "+60" }, 
-  { name: "Maldives", code: "+960" }, { name: "Mali", code: "+223" }, { name: "Malta", code: "+356" }, 
-  { name: "Mauritania", code: "+222" }, { name: "Mexico", code: "+52" }, { name: "Moldova", code: "+373" }, 
-  { name: "Monaco", code: "+377" }, { name: "Mongolia", code: "+976" }, { name: "Montenegro", code: "+382" }, 
-  { name: "Morocco", code: "+212" }, { name: "Mozambique", code: "+258" }, { name: "Myanmar", code: "+95" }, 
-  { name: "Namibia", code: "+264" }, { name: "Nepal", code: "+977" }, { name: "Netherlands", code: "+31" }, 
-  { name: "New Zealand", code: "+64" }, { name: "Nicaragua", code: "+505" }, { name: "Niger", code: "+227" }, 
-  { name: "Nigeria", code: "+234" }, { name: "North Korea", code: "+850" }, { name: "Norway", code: "+47" }, 
-  { name: "Oman", code: "+968" }, { name: "Pakistan", code: "+92" }, { name: "Panama", code: "+507" }, 
-  { name: "Paraguay", code: "+595" }, { name: "Peru", code: "+51" }, { name: "Philippines", code: "+63" }, 
-  { name: "Poland", code: "+48" }, { name: "Portugal", code: "+351" }, { name: "Qatar", code: "+974" }, 
-  { name: "Romania", code: "+40" }, { name: "Russia", code: "+7" }, { name: "Rwanda", code: "+250" }, 
-  { name: "Saudi Arabia", code: "+966" }, { name: "Senegal", code: "+221" }, { name: "Serbia", code: "+381" }, 
-  { name: "Seychelles", code: "+248" }, { name: "Sierra Leone", code: "+232" }, { name: "Singapore", code: "+65" }, 
-  { name: "Slovakia", code: "+421" }, { name: "Slovenia", code: "+386" }, { name: "Somalia", code: "+252" }, 
-  { name: "South Africa", code: "+27" }, { name: "South Korea", code: "+82" }, { name: "Spain", code: "+34" }, 
-  { name: "Sri Lanka", code: "+94" }, { name: "Sudan", code: "+249" }, { name: "Suriname", code: "+597" }, 
-  { name: "Swaziland", code: "+268" }, { name: "Sweden", code: "+46" }, { name: "Switzerland", code: "+41" }, 
-  { name: "Syria", code: "+963" }, { name: "Taiwan", code: "+886" }, { name: "Tajikistan", code: "+992" }, 
-  { name: "Tanzania", code: "+255" }, { name: "Thailand", code: "+66" }, { name: "Togo", code: "+228" }, 
-  { name: "Tunisia", code: "+216" }, { name: "Turkey", code: "+90" }, { name: "Turkmenistan", code: "+993" }, 
-  { name: "Uganda", code: "+256" }, { name: "Ukraine", code: "+380" }, { name: "UAE", code: "+971" }, 
-  { name: "United Kingdom", code: "+44" }, { name: "USA", code: "+1" }, { name: "Uruguay", code: "+598" }, 
-  { name: "Uzbekistan", code: "+998" }, { name: "Vatican City", code: "+379" }, { name: "Venezuela", code: "+58" }, 
-  { name: "Vietnam", code: "+84" }, { name: "Yemen", code: "+967" }, { name: "Zambia", code: "+260" }, 
-  { name: "Zimbabwe", code: "+263" }
+// --- UPDATED COUNTRY DATA WITH ISO CODES ---
+const allCountries = [
+  { name: "Afghanistan", dial_code: "+93", code: "AF" },
+  { name: "Aland Islands", dial_code: "+358", code: "AX" }
+  { name: "Albania", dial_code: "+355", code: "AL" },
+  { name: "Algeria", dial_code: "+213", code: "DZ" },
+  { name: "American Samoa", dial_code: "+1684", code: "AS" },
+  { name: "Andorra", dial_code: "+376", code: "AD" },
+  { name: "Angola", dial_code: "+244", code: "AO" },
+  { name: "Anguilla", dial_code: "+1264", code: "AI" },
+  { name: "Antarctica", dial_code: "+672", code: "AQ" },
+  { name: "Antigua and Barbuda", dial_code: "+1268", code: "AG" },
+  { name: "Argentina", dial_code: "+54", code: "AR" },
+  { name: "Armenia", dial_code: "+374", code: "AM" },
+  { name: "Aruba", dial_code: "+297", code: "AW" },
+  { name: "Australia", dial_code: "+61", code: "AU" },
+  { name: "Austria", dial_code: "+43", code: "AT" },
+  { name: "Azerbaijan", dial_code: "+994", code: "AZ" },
+  { name: "Bahamas", dial_code: "+1242", code: "BS" },
+  { name: "Bahrain", dial_code: "+973", code: "BH" },
+  { name: "Bangladesh", dial_code: "+880", code: "BD" },
+  { name: "Barbados", dial_code: "+1246", code: "BB" },
+  { name: "Belarus", dial_code: "+375", code: "BY" },
+  { name: "Belgium", dial_code: "+32", code: "BE" },
+  { name: "Belize", dial_code: "+501", code: "BZ" },
+  { name: "Benin", dial_code: "+229", code: "BJ" },
+  { name: "Bermuda", dial_code: "+1441", code: "BM" },
+  { name: "Bhutan", dial_code: "+975", code: "BT" },
+  { name: "Bolivia", dial_code: "+591", code: "BO" },
+  { name: "Bosnia and Herzegovina", dial_code: "+387", code: "BA" },
+  { name: "Botswana", dial_code: "+267", code: "BW" },
+  { name: "Brazil", dial_code: "+55", code: "BR" },
+  { name: "British Indian Ocean Territory", dial_code: "+246", code: "IO" },
+  { name: "British Virgin Islands", dial_code: "+1284", code: "VG" },
+  { name: "Brunei Darussalam", dial_code: "+673", code: "BN" },
+  { name: "Bulgaria", dial_code: "+359", code: "BG" },
+  { name: "Burkina Faso", dial_code: "+226", code: "BF" },
+  { name: "Burundi", dial_code: "+257", code: "BI" },
+  { name: "Cambodia", dial_code: "+855", code: "KH" },
+  { name: "Cameroon", dial_code: "+237", code: "CM" },
+  { name: "Canada", dial_code: "+1", code: "CA" },
+  { name: "Cape Verde", dial_code: "+238", code: "CV" },
+  { name: "Cayman Islands", dial_code: "+1345", code: "KY" },
+  { name: "Central African Republic", dial_code: "+236", code: "CF" },
+  { name: "Chad", dial_code: "+235", code: "TD" },
+  { name: "Chile", dial_code: "+56", code: "CL" },
+  { name: "China", dial_code: "+86", code: "CN" },
+  { name: "Christmas Island", dial_code: "+61", code: "CX" },
+  { name: "Cocos (Keeling) Islands", dial_code: "+61", code: "CC" },
+  { name: "Colombia", dial_code: "+57", code: "CO" },
+  { name: "Comoros", dial_code: "+269", code: "KM" },
+  { name: "Congo", dial_code: "+242", code: "CG" },
+  { name: "Congo, Democratic Republic of the", dial_code: "+243", code: "CD" },
+  { name: "Cook Islands", dial_code: "+682", code: "CK" },
+  { name: "Costa Rica", dial_code: "+506", code: "CR" },
+  { name: "Croatia", dial_code: "+385", code: "HR" },
+  { name: "Cuba", dial_code: "+53", code: "CU" },
+  { name: "Cyprus", dial_code: "+357", code: "CY" },
+  { name: "Czech Republic", dial_code: "+420", code: "CZ" },
+  { name: "Denmark", dial_code: "+45", code: "DK" },
+  { name: "Djibouti", dial_code: "+253", code: "DJ" },
+  { name: "Dominica", dial_code: "+1767", code: "DM" },
+  { name: "Dominican Republic", dial_code: "+1849", code: "DO" },
+  { name: "Ecuador", dial_code: "+593", code: "EC" },
+  { name: "Egypt", dial_code: "+20", code: "EG" },
+  { name: "El Salvador", dial_code: "+503", code: "SV" },
+  { name: "Equatorial Guinea", dial_code: "+240", code: "GQ" },
+  { name: "Eritrea", dial_code: "+291", code: "ER" },
+  { name: "Estonia", dial_code: "+372", code: "EE" },
+  { name: "Ethiopia", dial_code: "+251", code: "ET" },
+  { name: "Falkland Islands (Malvinas)", dial_code: "+500", code: "FK" },
+  { name: "Faroe Islands", dial_code: "+298", code: "FO" },
+  { name: "Fiji", dial_code: "+679", code: "FJ" },
+  { name: "Finland", dial_code: "+358", code: "FI" },
+  { name: "France", dial_code: "+33", code: "FR" },
+  { name: "French Guiana", dial_code: "+594", code: "GF" },
+  { name: "French Polynesia", dial_code: "+689", code: "PF" },
+  { name: "Gabon", dial_code: "+241", code: "GA" },
+  { name: "Gambia", dial_code: "+220", code: "GM" },
+  { name: "Georgia", dial_code: "+995", code: "GE" },
+  { name: "Germany", dial_code: "+49", code: "DE" },
+  { name: "Ghana", dial_code: "+233", code: "GH" },
+  { name: "Gibraltar", dial_code: "+350", code: "GI" },
+  { name: "Greece", dial_code: "+30", code: "GR" },
+  { name: "Greenland", dial_code: "+299", code: "GL" },
+  { name: "Grenada", dial_code: "+1473", code: "GD" },
+  { name: "Guadeloupe", dial_code: "+590", code: "GP" },
+  { name: "Guam", dial_code: "+1671", code: "GU" },
+  { name: "Guatemala", dial_code: "+502", code: "GT" },
+  { name: "Guernsey", dial_code: "+44", code: "GG" },
+  { name: "Guinea", dial_code: "+224", code: "GN" },
+  { name: "Guinea-Bissau", dial_code: "+245", code: "GW" },
+  { name: "Guyana", dial_code: "+592", code: "GY" },
+  { name: "Haiti", dial_code: "+509", code: "HT" },
+  { name: "Holy See (Vatican City State)", dial_code: "+379", code: "VA" },
+  { name: "Honduras", dial_code: "+504", code: "HN" },
+  { name: "Hong Kong", dial_code: "+852", code: "HK" },
+  { name: "Hungary", dial_code: "+36", code: "HU" },
+  { name: "Iceland", dial_code: "+354", code: "IS" },
+  { name: "India", dial_code: "+91", code: "IN" },
+  { name: "Indonesia", dial_code: "+62", code: "ID" },
+  { name: "Iran", dial_code: "+98", code: "IR" },
+  { name: "Iraq", dial_code: "+964", code: "IQ" },
+  { name: "Ireland", dial_code: "+353", code: "IE" },
+  { name: "Isle of Man", dial_code: "+44", code: "IM" },
+  { name: "Israel", dial_code: "+972", code: "IL" },
+  { name: "Italy", dial_code: "+39", code: "IT" },
+  { name: "Ivory Coast", dial_code: "+225", code: "CI" },
+  { name: "Jamaica", dial_code: "+1876", code: "JM" },
+  { name: "Japan", dial_code: "+81", code: "JP" },
+  { name: "Jersey", dial_code: "+44", code: "JE" },
+  { name: "Jordan", dial_code: "+962", code: "JO" },
+  { name: "Kazakhstan", dial_code: "+7", code: "KZ" },
+  { name: "Kenya", dial_code: "+254", code: "KE" },
+  { name: "Kiribati", dial_code: "+686", code: "KI" },
+  { name: "Kuwait", dial_code: "+965", code: "KW" },
+  { name: "Kyrgyzstan", dial_code: "+996", code: "KG" },
+  { name: "Laos", dial_code: "+856", code: "LA" },
+  { name: "Latvia", dial_code: "+371", code: "LV" },
+  { name: "Lebanon", dial_code: "+961", code: "LB" },
+  { name: "Lesotho", dial_code: "+266", code: "LS" },
+  { name: "Liberia", dial_code: "+231", code: "LR" },
+  { name: "Libyan Arab Jamahiriya", dial_code: "+218", code: "LY" },
+  { name: "Liechtenstein", dial_code: "+423", code: "LI" },
+  { name: "Lithuania", dial_code: "+370", code: "LT" },
+  { name: "Luxembourg", dial_code: "+352", code: "LU" },
+  { name: "Macao", dial_code: "+853", code: "MO" },
+  { name: "Macedonia", dial_code: "+389", code: "MK" },
+  { name: "Madagascar", dial_code: "+261", code: "MG" },
+  { name: "Malawi", dial_code: "+265", code: "MW" },
+  { name: "Malaysia", dial_code: "+60", code: "MY" },
+  { name: "Maldives", dial_code: "+960", code: "MV" },
+  { name: "Mali", dial_code: "+223", code: "ML" },
+  { name: "Malta", dial_code: "+356", code: "MT" },
+  { name: "Marshall Islands", dial_code: "+692", code: "MH" },
+  { name: "Martinique", dial_code: "+596", code: "MQ" },
+  { name: "Mauritania", dial_code: "+222", code: "MR" },
+  { name: "Mauritius", dial_code: "+230", code: "MU" },
+  { name: "Mayotte", dial_code: "+262", code: "YT" },
+  { name: "Mexico", dial_code: "+52", code: "MX" },
+  { name: "Micronesia", dial_code: "+691", code: "FM" },
+  { name: "Moldova", dial_code: "+373", code: "MD" },
+  { name: "Monaco", dial_code: "+377", code: "MC" },
+  { name: "Mongolia", dial_code: "+976", code: "MN" },
+  { name: "Montenegro", dial_code: "+382", code: "ME" },
+  { name: "Montserrat", dial_code: "+1664", code: "MS" },
+  { name: "Morocco", dial_code: "+212", code: "MA" },
+  { name: "Mozambique", dial_code: "+258", code: "MZ" },
+  { name: "Myanmar", dial_code: "+95", code: "MM" },
+  { name: "Namibia", dial_code: "+264", code: "NA" },
+  { name: "Nauru", dial_code: "+674", code: "NR" },
+  { name: "Nepal", dial_code: "+977", code: "NP" },
+  { name: "Netherlands", dial_code: "+31", code: "NL" },
+  { name: "Netherlands Antilles", dial_code: "+599", code: "AN" },
+  { name: "New Caledonia", dial_code: "+687", code: "NC" },
+  { name: "New Zealand", dial_code: "+64", code: "NZ" },
+  { name: "Nicaragua", dial_code: "+505", code: "NI" },
+  { name: "Niger", dial_code: "+227", code: "NE" },
+  { name: "Nigeria", dial_code: "+234", code: "NG" },
+  { name: "Niue", dial_code: "+683", code: "NU" },
+  { name: "Norfolk Island", dial_code: "+672", code: "NF" },
+  { name: "North Korea", dial_code: "+850", code: "KP" },
+  { name: "Northern Mariana Islands", dial_code: "+1670", code: "MP" },
+  { name: "Norway", dial_code: "+47", code: "NO" },
+  { name: "Oman", dial_code: "+968", code: "OM" },
+  { name: "Pakistan", dial_code: "+92", code: "PK" },
+  { name: "Palau", dial_code: "+680", code: "PW" },
+  { name: "Palestinian Territory, Occupied", dial_code: "+970", code: "PS" },
+  { name: "Panama", dial_code: "+507", code: "PA" },
+  { name: "Papua New Guinea", dial_code: "+675", code: "PG" },
+  { name: "Paraguay", dial_code: "+595", code: "PY" },
+  { name: "Peru", dial_code: "+51", code: "PE" },
+  { name: "Philippines", dial_code: "+63", code: "PH" },
+  { name: "Pitcairn", dial_code: "+64", code: "PN" },
+  { name: "Poland", dial_code: "+48", code: "PL" },
+  { name: "Portugal", dial_code: "+351", code: "PT" },
+  { name: "Puerto Rico", dial_code: "+1939", code: "PR" },
+  { name: "Qatar", dial_code: "+974", code: "QA" },
+  { name: "Romania", dial_code: "+40", code: "RO" },
+  { name: "Russia", dial_code: "+7", code: "RU" },
+  { name: "Rwanda", dial_code: "+250", code: "RW" },
+  { name: "Reunion", dial_code: "+262", code: "RE" },
+  { name: "Saint Barthelemy", dial_code: "+590", code: "BL" },
+  { name: "Saint Helena, Ascension and Tristan Da Cunha", dial_code: "+290", code: "SH" },
+  { name: "Saint Kitts and Nevis", dial_code: "+1869", code: "KN" },
+  { name: "Saint Lucia", dial_code: "+1758", code: "LC" },
+  { name: "Saint Martin", dial_code: "+590", code: "MF" },
+  { name: "Saint Pierre and Miquelon", dial_code: "+508", code: "PM" },
+  { name: "Saint Vincent and the Grenadines", dial_code: "+1784", code: "VC" },
+  { name: "Samoa", dial_code: "+685", code: "WS" },
+  { name: "San Marino", dial_code: "+378", code: "SM" },
+  { name: "Sao Tome and Principe", dial_code: "+239", code: "ST" },
+  { name: "Saudi Arabia", dial_code: "+966", code: "SA" },
+  { name: "Senegal", dial_code: "+221", code: "SN" },
+  { name: "Serbia", dial_code: "+381", code: "RS" },
+  { name: "Seychelles", dial_code: "+248", code: "SC" },
+  { name: "Sierra Leone", dial_code: "+232", code: "SL" },
+  { name: "Singapore", dial_code: "+65", code: "SG" },
+  { name: "Slovakia", dial_code: "+421", code: "SK" },
+  { name: "Slovenia", dial_code: "+386", code: "SI" },
+  { name: "Solomon Islands", dial_code: "+677", code: "SB" },
+  { name: "Somalia", dial_code: "+252", code: "SO" },
+  { name: "South Africa", dial_code: "+27", code: "ZA" },
+  { name: "South Georgia and the South Sandwich Islands", dial_code: "+500", code: "GS" },
+  { name: "South Korea", dial_code: "+82", code: "KR" },
+  { name: "South Sudan", dial_code: "+211", code: "SS" },
+  { name: "Spain", dial_code: "+34", code: "ES" },
+  { name: "Sri Lanka", dial_code: "+94", code: "LK" },
+  { name: "Sudan", dial_code: "+249", code: "SD" },
+  { name: "Suriname", dial_code: "+597", code: "SR" },
+  { name: "Svalbard and Jan Mayen", dial_code: "+47", code: "SJ" },
+  { name: "Swaziland", dial_code: "+268", code: "SZ" },
+  { name: "Sweden", dial_code: "+46", code: "SE" },
+  { name: "Switzerland", dial_code: "+41", code: "CH" },
+  { name: "Syrian Arab Republic", dial_code: "+963", code: "SY" },
+  { name: "Taiwan", dial_code: "+886", code: "TW" },
+  { name: "Tajikistan", dial_code: "+992", code: "TJ" },
+  { name: "Tanzania, United Republic of", dial_code: "+255", code: "TZ" },
+  { name: "Thailand", dial_code: "+66", code: "TH" },
+  { name: "Timor-Leste", dial_code: "+670", code: "TL" },
+  { name: "Togo", dial_code: "+228", code: "TG" },
+  { name: "Tokelau", dial_code: "+690", code: "TK" },
+  { name: "Tonga", dial_code: "+676", code: "TO" },
+  { name: "Trinidad and Tobago", dial_code: "+1868", code: "TT" },
+  { name: "Tunisia", dial_code: "+216", code: "TN" },
+  { name: "Turkey", dial_code: "+90", code: "TR" },
+  { name: "Turkmenistan", dial_code: "+993", code: "TM" },
+  { name: "Turks and Caicos Islands", dial_code: "+1649", code: "TC" },
+  { name: "Tuvalu", dial_code: "+688", code: "TV" },
+  { name: "Uganda", dial_code: "+256", code: "UG" },
+  { name: "Ukraine", dial_code: "+380", code: "UA" },
+  { name: "United Arab Emirates", dial_code: "+971", code: "AE" },
+  { name: "United Kingdom", dial_code: "+44", code: "GB" },
+  { name: "United States", dial_code: "+1", code: "US" },
+  { name: "Uruguay", dial_code: "+598", code: "UY" },
+  { name: "Uzbekistan", dial_code: "+998", code: "UZ" },
+  { name: "Vanuatu", dial_code: "+678", code: "VU" },
+  { name: "Venezuela", dial_code: "+58", code: "VE" },
+  { name: "Vietnam", dial_code: "+84", code: "VN" },
+  { name: "Virgin Islands, U.S.", dial_code: "+1340", code: "VI" },
+  { name: "Wallis and Futuna", dial_code: "+681", code: "WF" },
+  { name: "Yemen", dial_code: "+967", code: "YE" },
+  { name: "Zambia", dial_code: "+260", code: "ZM" },
+  { name: "Zimbabwe", dial_code: "+263", code: "ZW" }
 ];
+
+// --- CUSTOM COUNTRY SELECTOR COMPONENT ---
+const CountrySelector = ({ selectedCode, onChange, name }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Sort and Filter Logic
+  const filteredCountries = useMemo(() => {
+    // 1. Define Priority List (India Top, then US, UK, DE, FR)
+    const priorityCodes = ["IN", "US", "GB", "DE", "FR"];
+    
+    // 2. Separate countries
+    const priority = [];
+    const others = [];
+
+    allCountries.forEach(c => {
+      if (priorityCodes.includes(c.code)) {
+        priority.push(c);
+      } else {
+        others.push(c);
+      }
+    });
+
+    // 3. Sort priority list based on the order defined in priorityCodes array
+    priority.sort((a, b) => priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code));
+    
+    // 4. Combine
+    const sortedList = [...priority, ...others];
+
+    // 5. Apply Search Filter
+    if (!search) return sortedList;
+    return sortedList.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.dial_code.includes(search)
+    );
+  }, [search]);
+
+  // Find currently selected country object
+  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries.find(c => c.code === "IN");
+
+  return (
+    <div className="relative w-32" ref={dropdownRef}>
+      {/* Hidden input for form submission */}
+      <input type="hidden" name={name} value={selectedCountry?.dial_code} />
+
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors flex items-center justify-between gap-2"
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          <img 
+            src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} 
+            srcSet={`https://flagcdn.com/w40/${selectedCountry?.code.toLowerCase()}.png 2x`}
+            width="20" 
+            alt={selectedCountry?.code} 
+            className="rounded-sm object-cover shrink-0"
+          />
+          <span className="text-slate-300 truncate">{selectedCountry?.dial_code}</span>
+        </div>
+        <ChevronDown size={14} className={`text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Dropdown Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-0 mt-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
+          >
+            {/* Search Bar */}
+            <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search country..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* List */}
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+              {filteredCountries.length > 0 ? (
+                filteredCountries.map((country) => (
+                  <button
+                    key={country.code}
+                    type="button"
+                    onClick={() => {
+                      onChange(country.dial_code);
+                      setIsOpen(false);
+                      setSearch("");
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
+                      selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
+                    }`}
+                  >
+                    <img 
+                      src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                      srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
+                      width="20" 
+                      alt={country.name} 
+                      className="rounded-sm object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-200 truncate">{country.name}</span>
+                        <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
+                      </div>
+                    </div>
+                    {/* Pin Icon for top 5 (Visual Indicator) */}
+                    {["IN", "US", "GB", "DE", "FR"].includes(country.code) && !search && (
+                       <div className="w-1.5 h-1.5 rounded-full bg-neon-green shrink-0 shadow-[0_0_5px_rgba(16,185,129,0.5)]"></div>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-xs text-slate-500">
+                  No countries found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 // --- DATA ---
 const data = {
@@ -652,6 +986,7 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default India
   
   // Real-time Database Quota (Default to 6 until DB loads)
   const [dbQuota, setDbQuota] = useState(6); 
@@ -810,6 +1145,11 @@ function App() {
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
+        
+        /* Custom Scrollbar for Dropdown */
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
       `}</style>
 
       {/* Profile Image Modal */}
@@ -1131,9 +1471,12 @@ function App() {
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
-                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
-                            {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
-                          </select>
+                          {/* --- CUSTOM COUNTRY SELECTOR REPLACES <SELECT> --- */}
+                          <CountrySelector 
+                            name="countryCode"
+                            selectedCode={selectedCountryCode}
+                            onChange={setSelectedCountryCode}
+                          />
                           <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
@@ -1205,9 +1548,12 @@ function App() {
                      <div>
                         <label className="text-xs text-slate-400 ml-1">Phone Number</label>
                         <div className="flex gap-2 mt-1">
-                          <select name="countryCode" className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors w-24 placeholder:text-slate-600">
-                            {countries.map(c => <option key={c.name} value={c.code}>{c.code} {c.name}</option>)}
-                          </select>
+                          {/* --- CUSTOM COUNTRY SELECTOR REPLACES <SELECT> --- */}
+                          <CountrySelector 
+                            name="countryCode"
+                            selectedCode={selectedCountryCode}
+                            onChange={setSelectedCountryCode}
+                          />
                           <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                         </div>
                      </div>
