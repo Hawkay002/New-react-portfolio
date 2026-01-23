@@ -11,7 +11,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- NEW ICON IMPORTS (Simple Icons + VSC) ---
-// Removed SiVisualstudiocode to prevent build error
 import { 
   SiHtml5, SiCss3, SiJavascript, SiReact, SiTailwindcss, SiTypescript,
   SiFirebase, SiSupabase, SiPython, SiNodedotjs, SiExpress,
@@ -19,7 +18,6 @@ import {
   SiGithub, SiAutodesk
 } from 'react-icons/si';
 
-// Import VS Code icon from VSC library for safety
 import { VscVscode } from 'react-icons/vsc';
 
 // --- FIREBASE IMPORTS ---
@@ -489,6 +487,29 @@ const Navbar = () => {
     { id: 'contact', icon: Mail, href: '#contact' },
   ];
 
+  // SMOOTH SCROLL HANDLER
+  const scrollToSection = (e, id) => {
+    e.preventDefault();
+    const element = document.getElementById(id.replace('#', ''));
+    if (element) {
+      const offset = 80; // Navbar height + buffer
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      setActiveTab(id.replace('#', ''));
+      
+      // Update URL hash without jumping
+      history.pushState(null, null, id);
+    }
+  };
+
   // Scroll Spy Logic
   useEffect(() => {
     const handleScroll = () => {
@@ -517,7 +538,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center justify-between h-16">
             <div className="flex-shrink-0 cursor-pointer flex items-center gap-2">
-              <a href="#home" className="flex items-center gap-2">
+              <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
                 <div className="bg-neon-green/20 p-1.5 rounded-lg">
                   <Code2 className="text-neon-green w-5 h-5" />
                 </div>
@@ -531,7 +552,12 @@ const Navbar = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-gray-300 hover:text-neon-green hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-300"
+                  onClick={(e) => scrollToSection(e, link.href)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                    activeTab === link.href.replace('#', '') 
+                    ? 'text-neon-green bg-white/5' 
+                    : 'text-gray-300 hover:text-neon-green hover:bg-white/5'
+                  }`}
                 >
                   {link.name}
                 </a>
@@ -549,7 +575,7 @@ const Navbar = () => {
          </span>
       </div>
 
-      {/* --- MOBILE FLOATING DOCK (Slimmer, Wider, Smooth Glide, MOVED UP) --- */}
+      {/* --- MOBILE FLOATING DOCK --- */}
       <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => {
@@ -558,25 +584,33 @@ const Navbar = () => {
               <a 
                 key={item.id}
                 href={item.href}
-                onClick={() => setActiveTab(item.id)}
+                onClick={(e) => scrollToSection(e, item.href)}
                 className={`relative p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${
                   isActive ? 'text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {/* SMOOTH GLIDING HIGHLIGHTER */}
+                {/* ACTIVE PILL BACKGROUND */}
                 {isActive && (
                   <motion.div 
                     layoutId="active-dock-pill"
                     className="absolute inset-0 bg-slate-800 rounded-full"
-                    // UPDATED: Smooth bouncy transition
                     transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
-                  >
-                     {/* Top Active Indicator Line */}
-                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-[2px] bg-white/50 rounded-b-full shadow-[0_2px_8px_rgba(255,255,255,0.5)]"></div>
-                  </motion.div>
+                  />
                 )}
                 
-                {/* Icon (Smaller size: 18px for breathing room) */}
+                {/* WHITE TRAPEZOID INDICATOR (ON THE NAVBAR EDGE) */}
+                {isActive && (
+                  <motion.div 
+                    layoutId="active-dock-indicator"
+                    className="absolute -bottom-1.5 w-6 h-1.5 bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.4)] z-20"
+                    style={{
+                      clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' // Trapezoid: Wide Bottom, Narrow Top
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30, bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                
+                {/* Icon */}
                 <span className="relative z-10">
                    <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 </span>
