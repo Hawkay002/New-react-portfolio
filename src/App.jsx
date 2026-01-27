@@ -7,7 +7,7 @@ import {
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
-  ShieldCheck
+  ShieldCheck, FileLock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,7 +48,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- SHORTENED COUNTRY DATA (For Testing - Logic Supports Full List) ---
+// --- SHORTENED COUNTRY DATA (For Testing) ---
 const allCountries = [
   { name: "Afghanistan", dial_code: "+93", code: "AF" },
   { name: "Aland Islands", dial_code: "+358", code: "AX" },
@@ -324,34 +324,16 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Priority Pinned Countries Logic
   const filteredCountries = useMemo(() => {
-    const priorityCodes = ["IN", "US", "GB", "DE", "FR"]; // Pinned at top
-    const priority = [];
-    const others = [];
-
-    allCountries.forEach(c => {
-      if (priorityCodes.includes(c.code)) {
-        priority.push(c);
-      } else {
-        others.push(c);
-      }
-    });
-
-    // Sort priority list to match the specific order defined in priorityCodes
-    priority.sort((a, b) => priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code));
-    
-    // Combine lists
-    const sortedList = [...priority, ...others];
-
-    if (!search) return sortedList;
-    return sortedList.filter(c => 
+    // Logic kept simple for shortened list
+    if (!search) return allCountries;
+    return allCountries.filter(c => 
       c.name.toLowerCase().includes(search.toLowerCase()) || 
       c.dial_code.includes(search)
     );
   }, [search]);
 
-  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries.find(c => c.code === "IN");
+  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries[0];
 
   return (
     <div className="relative w-32" ref={dropdownRef}>
@@ -399,45 +381,34 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
             <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
               {filteredCountries.length > 0 ? (
-                filteredCountries.map((country, index) => {
-                  // Separator logic: If not searching, and this is the last item of priority group (index 4 implies 5th item)
-                  // Note: Adjust index check based on how many priority codes exist in current list
-                  const isLastPinned = !search && index === (Math.min(filteredCountries.length, 5) - 1) && filteredCountries.length > 5;
-                  
-                  return (
-                    <React.Fragment key={country.code}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onChange(country.dial_code);
-                          setIsOpen(false);
-                          setSearch("");
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
-                          selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
-                        }`}
-                      >
-                        <img 
-                          src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
-                          srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
-                          width="20" 
-                          alt={country.name} 
-                          className="rounded-sm object-cover shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-200 truncate">{country.name}</span>
-                            <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
-                          </div>
+                filteredCountries.map((country) => (
+                    <button
+                      key={country.code}
+                      type="button"
+                      onClick={() => {
+                        onChange(country.dial_code);
+                        setIsOpen(false);
+                        setSearch("");
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
+                        selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
+                      }`}
+                    >
+                      <img 
+                        src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                        srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
+                        width="20" 
+                        alt={country.name} 
+                        className="rounded-sm object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-slate-200 truncate">{country.name}</span>
+                          <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
                         </div>
-                      </button>
-                      {/* Optional Divider after pinned items */}
-                      {isLastPinned && (
-                        <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 mx-2" />
-                      )}
-                    </React.Fragment>
-                  );
-                })
+                      </div>
+                    </button>
+                ))
               ) : (
                 <div className="p-4 text-center text-xs text-slate-500">
                   No countries found
@@ -557,6 +528,7 @@ const data = {
       tags: ["Python", "Security", "Forensics"],
       image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
+      locked: true, // <--- New Field: Triggers OTP
       link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
       icon: Eye, 
       color: "text-red-400", 
@@ -565,6 +537,22 @@ const data = {
       hoverBg: "hover:bg-gradient-to-br hover:from-red-500/20 hover:via-red-500/5 hover:to-transparent",
       hoverBorder: "hover:border-red-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
+    },
+    {
+      title: "Ransomware",
+      desc: "Ransomware is malware that locks or encrypts data and demands payment to restore access.",
+      tags: ["Python", "Encryption", "Security"],
+      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+      isDownload: true,
+      locked: true, // <--- New Field: Triggers OTP (Reuse of Universal Logic)
+      link: "https://example.com/steganography_tool.zip", // Replace with actual link
+      icon: FileLock, 
+      color: "text-cyan-400", 
+      bg: "bg-cyan-400/10",
+      cardBorder: "border-cyan-500/20",
+      hoverBg: "hover:bg-gradient-to-br hover:from-cyan-500/20 hover:via-cyan-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-cyan-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
     },
     {
       title: "Event Ticketing System",
@@ -692,7 +680,7 @@ const Card = ({ children, className = "", style }) => (
   </div>
 );
 
-// --- COMPONENT: PROGRESS BAR (With Bubble Animation) ---
+// --- COMPONENT: PROGRESS BAR ---
 const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between items-end mb-2">
@@ -714,13 +702,11 @@ const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
         transition={{ duration: 1.5, ease: "easeOut" }} 
         className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
       >
-        {/* Striped Background Animation */}
         <div 
           className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]" 
           style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}
         ></div>
         
-        {/* Bubble Animation Particles */}
         {[...Array(5)].map((_, i) => (
           <div 
             key={i}
@@ -824,13 +810,11 @@ const Navbar = () => {
         </div>
       </nav>
       
-      {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5 flex items-center gap-2">
         <Code2 className="text-neon-green w-5 h-5" />
         <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
       </div>
       
-      {/* Mobile Dock */}
       <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => { 
@@ -872,15 +856,15 @@ function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); 
   const [dbQuota, setDbQuota] = useState(6); 
 
-  // --- TELEGRAM OTP STATES (Replaces Firebase Auth) ---
+  // --- TELEGRAM OTP STATES ---
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
-  const [verificationStep, setVerificationStep] = useState(1); // 1 = Start, 2 = Enter Code
+  const [verificationStep, setVerificationStep] = useState(1);
   const [otpCode, setOtpCode] = useState("");
   const [otpError, setOtpError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // --- QUOTA MANAGEMENT (Yearly Reset) ---
+  // --- QUOTA MANAGEMENT ---
   useEffect(() => {
     const fetchQuota = async () => {
       try {
@@ -914,8 +898,10 @@ function App() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // --- UNIVERSAL SECURE DOWNLOAD LOGIC ---
   const handleDownloadClick = (project) => {
-    if (project.title.includes("Unredactor") && project.isDownload) {
+    // Only trigger OTP if the project is strictly marked as "locked"
+    if (project.locked) {
       setCurrentProject(project);
       setIsOtpModalOpen(true);
       setVerificationStep(1); 
@@ -928,16 +914,14 @@ function App() {
 
   // --- TELEGRAM VERIFICATION LOGIC ---
   const handleStartVerification = () => {
-    // 1. Check or Create LocalStorage Session
-    let sessionId = localStorage.getItem('unredactor_session_id');
+    // Use a generic session ID for any secure download
+    let sessionId = localStorage.getItem('secure_download_session_id');
     if (!sessionId) {
       sessionId = generateSessionId();
-      localStorage.setItem('unredactor_session_id', sessionId);
+      localStorage.setItem('secure_download_session_id', sessionId);
     }
-    // 2. Open Telegram
     const botUrl = `https://t.me/${BOT_USERNAME}?start=${sessionId}`;
     window.open(botUrl, '_blank');
-    // 3. Move UI
     setVerificationStep(2);
   };
 
@@ -947,7 +931,7 @@ function App() {
     setIsVerifying(true);
     setOtpError("");
 
-    const sessionId = localStorage.getItem('unredactor_session_id');
+    const sessionId = localStorage.getItem('secure_download_session_id');
     if (!sessionId) {
       setOtpError("Session expired. Please start again.");
       setIsVerifying(false);
@@ -961,7 +945,7 @@ function App() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.otp === otpCode.trim()) {
-          // A. Log Success
+          // Log Success
           await addDoc(collection(db, "verified_downloads"), {
             telegram_id: data.telegram_id,
             telegram_name: data.telegram_name || "Unknown",
@@ -969,8 +953,8 @@ function App() {
             timestamp: serverTimestamp()
           });
 
-          // B. Download
-          showNotification("Verification Successful! Downloading...", "success");
+          // Download
+          showNotification(`Verification Successful! Downloading ${currentProject.title}...`, "success");
           const link = document.createElement('a');
           link.href = currentProject.link;
           link.download = currentProject.title;
@@ -978,9 +962,9 @@ function App() {
           link.click();
           document.body.removeChild(link);
 
-          // C. Cleanup
+          // Cleanup
           await deleteDoc(docRef);
-          localStorage.removeItem('unredactor_session_id');
+          localStorage.removeItem('secure_download_session_id');
           setIsOtpModalOpen(false);
         } else {
           setOtpError("Incorrect code. Check your Telegram.");
@@ -1060,7 +1044,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
-      {/* Global CSS for Bubble and Stripe Animations */}
       <style>{`
         @keyframes progress-stripes { 
           from { background-position: 1rem 0; } 
@@ -1080,7 +1063,7 @@ function App() {
         .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
       `}</style>
 
-      {/* --- OTP MODAL (Telegram Version) --- */}
+      {/* --- OTP MODAL --- */}
       <AnimatePresence>
         {isOtpModalOpen && (
           <motion.div 
@@ -1102,7 +1085,9 @@ function App() {
                   <ShieldCheck className="text-blue-500 w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-bold text-white">Security Verification</h3>
-                <p className="text-sm text-slate-400 text-center mt-2">To prevent misuse, please verify your identity via Telegram to download this file.</p>
+                <p className="text-sm text-slate-400 text-center mt-2">
+                  To download <strong className="text-white">{currentProject?.title}</strong>, please verify your identity via Telegram.
+                </p>
               </div>
 
               {verificationStep === 1 ? (
@@ -1175,7 +1160,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* --- NOTIFICATION --- */}
       <AnimatePresence>
         {notification && (
           <motion.div 
@@ -1351,7 +1335,8 @@ function App() {
                         onClick={() => handleDownloadClick(project)} 
                         className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
                       >
-                        <Download size={16} />
+                        {/* Show Lock icon if locked, otherwise standard download */}
+                        {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
                       </button>
                     ) : (
                       <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
