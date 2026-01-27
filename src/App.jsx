@@ -538,8 +538,8 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
     {
-      title: "Steganography Tool",
-      desc: "Hide sensitive text data inside standard image files without altering their appearance using bit manipulation.",
+      title: "Ransomware",
+      desc: "Ransomware is malware that locks or encrypts data and demands payment to restore access.",
       tags: ["Python", "Encryption", "Security"],
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
