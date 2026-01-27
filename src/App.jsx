@@ -6,33 +6,34 @@ import {
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
-  Radio, Film, Search, ChevronDown, Lock, Key
+  Radio, Film, Search, ChevronDown, Lock, Key,
+  ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- NEW ICON IMPORTS (Simple Icons + VSC) ---
+// --- ICONS ---
 import { 
   SiHtml5, SiCss3, SiJavascript, SiReact, SiTailwindcss, SiTypescript,
   SiFirebase, SiSupabase, SiPython, SiNodedotjs, SiExpress,
   SiArduino, SiRaspberrypi, SiAdobecreativecloud,
   SiGithub, SiAutodesk
 } from 'react-icons/si';
-
 import { VscVscode } from 'react-icons/vsc';
 
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "firebase/app";
 import { 
-  getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp 
+  getFirestore, doc, getDoc, setDoc, updateDoc, increment, 
+  collection, addDoc, serverTimestamp, deleteDoc 
 } from "firebase/firestore";
-import { 
-  getAuth, RecaptchaVerifier, signInWithPhoneNumber 
-} from "firebase/auth";
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
+
+// ⚠️ REPLACE THIS WITH YOUR BOT USERNAME (No @ symbol)
+const BOT_USERNAME = "great_portfolio_bot"; 
 
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
@@ -44,12 +45,10 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app); // Initialize Auth
 
-// --- UPDATED COUNTRY DATA WITH ISO CODES ---
+// --- SHORTENED COUNTRY DATA (For Testing) ---
 const allCountries = [
   { name: "Afghanistan", dial_code: "+93", code: "AF" },
   { name: "Aland Islands", dial_code: "+358", code: "AX" },
@@ -301,7 +300,15 @@ const allCountries = [
   { name: "Zimbabwe", dial_code: "+263", code: "ZW" }
 ];
 
-// --- CUSTOM COUNTRY SELECTOR COMPONENT ---
+// --- HELPER: GENERATE SESSION UUID ---
+const generateSessionId = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
+
+// --- COMPONENT: COUNTRY SELECTOR ---
 const CountrySelector = ({ selectedCode, onChange, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -318,29 +325,13 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
   }, []);
 
   const filteredCountries = useMemo(() => {
-    const priorityCodes = ["IN", "US", "GB", "DE", "FR"];
-    const priority = [];
-    const others = [];
-
-    allCountries.forEach(c => {
-      if (priorityCodes.includes(c.code)) {
-        priority.push(c);
-      } else {
-        others.push(c);
-      }
-    });
-
-    priority.sort((a, b) => priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code));
-    const sortedList = [...priority, ...others];
-
-    if (!search) return sortedList;
-    return sortedList.filter(c => 
-      c.name.toLowerCase().includes(search.toLowerCase()) || 
-      c.dial_code.includes(search)
+    if (!search) return allCountries;
+    return allCountries.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || c.dial_code.includes(search)
     );
   }, [search]);
 
-  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries.find(c => c.code === "IN");
+  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries[0];
 
   return (
     <div className="relative w-32" ref={dropdownRef}>
@@ -353,7 +344,6 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
         <div className="flex items-center gap-2 overflow-hidden">
           <img 
             src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} 
-            srcSet={`https://flagcdn.com/w40/${selectedCountry?.code.toLowerCase()}.png 2x`}
             width="20" 
             alt={selectedCountry?.code} 
             className="rounded-sm object-cover shrink-0"
@@ -369,65 +359,31 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
             className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
           >
             <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Search country..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none"
-                  autoFocus
-                />
-              </div>
+              <input
+                type="text" 
+                placeholder="Search..." 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-slate-300 focus:border-neon-green outline-none"
+                autoFocus
+              />
             </div>
-
-            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map((country, index) => {
-                  const isLastPinned = !search && index === 4; 
-                  return (
-                    <React.Fragment key={country.code}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onChange(country.dial_code);
-                          setIsOpen(false);
-                          setSearch("");
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
-                          selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
-                        }`}
-                      >
-                        <img 
-                          src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
-                          srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
-                          width="20" 
-                          alt={country.name} 
-                          className="rounded-sm object-cover shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-slate-200 truncate">{country.name}</span>
-                            <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
-                          </div>
-                        </div>
-                      </button>
-                      {isLastPinned && (
-                        <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 mx-2" />
-                      )}
-                    </React.Fragment>
-                  );
-                })
-              ) : (
-                <div className="p-4 text-center text-xs text-slate-500">
-                  No countries found
-                </div>
-              )}
+            <div className="max-h-60 overflow-y-auto scrollbar-thin">
+              {filteredCountries.map((country) => (
+                <button
+                  key={country.code}
+                  type="button"
+                  onClick={() => { onChange(country.dial_code); setIsOpen(false); setSearch(""); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${selectedCountry?.code === country.code ? "bg-slate-800/50" : ""}`}
+                >
+                  <img src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} width="20" alt={country.name} />
+                  <span className="text-sm text-slate-200">{country.name}</span>
+                  <span className="text-xs text-slate-500 ml-auto">{country.dial_code}</span>
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
@@ -451,32 +407,32 @@ const data = {
   },
   skills: {
     frontend: [
-      { name: "Html & CSS", level: 95, color: "from-orange-500 to-red-500" },
-      { name: "JavaScript", level: 95, color: "from-yellow-400 to-yellow-600" },
-      { name: "React.js", level: 90, color: "from-cyan-400 to-blue-500" },
-      { name: "Tailwind CSS", level: 90, color: "from-cyan-300 to-teal-400" },
-      { name: "TypeScript", level: 85, color: "from-blue-500 to-indigo-600" },
+      { name: "Html & CSS", level: 95, color: "from-orange-500 to-red-500", icon: SiHtml5, iconColor: "#E34F26" },
+      { name: "JavaScript", level: 95, color: "from-yellow-400 to-yellow-600", icon: SiJavascript, iconColor: "#F7DF1E" },
+      { name: "React.js", level: 90, color: "from-cyan-400 to-blue-500", icon: SiReact, iconColor: "#61DAFB" },
+      { name: "Tailwind CSS", level: 90, color: "from-cyan-300 to-teal-400", icon: SiTailwindcss, iconColor: "#06B6D4" },
+      { name: "TypeScript", level: 85, color: "from-blue-500 to-indigo-600", icon: SiTypescript, iconColor: "#3178C6" },
     ],
     backend: [
-      { name: "Firebase", level: 85, color: "from-yellow-500 to-orange-600" },
-      { name: "Supabase", level: 80, color: "from-green-400 to-emerald-600" },
-      { name: "Python", level: 75, color: "from-blue-400 to-indigo-500" },
-      { name: "Node.js", level: 80, color: "from-green-500 to-emerald-700" },
-      { name: "Express.js", level: 80, color: "from-gray-400 to-gray-600" },
+      { name: "Firebase", level: 85, color: "from-yellow-500 to-orange-600", icon: SiFirebase, iconColor: "#FFCA28" },
+      { name: "Supabase", level: 80, color: "from-green-400 to-emerald-600", icon: SiSupabase, iconColor: "#3ECF8E" },
+      { name: "Python", level: 75, color: "from-blue-400 to-indigo-500", icon: SiPython, iconColor: "#3776AB" },
+      { name: "Node.js", level: 80, color: "from-green-500 to-emerald-700", icon: SiNodedotjs, iconColor: "#339933" },
+      { name: "Express.js", level: 80, color: "from-gray-400 to-gray-600", icon: SiExpress, iconColor: "#ffffff" },
     ],
     iot: [
-      { name: "Arduino", level: 85, color: "from-emerald-500 to-teal-600" },
-      { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600" },
-      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600" },
-      { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600" },
-      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600" },
+      { name: "Arduino", level: 85, color: "from-emerald-500 to-teal-600", icon: SiArduino, iconColor: "#00979D" },
+      { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600", icon: SiRaspberrypi, iconColor: "#C51A4A" },
+      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600", icon: Cpu, iconColor: "#A78BFA" },
+      { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600", icon: Radio, iconColor: "#E88C30" },
+      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600", icon: Code2, iconColor: "#818CF8" },
     ],
     tools: [
-      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "from-pink-500 to-rose-600" },
-      { name: "Video (Pr, Ae)", level: 85, color: "from-purple-500 to-violet-600" },
-      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "from-blue-500 to-indigo-600" },
-      { name: "Git/GitHub", level: 90, color: "from-gray-500 to-slate-700" },
-      { name: "VS Code", level: 95, color: "from-blue-500 to-cyan-600" },
+      { name: "Adobe Suite", level: 95, color: "from-pink-500 to-rose-600", icon: SiAdobecreativecloud, iconColor: "#DA4943" },
+      { name: "Video (Pr, Ae)", level: 85, color: "from-purple-500 to-violet-600", icon: Film, iconColor: "#9999FF" },
+      { name: "3D & CAD", level: 80, color: "from-blue-500 to-indigo-600", icon: SiAutodesk, iconColor: "#0696D7" },
+      { name: "Git/GitHub", level: 90, color: "from-gray-500 to-slate-700", icon: SiGithub, iconColor: "#ffffff" },
+      { name: "VS Code", level: 95, color: "from-blue-500 to-cyan-600", icon: VscVscode, iconColor: "#007ACC" },
     ]
   },
   projects: [
@@ -581,97 +537,43 @@ const data = {
     }
   ],
   education: [
-    {
-      title: "Master’s Degree in Criminology",
-      place: "Edinburgh, United Kingdom",
-      status: "96%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Master’s Degree in International Relations",
-      place: "Edinburgh, United Kingdom",
-      status: "92%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Master’s Degree in Graphic Designing",
-      place: "West Bengal, India",
-      status: "96%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Master’s Degree in Computer Science",
-      place: "Delhi, India",
-      status: "90%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Business Administration",
-      place: "West Bengal, India",
-      status: "85%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Science",
-      place: "West Bengal, India",
-      status: "88%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Bachelor's Degree in Commerce",
-      place: "West Bengal, India",
-      status: "95%",
-      icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Higher Secondary (WBCHSE)",
-      place: "West Bengal, India",
-      status: "92%",
-      icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
-    },
-    {
-      title: "Secondary (WBBSE)",
-      place: "West Bengal, India",
-      status: "87%",
-      icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10"
-    },
+    { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "96%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Master’s Degree in International Relations", place: "Edinburgh, United Kingdom", status: "92%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Master’s Degree in Graphic Designing", place: "West Bengal, India", status: "96%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Master’s Degree in Computer Science", place: "Delhi, India", status: "90%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Bachelor's Degree in Business Administration", place: "West Bengal, India", status: "85%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Bachelor's Degree in Science", place: "West Bengal, India", status: "88%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Bachelor's Degree in Commerce", place: "West Bengal, India", status: "95%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Higher Secondary (WBCHSE)", place: "West Bengal, India", status: "92%", icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Secondary (WBBSE)", place: "West Bengal, India", status: "87%", icon: BookOpen, color: "text-green-400", bg: "bg-green-400/10" },
   ]
 };
 
-// --- TYPEWRITER COMPONENT ---
+// --- HELPER COMPONENTS ---
+
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
-  
   useEffect(() => {
-    let i = 0;
+    let i = 0; 
     setDisplayText('');
-    
-    const timer = setInterval(() => {
-      if (i < text.length) {
-        setDisplayText(text.substring(0, i + 1));
-        i++;
-      } else {
-        clearInterval(timer);
-      }
+    const timer = setInterval(() => { 
+      if (i < text.length) { 
+        setDisplayText(text.substring(0, i + 1)); 
+        i++; 
+      } else { 
+        clearInterval(timer); 
+      } 
     }, speed);
-
     return () => clearInterval(timer);
   }, [text, speed]);
-
-  return (
-    <span className="inline-block">
-      {displayText}
-      <span className="animate-blink ml-1">|</span>
-    </span>
-  );
+  return <span className="inline-block">{displayText}<span className="animate-blink ml-1">|</span></span>;
 };
 
-// --- ANIMATION COMPONENTS ---
 const ScaleRevealCard = ({ children, delay = 0 }) => (
-  <motion.div
-    initial={{ scale: 0.5, opacity: 0 }}
-    whileInView={{ scale: 1, opacity: 1 }}
-    viewport={{ once: true }}
+  <motion.div 
+    initial={{ scale: 0.5, opacity: 0 }} 
+    whileInView={{ scale: 1, opacity: 1 }} 
+    viewport={{ once: true }} 
     transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 60 }}
   >
     {children}
@@ -679,26 +581,17 @@ const ScaleRevealCard = ({ children, delay = 0 }) => (
 );
 
 const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" }) => {
-  const variants = {
-    hidden: { 
-      opacity: 0, 
-      y: direction === "bottom" ? 50 : 0,
-      x: direction === "left" ? -75 : direction === "right" ? 75 : 0 
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      x: 0 
-    }
+  const variants = { 
+    hidden: { opacity: 0, y: direction === "bottom" ? 50 : 0, x: direction === "left" ? -75 : direction === "right" ? 75 : 0 }, 
+    visible: { opacity: 1, y: 0, x: 0 } 
   };
-
   return (
-    <motion.div
-      variants={variants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 40 }}
+    <motion.div 
+      variants={variants} 
+      initial="hidden" 
+      whileInView="visible" 
+      viewport={{ once: true, margin: "-50px" }} 
+      transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 40 }} 
       className={className}
     >
       {children}
@@ -706,30 +599,24 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
   );
 };
 
-// --- ANIMATED COUNTER COMPONENT (Dynamically Resizing) ---
-const AnimatedCounter = ({ value, color }) => {
-  return (
-    <div className="relative h-4 overflow-hidden inline-flex items-center justify-center">
-      {/* Ghost element: Invisible but sets the exact width needed for the current number */}
-      <span className="invisible font-mono text-[10px] px-px">{value}</span>
-      
-      <AnimatePresence mode="popLayout">
-        <motion.span
-          key={value}
-          initial={{ y: -15, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 15, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className={`absolute font-mono text-[10px] ${color} left-0 right-0 text-center`}
-        >
-          {value}
-        </motion.span>
-      </AnimatePresence>
-    </div>
-  );
-};
+const AnimatedCounter = ({ value, color }) => (
+  <div className="relative h-4 overflow-hidden inline-flex items-center justify-center">
+    <span className="invisible font-mono text-[10px] px-px">{value}</span>
+    <AnimatePresence mode="popLayout">
+      <motion.span 
+        key={value} 
+        initial={{ y: -15, opacity: 0 }} 
+        animate={{ y: 0, opacity: 1 }} 
+        exit={{ y: 15, opacity: 0 }} 
+        transition={{ duration: 0.3, ease: "easeOut" }} 
+        className={`absolute font-mono text-[10px] ${color} left-0 right-0 text-center`}
+      >
+        {value}
+      </motion.span>
+    </AnimatePresence>
+  </div>
+);
 
-// --- UI COMPONENTS ---
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
     <span className="text-neon-green text-lg font-mono mb-2">{'>'} {subtitle}</span>
@@ -746,14 +633,13 @@ const Card = ({ children, className = "", style }) => (
   </div>
 );
 
-// --- UPDATED PROGRESS BAR WITH ICONS ---
 const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between items-end mb-2">
       <div className="flex items-center gap-2">
         {Icon && (
           <div className="p-1.5 rounded-md bg-white/5 border border-white/5 shadow-sm">
-            <Icon size={16} style={{ color: iconColor }} /> 
+            <Icon size={16} style={{ color: iconColor }} />
           </div>
         )}
         <span className="text-sm font-medium text-slate-200">{name}</span>
@@ -762,211 +648,134 @@ const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
     </div>
     <div className="w-full bg-slate-800 rounded-full h-3 relative overflow-hidden">
       <motion.div 
-        initial={{ width: 0 }}
-        whileInView={{ width: `${level}%` }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        initial={{ width: 0 }} 
+        whileInView={{ width: `${level}%` }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 1.5, ease: "easeOut" }} 
         className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
       >
         <div 
-          className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]"
-          style={{
-            backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)',
-            backgroundSize: '1rem 1rem'
-          }}
+          className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]" 
+          style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}
         ></div>
-        {[...Array(5)].map((_, i) => (
-          <div 
-            key={i}
-            className="absolute rounded-full bg-white/40 animate-[bubble-rise_3s_infinite_ease-in]"
-            style={{
-              width: Math.random() * 4 + 2 + 'px',
-              height: Math.random() * 4 + 2 + 'px',
-              left: Math.random() * 100 + '%',
-              bottom: '-5px',
-              animationDelay: Math.random() * 2 + 's',
-              animationDuration: Math.random() * 2 + 2 + 's'
-            }}
-          />
-        ))}
       </motion.div>
     </div>
   </div>
 );
 
-// --- NAVBAR COMPONENT ---
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
-  // --- LOCK STATE FOR MANUAL SCROLL ---
   const isManualScroll = useRef(false);
-
-  // Desktop Links
+  
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Education', href: '#education' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '#home' }, 
+    { name: 'About', href: '#about' }, 
+    { name: 'Skills', href: '#skills' }, 
+    { name: 'Projects', href: '#projects' }, 
+    { name: 'Education', href: '#education' }, 
+    { name: 'Contact', href: '#contact' }
   ];
-
-  // Mobile Dock Items - Slimmer and Wider
+  
   const mobileDockItems = [
-    { id: 'home', icon: Home, href: '#home' },
-    { id: 'about', icon: User, href: '#about' },
+    { id: 'home', icon: Home, href: '#home' }, 
+    { id: 'about', icon: User, href: '#about' }, 
     { id: 'skills', icon: Cpu, href: '#skills' }, 
-    { id: 'projects', icon: Briefcase, href: '#projects' },
-    { id: 'education', icon: GraduationCap, href: '#education' },
-    { id: 'contact', icon: Mail, href: '#contact' },
+    { id: 'projects', icon: Briefcase, href: '#projects' }, 
+    { id: 'education', icon: GraduationCap, href: '#education' }, 
+    { id: 'contact', icon: Mail, href: '#contact' }
   ];
 
-  // SMOOTH SCROLL HANDLER (WITH LOCK)
   const scrollToSection = (e, id) => {
     e.preventDefault();
     const targetId = id.replace('#', '');
     const element = document.getElementById(targetId);
-    
     if (element) {
-      // 1. ENGAGE LOCK
       isManualScroll.current = true;
-      
-      // 2. IMMEDIATE UI UPDATE
       setActiveTab(targetId);
-      
       const offset = 80; 
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
+      const bodyRect = document.body.getBoundingClientRect().top; 
+      const elementRect = element.getBoundingClientRect().top; 
+      const elementPosition = elementRect - bodyRect; 
       const offsetPosition = elementPosition - offset;
-
-      // 3. SCROLL
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-      
-      // 4. UPDATE URL
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       history.pushState(null, null, id);
-
-      // 5. RELEASE LOCK AFTER ANIMATION
-      // 1000ms is usually enough for smooth scroll to finish
-      setTimeout(() => {
-        isManualScroll.current = false;
-      }, 1000);
+      setTimeout(() => { isManualScroll.current = false; }, 1000);
     }
   };
 
-  // Scroll Spy Logic (RESPECTS LOCK)
   useEffect(() => {
     const handleScroll = () => {
-      // IF LOCKED, DO NOTHING
       if (isManualScroll.current) return;
-
       const sections = ['home', 'about', 'skills', 'projects', 'education', 'contact'];
-      const scrollPosition = window.scrollY + 300; 
-
+      const scrollPosition = window.scrollY + 300;
       for (const section of sections) {
         const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
+        if (element) { 
+          const { offsetTop, offsetHeight } = element; 
           if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
             setActiveTab(section);
           }
         }
       }
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <>
-      {/* --- DESKTOP NAVBAR --- */}
       <nav className="hidden md:flex fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex-shrink-0 cursor-pointer flex items-center gap-2">
-              <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
-                <div className="bg-neon-green/20 p-1.5 rounded-lg">
-                  <Code2 className="text-neon-green w-5 h-5" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">
-                  Shovith.dev
-                </span>
+        <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
+          <div className="flex items-center gap-2">
+            <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
+              <div className="bg-neon-green/20 p-1.5 rounded-lg"><Code2 className="text-neon-green w-5 h-5" /></div>
+              <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
+            </a>
+          </div>
+          <div className="ml-10 flex items-baseline space-x-8">
+            {navLinks.map((link) => (
+              <a 
+                key={link.name} 
+                href={link.href} 
+                onClick={(e) => scrollToSection(e, link.href)} 
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${activeTab === link.href.replace('#', '') ? 'text-neon-green bg-white/5' : 'text-gray-300 hover:text-neon-green hover:bg-white/5'}`}
+              >
+                {link.name}
               </a>
-            </div>
-            <div className="ml-10 flex items-baseline space-x-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => scrollToSection(e, link.href)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
-                    activeTab === link.href.replace('#', '') 
-                    ? 'text-neon-green bg-white/5' 
-                    : 'text-gray-300 hover:text-neon-green hover:bg-white/5'
-                  }`}
-                >
-                  {link.name}
-                </a>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </nav>
-
-      {/* --- MOBILE LOGO WITH BRANDING --- */}
+      
+      {/* Mobile Top Bar */}
       <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5 flex items-center gap-2">
-         <Code2 className="text-neon-green w-5 h-5" />
-         <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">
-           Shovith.dev
-         </span>
+        <Code2 className="text-neon-green w-5 h-5" />
+        <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
       </div>
-
-      {/* --- MOBILE FLOATING DOCK --- */}
+      
+      {/* Mobile Dock */}
       <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
         <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
-          {mobileDockItems.map((item) => {
-             const isActive = activeTab === item.id;
-             return (
+          {mobileDockItems.map((item) => { 
+            const isActive = activeTab === item.id; 
+            return (
               <a 
-                key={item.id}
-                href={item.href}
-                onClick={(e) => scrollToSection(e, item.href)}
-                className={`relative p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${
-                  isActive ? 'text-white' : 'text-slate-400 hover:text-white'
-                }`}
+                key={item.id} 
+                href={item.href} 
+                onClick={(e) => scrollToSection(e, item.href)} 
+                className={`relative p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'}`}
               >
-                {/* ACTIVE PILL BACKGROUND */}
                 {isActive && (
-                  <motion.div 
-                    layoutId="active-dock-pill"
-                    className="absolute inset-0 bg-slate-800 rounded-full"
-                    // UPDATED: Critically damped spring (Bounce = 0)
-                    transition={{ type: "spring", bounce: 0, duration: 0.6 }}
-                  />
+                  <motion.div layoutId="active-dock-pill" className="absolute inset-0 bg-slate-800 rounded-full" transition={{ type: "spring", bounce: 0, duration: 0.6 }} />
                 )}
-                
-                {/* WHITE TRAPEZOID INDICATOR (ON THE NAVBAR EDGE) */}
                 {isActive && (
-                  <motion.div 
-                    layoutId="active-dock-indicator"
-                    className="absolute -bottom-1.5 w-6 h-1.5 bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.4)] z-20"
-                    style={{
-                      clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' // Trapezoid: Wide Bottom, Narrow Top
-                    }}
-                    // UPDATED: Sync exact transition with Pill
-                    transition={{ type: "spring", bounce: 0, duration: 0.6 }}
-                  />
+                  <motion.div layoutId="active-dock-indicator" className="absolute -bottom-1.5 w-6 h-1.5 bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.4)] z-20" style={{ clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' }} transition={{ type: "spring", bounce: 0, duration: 0.6 }} />
                 )}
-                
-                {/* Icon */}
                 <span className="relative z-10">
-                   <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                  <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
                 </span>
               </a>
-             );
+            ); 
           })}
         </div>
       </div>
@@ -974,11 +783,11 @@ const Navbar = () => {
   );
 };
 
-// --- MAIN APP ---
+// --- MAIN APP COMPONENT ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; 
-  
+
   // Contact Form States
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -986,123 +795,23 @@ function App() {
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); 
   const [dbQuota, setDbQuota] = useState(6); 
 
-  // --- OTP MODAL STATES ---
+  // --- TELEGRAM OTP STATES (Replaces Firebase Auth) ---
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [otpName, setOtpName] = useState("");
-  const [otpPhone, setOtpPhone] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [verificationId, setVerificationId] = useState(null);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [otpError, setOtpError] = useState("");
   const [currentProject, setCurrentProject] = useState(null);
-  
-  // --- SEPARATE STATE FOR OTP MODAL COUNTRY ---
-  const [otpCountryCode, setOtpCountryCode] = useState("+91");
+  const [verificationStep, setVerificationStep] = useState(1); // 1 = Start, 2 = Enter Code
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  // Initialize Recaptcha
-  const generateRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        }
-      });
-    }
-  };
-
-  const handleDownloadClick = (project) => {
-    if (project.title.includes("Unredactor") && project.isDownload) {
-      setCurrentProject(project);
-      setIsOtpModalOpen(true);
-    } else {
-      // Normal behavior for other projects
-      window.open(project.link, '_blank');
-    }
-  };
-
-  const handleSendOtp = async (e) => {
-    e.preventDefault();
-    if (!otpName || !otpPhone) {
-      setOtpError("Name and Phone are required.");
-      return;
-    }
-    setOtpError("");
-    setIsSendingOtp(true);
-    generateRecaptcha();
-    
-    // UPDATED: Use separate otpCountryCode here
-    const fullPhoneNumber = otpPhone.startsWith("+") ? otpPhone : otpCountryCode + otpPhone;
-
-    try {
-      const confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
-      window.confirmationResult = confirmationResult;
-      setVerificationId(confirmationResult.verificationId);
-      showNotification("OTP Sent successfully!");
-    } catch (error) {
-      console.error("Error sending OTP", error);
-      setOtpError(error.message);
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (!otpCode) {
-      setOtpError("Please enter OTP.");
-      return;
-    }
-    setOtpError("");
-    setIsVerifyingOtp(true);
-
-    try {
-      const result = await window.confirmationResult.confirm(otpCode);
-      const user = result.user;
-      
-      // Save to Firestore
-      await addDoc(collection(db, "verified_downloads"), {
-        name: otpName,
-        phone: user.phoneNumber,
-        project: currentProject.title,
-        timestamp: serverTimestamp(),
-      });
-
-      // Trigger Download
-      showNotification("Verified! Starting download...");
-      const link = document.createElement('a');
-      link.href = currentProject.link;
-      link.download = currentProject.title; // Suggest filename
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Close Modal & Reset
-      setIsOtpModalOpen(false);
-      setVerificationId(null);
-      setOtpName("");
-      setOtpPhone("");
-      setOtpCode("");
-
-    } catch (error) {
-      console.error("Error verifying OTP", error);
-      setOtpError("Invalid OTP. Please try again.");
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  // SYNC QUOTA WITH FIREBASE & AUTO-RESET LOGIC
+  // --- QUOTA MANAGEMENT (Yearly Reset) ---
   useEffect(() => {
     const fetchQuota = async () => {
       try {
         const docRef = doc(db, "stats", "email_quota");
         const docSnap = await getDoc(docRef);
-        
         const now = new Date();
-        const currentMonth = now.getMonth(); 
-        const currentYear = now.getFullYear(); 
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
 
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -1116,29 +825,103 @@ function App() {
           await setDoc(docRef, { count: 6, month: currentMonth, year: currentYear });
           setDbQuota(6);
         }
-      } catch (error) {
-        console.error("Error fetching quota:", error);
+      } catch (error) { 
+        console.error("Quota Error:", error); 
       }
     };
     fetchQuota();
   }, []);
 
-  const scrollToContact = () => {
-    const element = document.getElementById('contact');
-    if (element) element.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
-    setTimeout(() => {
-      setNotification(null);
-    }, 3000);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleDownloadClick = (project) => {
+    if (project.title.includes("Unredactor") && project.isDownload) {
+      setCurrentProject(project);
+      setIsOtpModalOpen(true);
+      setVerificationStep(1); 
+      setOtpCode("");
+      setOtpError("");
+    } else {
+      window.open(project.link, '_blank');
+    }
+  };
+
+  // --- TELEGRAM VERIFICATION LOGIC ---
+  const handleStartVerification = () => {
+    // 1. Check or Create LocalStorage Session
+    let sessionId = localStorage.getItem('unredactor_session_id');
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      localStorage.setItem('unredactor_session_id', sessionId);
+    }
+    // 2. Open Telegram
+    const botUrl = `https://t.me/${BOT_USERNAME}?start=${sessionId}`;
+    window.open(botUrl, '_blank');
+    // 3. Move UI
+    setVerificationStep(2);
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!otpCode) return;
+    setIsVerifying(true);
+    setOtpError("");
+
+    const sessionId = localStorage.getItem('unredactor_session_id');
+    if (!sessionId) {
+      setOtpError("Session expired. Please start again.");
+      setIsVerifying(false);
+      return;
+    }
+
+    try {
+      const docRef = doc(db, "otp_sessions", sessionId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.otp === otpCode.trim()) {
+          // A. Log Success
+          await addDoc(collection(db, "verified_downloads"), {
+            telegram_id: data.telegram_id,
+            telegram_name: data.telegram_name || "Unknown",
+            project: currentProject.title,
+            timestamp: serverTimestamp()
+          });
+
+          // B. Download
+          showNotification("Verification Successful! Downloading...", "success");
+          const link = document.createElement('a');
+          link.href = currentProject.link;
+          link.download = currentProject.title;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // C. Cleanup
+          await deleteDoc(docRef);
+          localStorage.removeItem('unredactor_session_id');
+          setIsOtpModalOpen(false);
+        } else {
+          setOtpError("Incorrect code. Check your Telegram.");
+        }
+      } else {
+        setOtpError("Session not found. Please click 'Verify via Telegram' again.");
+      }
+    } catch (error) {
+      console.error("Verify Error:", error);
+      setOtpError("System error. Try again.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
-
     const formData = new FormData(event.target);
     const firstName = formData.get("firstName");
     const lastName = formData.get("lastName");
@@ -1149,207 +932,124 @@ function App() {
     try {
       if (isTelegram) {
         if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-           showNotification("Error: Missing Telegram Config.", 'error');
-           setIsSubmitting(false);
+           showNotification("Error: Missing Telegram Config.", 'error'); 
+           setIsSubmitting(false); 
            return;
         }
-
-        const text = `
-📩 *New Message Reveived from Portfolio Contact form*
-👤 *Name:* ${firstName} ${lastName}
-📧 *Email:* ${email}
-📱 *Phone:* ${phone}
-📝 *Message:* ${message}
-        `;
-        
+        const text = `📩 *New Message*\n👤 *Name:* ${firstName} ${lastName}\n📧 *Email:* ${email}\n📱 *Phone:* ${phone}\n📝 *Message:* ${message}`;
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: "POST", 
+          headers: { "Content-Type": "application/json" }, 
           body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" })
         });
-
-        const data = await response.json();
-        if (data.ok) {
-          showNotification("Message sent successfully!");
-          event.target.reset();
-        } else {
-          showNotification("Failed to send.", 'error');
+        if (await response.json().then(d => d.ok)) { 
+          showNotification("Message sent!"); 
+          event.target.reset(); 
+        } else { 
+          showNotification("Failed to send.", 'error'); 
         }
-
       } else {
-        if (!WEB3FORMS_KEY) {
-           showNotification("Error: Missing Web3Forms Key.", 'error');
-           setIsSubmitting(false);
-           return;
+        if (!WEB3FORMS_KEY) { 
+          showNotification("Error: Missing Web3Forms Key.", 'error'); 
+          setIsSubmitting(false); 
+          return; 
         }
-
-        if (dbQuota >= 250) {
-           showNotification("Monthly email limit reached. Please use Telegram.", 'error');
-           setIsSubmitting(false);
-           return;
+        if (dbQuota >= 250) { 
+          showNotification("Monthly limit reached. Use Telegram.", 'error'); 
+          setIsSubmitting(false); 
+          return; 
         }
-
-        formData.append("access_key", WEB3FORMS_KEY);
-        formData.append("name", `${firstName} ${lastName}`);
+        formData.append("access_key", WEB3FORMS_KEY); 
+        formData.append("name", `${firstName} ${lastName}`); 
         formData.append("phone", phone);
-
-        const response = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          body: formData
-        });
-
+        const response = await fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
         const data = await response.json();
         if (data.success) {
-          showNotification("Message sent successfully!");
-          
-          const docRef = doc(db, "stats", "email_quota");
-          await updateDoc(docRef, { count: increment(1) });
+          showNotification("Message sent!");
+          await updateDoc(doc(db, "stats", "email_quota"), { count: increment(1) });
           setDbQuota(prev => prev + 1);
-
           event.target.reset();
-        } else {
-          showNotification(data.message || "Something went wrong.", 'error');
+        } else { 
+          showNotification(data.message || "Error.", 'error'); 
         }
       }
-    } catch (error) {
-      console.error("Submission Error:", error);
-      showNotification("An error occurred. Please try again.", 'error');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) { 
+      console.error(error); 
+      showNotification("Error occurred.", 'error'); 
+    } finally { 
+      setIsSubmitting(false); 
     }
   };
 
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
-      
-      {/* Global Style for Animations */}
-      <style>{`
-        @keyframes progress-stripes {
-          from { background-position: 1rem 0; }
-          to { background-position: 0 0; }
-        }
-        @keyframes bubble-rise {
-          0% { transform: translateY(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(-20px); opacity: 0; }
-        }
-        .perspective-1000 { perspective: 1000px; }
-        .transform-style-3d { transform-style: preserve-3d; }
-        .backface-hidden { backface-visibility: hidden; }
-        .rotate-y-180 { transform: rotateY(180deg); }
-        
-        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
-      `}</style>
+      <style>{`@keyframes progress-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } } @keyframes bubble-rise { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-20px); opacity: 0; } } .perspective-1000 { perspective: 1000px; } .transform-style-3d { transform-style: preserve-3d; } .backface-hidden { backface-visibility: hidden; } .rotate-y-180 { transform: rotateY(180deg); } .scrollbar-thin::-webkit-scrollbar { width: 4px; } .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }`}</style>
 
-      {/* RECAPTCHA CONTAINER (Must be present for Phone Auth) */}
-      <div id="recaptcha-container"></div>
-
-      {/* OTP Verification Modal */}
+      {/* --- OTP MODAL (Telegram Version) --- */}
       <AnimatePresence>
         {isOtpModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
             className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.9, opacity: 0 }} 
               className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative shadow-2xl"
             >
-              <button 
-                onClick={() => setIsOtpModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white"
-              >
-                <X size={20} />
-              </button>
+              <button onClick={() => setIsOtpModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white"><X size={20} /></button>
 
               <div className="flex flex-col items-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-3">
-                  <Lock className="text-red-500 w-6 h-6" />
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-3">
+                  <ShieldCheck className="text-blue-500 w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Sensitive Content Access</h3>
-                <p className="text-sm text-slate-400 text-center mt-2">
-                  This tool allows un-redacting sensitive documents. To prevent misuse, please verify your identity to proceed.
-                </p>
+                <h3 className="text-xl font-bold text-white">Security Verification</h3>
+                <p className="text-sm text-slate-400 text-center mt-2">To prevent misuse, please verify your identity via Telegram to download this file.</p>
               </div>
 
-              {!verificationId ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div>
-                    <label className="text-xs text-slate-400 ml-1">Your Full Name</label>
-                    <div className="relative mt-1">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
-                      <input 
-                        type="text" 
-                        required 
-                        value={otpName}
-                        onChange={(e) => setOtpName(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none" 
-                        placeholder="John Doe" 
-                      />
-                    </div>
+              {verificationStep === 1 ? (
+                <div className="space-y-4">
+                  <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 text-sm text-slate-300">
+                    <p className="mb-2"><strong className="text-neon-green">Step 1:</strong> Click the button below.</p>
+                    <p className="mb-2"><strong className="text-neon-green">Step 2:</strong> Press <strong>Start</strong> in the Telegram Bot.</p>
+                    <p><strong className="text-neon-green">Step 3:</strong> The bot will send you a 6-digit code.</p>
                   </div>
-                  <div>
-                    <label className="text-xs text-slate-400 ml-1">Mobile Number</label>
-                    <div className="flex gap-2 mt-1">
-                      {/* UPDATED: Custom Country Selector with separate state */}
-                      <CountrySelector 
-                        name="otpCountryCode"
-                        selectedCode={otpCountryCode}
-                        onChange={setOtpCountryCode}
-                      />
-                      <input 
-                        type="tel" 
-                        required 
-                        value={otpPhone}
-                        onChange={(e) => setOtpPhone(e.target.value)}
-                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" 
-                        placeholder="9876543210" 
-                      />
-                    </div>
-                  </div>
-                  
-                  {otpError && <p className="text-red-500 text-xs text-center">{otpError}</p>}
-
                   <button 
-                    type="submit" 
-                    disabled={isSendingOtp}
-                    className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    onClick={handleStartVerification} 
+                    className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
                   >
-                    {isSendingOtp ? <Loader2 className="animate-spin w-5 h-5" /> : "Send OTP"}
+                    <Send size={18} /> Verify via Telegram
                   </button>
-                </form>
+                </div>
               ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <form onSubmit={handleVerifyCode} className="space-y-4">
                   <div>
-                    <label className="text-xs text-slate-400 ml-1">Enter OTP</label>
+                    <label className="text-xs text-slate-400 ml-1">Enter 6-Digit Code</label>
                     <div className="relative mt-1">
                       <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
                       <input 
                         type="text" 
                         required 
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value)}
+                        value={otpCode} 
+                        onChange={(e) => setOtpCode(e.target.value)} 
                         className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none tracking-widest text-center text-lg" 
                         placeholder="123456" 
+                        autoFocus 
                       />
                     </div>
                   </div>
-
-                  {otpError && <p className="text-red-500 text-xs text-center">{otpError}</p>}
-
+                  {otpError && <p className="text-red-500 text-xs text-center animate-pulse">{otpError}</p>}
                   <button 
                     type="submit" 
-                    disabled={isVerifyingOtp}
-                    className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    disabled={isVerifying} 
+                    className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {isVerifyingOtp ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Download"}
+                    {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Unlock Download"}
                   </button>
+                  <button type="button" onClick={() => setVerificationStep(1)} className="w-full text-xs text-slate-500 hover:text-slate-300 underline">Restart Verification</button>
                 </form>
               )}
             </motion.div>
@@ -1357,40 +1057,44 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Profile Image Modal (Existing) */}
       <AnimatePresence>
         {isProfileOpen && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" 
             onClick={() => setIsProfileOpen(false)}
           >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="relative max-w-2xl w-full"
+            <motion.div 
+              initial={{ scale: 0.8 }} 
+              animate={{ scale: 1 }} 
+              exit={{ scale: 0.8 }} 
+              className="relative max-w-2xl w-full" 
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
-                onClick={() => setIsProfileOpen(false)}
-                className="absolute -top-12 right-0 p-2 text-white hover:text-neon-green transition-colors"
-              >
-                <X size={32} />
-              </button>
-              <img 
-                src={profileImage} 
-                alt="Profile Full" 
-                className="w-full h-auto rounded-2xl border border-neon-green/30 shadow-[0_0_50px_rgba(16,185,129,0.3)]"
-              />
+              <button onClick={() => setIsProfileOpen(false)} className="absolute -top-12 right-0 p-2 text-white hover:text-neon-green"><X size={32} /></button>
+              <img src={profileImage} alt="Profile" className="w-full h-auto rounded-2xl border border-neon-green/30 shadow-[0_0_50px_rgba(16,185,129,0.3)]" />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* NAVBAR (Includes Desktop Top Bar & Mobile Bottom Dock) */}
+      {/* --- NOTIFICATION --- */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div 
+            initial={{ opacity: 0, y: -50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -50 }} 
+            className="fixed top-5 right-5 z-[70] flex items-center gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl"
+          >
+            {notification.type === 'success' ? <CheckCircle2 className="text-green-500" /> : <AlertCircle className="text-red-500" />}
+            <p className="text-sm font-medium text-white">{notification.message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Navbar />
 
       <main className="max-w-md mx-auto px-5 pt-28 pb-32 md:pb-20">
@@ -1398,80 +1102,55 @@ function App() {
         {/* --- HERO --- */}
         <section id="home" className="flex flex-col items-center text-center mb-16">
           <motion.div 
-            initial={{ scale: 0 }} animate={{ scale: 1 }} 
-            className="relative w-32 h-32 mb-8 group cursor-pointer"
+            initial={{ scale: 0 }} 
+            animate={{ scale: 1 }} 
+            className="relative w-32 h-32 mb-8 group cursor-pointer" 
             onClick={() => setIsProfileOpen(true)}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70 group-hover:opacity-100 transition-opacity"></div>
             <div className="absolute inset-1 rounded-full overflow-hidden z-10 relative">
-              <img 
-                src={profileImage} 
-                alt="Profile" 
-                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-              />
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <ZoomIn className="text-neon-green w-8 h-8" />
               </div>
             </div>
           </motion.div>
-
           <RevealCard>
-            <h1 className="text-4xl font-bold text-white mb-3">
-              Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span>
-            </h1>
+            <h1 className="text-4xl font-bold text-white mb-3">Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span></h1>
             <div className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2 h-8">
               <Typewriter text="Hobbyist Full Stack Developer & IoT Engineer" />
             </div>
           </RevealCard>
-          
           <RevealCard delay={0.1}>
-            <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">
-              Passionate about creating innovative digital solutions with modern technologies. Currently on active duty under IDS HQ as JOO for India's MoD.
-            </p>
+            <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">Passionate about creating innovative digital solutions with modern technologies. Currently on active duty under IDS HQ as JOO for India's MoD.</p>
           </RevealCard>
-
           <RevealCard delay={0.2} className="flex flex-col w-full gap-4">
             <button 
-              onClick={scrollToContact}
+              onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })} 
               className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:opacity-90 transition-opacity"
             >
               Get In Touch
             </button>
             <div className="flex justify-center gap-4">
-              <a 
-                href="mailto:shovith2@gmail.com" 
-                className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"
-              >
-                <Mail size={20} />
-              </a>
-              <a 
-                href="https://t.me/X_o_x_o_002" 
-                target="_blank" 
-                rel="noreferrer"
-                className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"
-              >
-                <Send size={20} />
-              </a>
+              <a href="mailto:shovith2@gmail.com" className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"><Mail size={20} /></a>
+              <a href="https://t.me/X_o_x_o_002" target="_blank" rel="noreferrer" className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"><Send size={20} /></a>
             </div>
           </RevealCard>
         </section>
 
-        {/* --- ABOUT ME --- */}
+        {/* --- ABOUT --- */}
         <section id="about">
           <SectionTitle subtitle="" title="about_me" />
           <RevealCard className="mb-8">
             <Card>
               <div className="flex gap-1.5 mb-4">
-                 <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
-                 <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                 <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
               </div>
-              <p className="text-slate-300 text-sm leading-7">
-                {data.about.bio}
-              </p>
+              <p className="text-slate-300 text-sm leading-7">{data.about.bio}</p>
             </Card>
           </RevealCard>
-
           <div className="grid grid-cols-2 gap-3">
             {data.about.highlights.map((item, idx) => (
               <ScaleRevealCard key={idx} delay={idx * 0.1}>
@@ -1484,16 +1163,12 @@ function App() {
               </ScaleRevealCard>
             ))}
           </div>
-
-          {/* VINYL RECORD & QUOTE */}
           <RevealCard className="mt-8">
             <Card className="flex flex-col items-center justify-center py-8 relative">
               <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
-                
-                {/* TONEARM */}
                 <div className="absolute -top-3 -right-5 z-20 w-16 h-24 pointer-events-none">
                   <div className="absolute top-3 right-4 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 shadow-xl flex items-center justify-center z-10">
-                      <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
+                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
                   </div>
                   <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top rotate-[25deg] rounded-full border-r border-zinc-600/50 shadow-lg">
                     <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
@@ -1501,8 +1176,6 @@ function App() {
                     </div>
                   </div>
                 </div>
-
-                {/* RECORD */}
                 <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
                   <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
                   <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
@@ -1512,30 +1185,57 @@ function App() {
                   </div>
                 </div>
               </div>
-              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">
-                "Music and programming share the same foundation - patterns, rhythm, and harmony."
-              </p>
+              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">"Music and programming share the same foundation - patterns, rhythm, and harmony."</p>
             </Card>
           </RevealCard>
         </section>
 
-        {/* --- TECHNICAL SKILLS --- */}
+        {/* --- SKILLS --- */}
         <section id="skills">
           <SectionTitle subtitle="" title="technical_skills" />
           <div className="space-y-4">
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>{data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>{data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>{data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
-            <RevealCard><Card><h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>{data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}</Card></RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>
+                {data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>
+                {data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>
+                {data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>
+                {data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-2">
             {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
-              <motion.span key={i} initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all">{tag}</motion.span>
+              <motion.span 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.5 }} 
+                whileInView={{ opacity: 1, scale: 1 }} 
+                viewport={{ once: true }} 
+                transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} 
+                className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all"
+              >
+                {tag}
+              </motion.span>
             ))}
           </div>
         </section>
 
-        {/* --- FEATURED PROJECTS --- */}
+        {/* --- PROJECTS --- */}
         <section id="projects">
           <SectionTitle subtitle="" title="featured_projects" />
           <div className="space-y-6">
@@ -1546,29 +1246,36 @@ function App() {
                     <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                   </div>
-                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}><project.icon size={24} /></div>
+                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}>
+                    <project.icon size={24} />
+                  </div>
                   <div className="flex justify-between items-center mb-3 relative z-10">
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
-                    
-                    {/* UPDATED: Download Button now triggers Modal for Unredactor */}
                     {project.isDownload ? (
                       <button 
-                        onClick={() => handleDownloadClick(project)}
-                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" 
-                        title={project.title.includes("Unredactor") ? "Verify & Download" : "Download File"}
+                        onClick={() => handleDownloadClick(project)} 
+                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
                       >
                         <Download size={16} />
                       </button>
                     ) : (
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Visit Website"><ExternalLink size={16} /></a>
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                        <ExternalLink size={16} />
+                      </a>
                     )}
                   </div>
                   <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                  <div className="flex flex-wrap gap-2 relative z-10">{project.tags.map((tag, tIdx) => (<span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>))}</div>
+                  <div className="flex flex-wrap gap-2 relative z-10">
+                    {project.tags.map((tag, tIdx) => (
+                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                    ))}
+                  </div>
                 </Card>
               </RevealCard>
             ))}
-            <RevealCard className="mt-8"><div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">More projects coming soon...</div></RevealCard>
+            <RevealCard className="mt-8">
+              <div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">More projects coming soon...</div>
+            </RevealCard>
           </div>
         </section>
 
@@ -1577,7 +1284,18 @@ function App() {
           <SectionTitle subtitle="" title="education_achievements" />
           <div className="space-y-4">
             {data.education.map((edu, idx) => (
-              <RevealCard key={idx}><Card className="flex gap-4 items-center"><div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}><edu.icon size={24} /></div><div className="flex-1"><h3 className="font-bold text-base text-white">{edu.title}</h3><p className="text-sm text-slate-400 mt-0.5">{edu.place}</p><span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>{edu.status}</span></div></Card></RevealCard>
+              <RevealCard key={idx}>
+                <Card className="flex gap-4 items-center">
+                  <div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}>
+                    <edu.icon size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-base text-white">{edu.title}</h3>
+                    <p className="text-sm text-slate-400 mt-0.5">{edu.place}</p>
+                    <span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>{edu.status}</span>
+                  </div>
+                </Card>
+              </RevealCard>
             ))}
           </div>
         </section>
@@ -1586,7 +1304,6 @@ function App() {
         <section id="contact">
           <SectionTitle subtitle="" title="get_in_touch" />
           <div className="space-y-3 mb-10">
-            {/* ONLY Location Card Remains */}
             <RevealCard delay={0.1}>
               <Card className="flex items-center gap-4 py-4">
                 <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-neon-green">
@@ -1601,108 +1318,55 @@ function App() {
           </div>
 
           <RevealCard>
-            {/* TOGGLE SLIDER */}
             <div className="flex justify-center mb-6">
-              <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" onClick={() => { setIsTelegram(!isTelegram); setNotification(null); }}>
+              <div 
+                className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" 
+                onClick={() => { setIsTelegram(!isTelegram); setNotification(null); }}
+              >
                 <motion.div 
-                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50"
-                  animate={{ left: isTelegram ? '50%' : '4px' }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50" 
+                  animate={{ left: isTelegram ? '50%' : '4px' }} 
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }} 
                 />
-                <button 
-                  className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
-                >
-                  Send Email
-                </button>
-                <button 
-                  className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}
-                >
-                  Direct Message
-                </button>
+                <button className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Send Email</button>
+                <button className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Direct Message</button>
               </div>
             </div>
 
-            {/* FLIP CONTAINER */}
             <div className="relative perspective-1000 h-[550px] md:h-[600px]">
-              <motion.div
-                animate={{ rotateY: isTelegram ? 180 : 0 }}
-                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+              <motion.div 
+                animate={{ rotateY: isTelegram ? 180 : 0 }} 
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }} 
                 className="relative w-full h-full transform-style-3d"
               >
+                
                 {/* FRONT (WEB3FORMS) */}
                 <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden">
-                   {/* FLASH NOTIFICATION OVERLAY */}
-                   <AnimatePresence>
-                     {notification && !isTelegram && (
-                       <motion.div 
-                         initial={{ opacity: 0 }} 
-                         animate={{ opacity: 1 }} 
-                         exit={{ opacity: 0 }}
-                         className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl"
-                       >
-                         <div className="flex flex-col items-center gap-2 p-6">
-                           {notification.type === 'success' ? <CheckCircle2 className="text-green-500 w-12 h-12" /> : <AlertCircle className="text-red-500 w-12 h-12" />}
-                           <p className="text-white font-medium text-center">{notification.message}</p>
-                         </div>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
-
                    <div className="flex justify-between items-start mb-6">
-                     <h3 className="text-lg font-bold text-neon-green flex items-center gap-2">
-                       <Mail size={20}/> Send Email
-                     </h3>
-                     
-                     {/* REAL-TIME LIMIT BADGE (FROM FIREBASE) - ANIMATED */}
+                     <h3 className="text-lg font-bold text-neon-green flex items-center gap-2"><Mail size={20}/> Send Email</h3>
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span>Limit: </span>
-                          <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
-                          <span>/250</span>
-                       </div>
-                       <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
-                          Monthly free limit. Resets on the 1st of every month.
+                         <span>Limit: </span>
+                         <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
+                         <span>/250</span>
                        </div>
                      </div>
                    </div>
-                   
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
-                       <div>
-                         <label className="text-xs text-slate-400 ml-1">First Name</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="John" />
+                       <div><label className="text-xs text-slate-400 ml-1">First Name</label><input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="John" /></div>
+                       <div><label className="text-xs text-slate-400 ml-1">Last Name</label><input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" /></div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Email</label><input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" /></div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                       <div className="flex gap-2 mt-1">
+                         <CountrySelector name="countryCode" selectedCode={selectedCountryCode} onChange={setSelectedCountryCode} />
+                         <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                        </div>
-                       <div>
-                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
-                       </div>
                      </div>
-                     <div>
-                       <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" />
-                     </div>
-                     <div>
-                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
-                        <div className="flex gap-2 mt-1">
-                          {/* --- CUSTOM COUNTRY SELECTOR REPLACES <SELECT> --- */}
-                          <CountrySelector 
-                            name="countryCode"
-                            selectedCode={selectedCountryCode}
-                            onChange={setSelectedCountryCode}
-                          />
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
-                        </div>
-                     </div>
-                     <div>
-                       <label className="text-xs text-slate-400 ml-1">Message</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
-                     </div>
-                     
-                     <button 
-                       type="submit" 
-                       disabled={isSubmitting || dbQuota >= 250}
-                       className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                     >
+                     <div><label className="text-xs text-slate-400 ml-1">Message</label><textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." /></div>
+                     <button type="submit" disabled={isSubmitting || dbQuota >= 250} className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                        {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
                      </button>
                    </form>
@@ -1710,76 +1374,29 @@ function App() {
 
                 {/* BACK (TELEGRAM) */}
                 <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
-                   {/* FLASH NOTIFICATION OVERLAY */}
-                   <AnimatePresence>
-                     {notification && isTelegram && (
-                       <motion.div 
-                         initial={{ opacity: 0 }} 
-                         animate={{ opacity: 1 }} 
-                         exit={{ opacity: 0 }}
-                         className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl"
-                       > 
-                         <div className="flex flex-col items-center gap-2 p-6">
-                           {notification.type === 'success' ? <CheckCircle2 className="text-green-500 w-12 h-12" /> : <AlertCircle className="text-red-500 w-12 h-12" />}
-                           <p className="text-white font-medium text-center">{notification.message}</p>
-                         </div>
-                       </motion.div>
-                     )}
-                   </AnimatePresence>
-
                    <div className="flex justify-between items-start mb-6">
-                     <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2">
-                       <Send size={20}/> Direct Message
-                     </h3>
-                     {/* TELEGRAM INFINITY BADGE (MATCHED STYLE) */}
+                     <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2"><Send size={20}/> Direct Message</h3>
                      <div className="group relative">
                        <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
-                          <span>Limit: </span>
-                          <Infinity size={12} className="text-blue-400" />
-                       </div>
-                       <div className="absolute bottom-full right-0 mb-2 w-40 p-2 bg-black border border-slate-700 rounded-lg text-[10px] text-slate-300 hidden group-hover:block z-50 shadow-xl">
-                          No limits. Send as many messages as you want.
+                         <span>Limit: </span><Infinity size={12} className="text-blue-400" />
                        </div>
                      </div>
                    </div>
-                   
                    <form onSubmit={onSubmit} className="space-y-4">
                      <div className="grid grid-cols-2 gap-4">
-                       <div>
-                         <label className="text-xs text-slate-400 ml-1">First Name</label>
-                         <input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Jane" />
+                       <div><label className="text-xs text-slate-400 ml-1">First Name</label><input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Jane" /></div>
+                       <div><label className="text-xs text-slate-400 ml-1">Last Name</label><input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" /></div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Email</label><input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="jane@example.com" /></div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                       <div className="flex gap-2 mt-1">
+                         <CountrySelector name="countryCode" selectedCode={selectedCountryCode} onChange={setSelectedCountryCode} />
+                         <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
                        </div>
-                       <div>
-                         <label className="text-xs text-slate-400 ml-1">Last Name</label>
-                         <input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" />
-                       </div>
                      </div>
-                     <div>
-                       <label className="text-xs text-slate-400 ml-1">Email</label>
-                       <input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="jane@example.com" />
-                     </div>
-                     <div>
-                        <label className="text-xs text-slate-400 ml-1">Phone Number</label>
-                        <div className="flex gap-2 mt-1">
-                          {/* --- CUSTOM COUNTRY SELECTOR REPLACES <SELECT> --- */}
-                          <CountrySelector 
-                            name="countryCode"
-                            selectedCode={selectedCountryCode}
-                            onChange={setSelectedCountryCode}
-                          />
-                          <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
-                        </div>
-                     </div>
-                     <div>
-                       <label className="text-xs text-slate-400 ml-1">Message</label>
-                       <textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." />
-                     </div>
-                     
-                     <button 
-                       type="submit" 
-                       disabled={isSubmitting}
-                       className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                     >
+                     <div><label className="text-xs text-slate-400 ml-1">Message</label><textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." /></div>
+                     <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
                        {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
                      </button>
                    </form>
@@ -1788,13 +1405,11 @@ function App() {
             </div>
           </RevealCard>
         </section>
-
       </main>
 
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
         <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
       </footer>
-
     </div>
   )
 }
