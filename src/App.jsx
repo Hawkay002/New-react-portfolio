@@ -6,7 +6,7 @@ import {
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
-  Radio, Film, Search, ChevronDown
+  Radio, Film, Search, ChevronDown, Lock, Key
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,8 +23,11 @@ import { VscVscode } from 'react-icons/vsc';
 // --- FIREBASE IMPORTS ---
 import { initializeApp } from "firebase/app";
 import { 
-  getFirestore, doc, getDoc, setDoc, updateDoc, increment 
+  getFirestore, doc, getDoc, setDoc, updateDoc, increment, collection, addDoc, serverTimestamp 
 } from "firebase/firestore";
+import { 
+  getAuth, RecaptchaVerifier, signInWithPhoneNumber 
+} from "firebase/auth";
 
 // --- CONFIGURATION ---
 const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
@@ -44,8 +47,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app); // Initialize Auth
 
-// --- UPDATED COUNTRY DATA (Fixed Broken Flags) ---
+// --- UPDATED COUNTRY DATA WITH ISO CODES ---
 const allCountries = [
   { name: "Afghanistan", dial_code: "+93", code: "AF" },
   { name: "Aland Islands", dial_code: "+358", code: "AX" },
@@ -296,13 +300,13 @@ const allCountries = [
   { name: "Zambia", dial_code: "+260", code: "ZM" },
   { name: "Zimbabwe", dial_code: "+263", code: "ZW" }
 ];
+
 // --- CUSTOM COUNTRY SELECTOR COMPONENT ---
 const CountrySelector = ({ selectedCode, onChange, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -313,12 +317,8 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Sort and Filter Logic
   const filteredCountries = useMemo(() => {
-    // 1. Define Priority List (India Top, then US, UK, DE, FR)
     const priorityCodes = ["IN", "US", "GB", "DE", "FR"];
-    
-    // 2. Separate countries
     const priority = [];
     const others = [];
 
@@ -330,13 +330,9 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
       }
     });
 
-    // 3. Sort priority list based on the order defined in priorityCodes array
     priority.sort((a, b) => priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code));
-    
-    // 4. Combine
     const sortedList = [...priority, ...others];
 
-    // 5. Apply Search Filter
     if (!search) return sortedList;
     return sortedList.filter(c => 
       c.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -344,15 +340,11 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
     );
   }, [search]);
 
-  // Find currently selected country object
   const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries.find(c => c.code === "IN");
 
   return (
     <div className="relative w-32" ref={dropdownRef}>
-      {/* Hidden input for form submission */}
       <input type="hidden" name={name} value={selectedCountry?.dial_code} />
-
-      {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -371,7 +363,6 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
         <ChevronDown size={14} className={`text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown Menu - Opens UPWARDS (bottom-full) to avoid overflow */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -381,7 +372,6 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
             transition={{ duration: 0.2 }}
             className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
           >
-            {/* Search Bar */}
             <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -396,12 +386,10 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
               </div>
             </div>
 
-            {/* List */}
             <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
               {filteredCountries.length > 0 ? (
                 filteredCountries.map((country, index) => {
-                  const isLastPinned = !search && index === 4; // 5th item (index 4) is last pinned
-
+                  const isLastPinned = !search && index === 4; 
                   return (
                     <React.Fragment key={country.code}>
                       <button
@@ -429,8 +417,6 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
                           </div>
                         </div>
                       </button>
-                      
-                      {/* Visual Separator for Pinned Countries */}
                       {isLastPinned && (
                         <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 mx-2" />
                       )}
@@ -465,32 +451,32 @@ const data = {
   },
   skills: {
     frontend: [
-      { name: "Html & CSS", level: 95, color: "from-[#E34F26] to-[#1572B6]", icon: SiHtml5, iconColor: "#E34F26" },
-      { name: "JavaScript", level: 95, color: "from-[#F7DF1E] to-[#F7DF1E]", icon: SiJavascript, iconColor: "#F7DF1E" },
-      { name: "React.js", level: 90, color: "from-[#61DAFB] to-[#00B4D8]", icon: SiReact, iconColor: "#61DAFB" },
-      { name: "Tailwind CSS", level: 90, color: "from-[#06B6D4] to-[#38BDF8]", icon: SiTailwindcss, iconColor: "#06B6D4" },
-      { name: "TypeScript", level: 85, color: "from-[#3178C6] to-[#5C9CE6]", icon: SiTypescript, iconColor: "#3178C6" },
+      { name: "Html & CSS", level: 95, color: "from-orange-500 to-red-500" },
+      { name: "JavaScript", level: 95, color: "from-yellow-400 to-yellow-600" },
+      { name: "React.js", level: 90, color: "from-cyan-400 to-blue-500" },
+      { name: "Tailwind CSS", level: 90, color: "from-cyan-300 to-teal-400" },
+      { name: "TypeScript", level: 85, color: "from-blue-500 to-indigo-600" },
     ],
     backend: [
-      { name: "Firebase", level: 85, color: "from-[#FFCA28] to-[#FFA000]", icon: SiFirebase, iconColor: "#FFCA28" },
-      { name: "Supabase", level: 80, color: "from-[#3ECF8E] to-[#33B078]", icon: SiSupabase, iconColor: "#3ECF8E" },
-      { name: "Python", level: 75, color: "from-[#3776AB] to-[#5A9FD4]", icon: SiPython, iconColor: "#3776AB" },
-      { name: "Node.js", level: 80, color: "from-[#339933] to-[#539E43]", icon: SiNodedotjs, iconColor: "#339933" },
-      { name: "Express.js", level: 80, color: "from-gray-400 to-white", icon: SiExpress, iconColor: "#ffffff" },
+      { name: "Firebase", level: 85, color: "from-yellow-500 to-orange-600" },
+      { name: "Supabase", level: 80, color: "from-green-400 to-emerald-600" },
+      { name: "Python", level: 75, color: "from-blue-400 to-indigo-500" },
+      { name: "Node.js", level: 80, color: "from-green-500 to-emerald-700" },
+      { name: "Express.js", level: 80, color: "from-gray-400 to-gray-600" },
     ],
     iot: [
-      { name: "Arduino", level: 85, color: "from-[#00979D] to-[#008184]", icon: SiArduino, iconColor: "#00979D" },
-      { name: "Raspberry Pi", level: 75, color: "from-[#C51A4A] to-[#A5153D]", icon: SiRaspberrypi, iconColor: "#C51A4A" },
-      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600", icon: Cpu, iconColor: "#A78BFA" },
-      { name: "Flipper Zero", level: 90, color: "from-[#E88C30] to-[#D97706]", icon: Radio, iconColor: "#E88C30" },
-      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600", icon: Code2, iconColor: "#818CF8" },
+      { name: "Arduino", level: 85, color: "from-emerald-500 to-teal-600" },
+      { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600" },
+      { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600" },
+      { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600" },
+      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600" },
     ],
     tools: [
-      { name: "Adobe Suite", level: 95, color: "from-[#DA4943] to-[#FF0000]", icon: SiAdobecreativecloud, iconColor: "#DA4943" },
-      { name: "Video (Pr, Ae)", level: 85, color: "from-[#9999FF] to-[#00005B]", icon: Film, iconColor: "#9999FF" },
-      { name: "3D & CAD", level: 80, color: "from-[#0696D7] to-[#057FB9]", icon: SiAutodesk, iconColor: "#0696D7" },
-      { name: "Git/GitHub", level: 90, color: "from-[#F05032] to-[#181717]", icon: SiGithub, iconColor: "#ffffff" },
-      { name: "VS Code", level: 95, color: "from-[#007ACC] to-[#0065A9]", icon: VscVscode, iconColor: "#007ACC" },
+      { name: "Adobe Suite (Ai, Ps, Id)", level: 95, color: "from-pink-500 to-rose-600" },
+      { name: "Video (Pr, Ae)", level: 85, color: "from-purple-500 to-violet-600" },
+      { name: "3D & CAD (3ds Max, Autocad)", level: 80, color: "from-blue-500 to-indigo-600" },
+      { name: "Git/GitHub", level: 90, color: "from-gray-500 to-slate-700" },
+      { name: "VS Code", level: 95, color: "from-blue-500 to-cyan-600" },
     ]
   },
   projects: [
@@ -997,12 +983,117 @@ function App() {
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
-  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); // Default India
-  
-  // Real-time Database Quota (Default to 6 until DB loads)
+  const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); 
   const [dbQuota, setDbQuota] = useState(6); 
 
-  // SYNC QUOTA WITH FIREBASE & AUTO-RESET LOGIC (Month + Year)
+  // --- OTP MODAL STATES ---
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpName, setOtpName] = useState("");
+  const [otpPhone, setOtpPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [verificationId, setVerificationId] = useState(null);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [currentProject, setCurrentProject] = useState(null);
+  
+  // --- SEPARATE STATE FOR OTP MODAL COUNTRY ---
+  const [otpCountryCode, setOtpCountryCode] = useState("+91");
+
+  // Initialize Recaptcha
+  const generateRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber.
+        }
+      });
+    }
+  };
+
+  const handleDownloadClick = (project) => {
+    if (project.title.includes("Unredactor") && project.isDownload) {
+      setCurrentProject(project);
+      setIsOtpModalOpen(true);
+    } else {
+      // Normal behavior for other projects
+      window.open(project.link, '_blank');
+    }
+  };
+
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    if (!otpName || !otpPhone) {
+      setOtpError("Name and Phone are required.");
+      return;
+    }
+    setOtpError("");
+    setIsSendingOtp(true);
+    generateRecaptcha();
+    
+    // UPDATED: Use separate otpCountryCode here
+    const fullPhoneNumber = otpPhone.startsWith("+") ? otpPhone : otpCountryCode + otpPhone;
+
+    try {
+      const confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
+      window.confirmationResult = confirmationResult;
+      setVerificationId(confirmationResult.verificationId);
+      showNotification("OTP Sent successfully!");
+    } catch (error) {
+      console.error("Error sending OTP", error);
+      setOtpError(error.message);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otpCode) {
+      setOtpError("Please enter OTP.");
+      return;
+    }
+    setOtpError("");
+    setIsVerifyingOtp(true);
+
+    try {
+      const result = await window.confirmationResult.confirm(otpCode);
+      const user = result.user;
+      
+      // Save to Firestore
+      await addDoc(collection(db, "verified_downloads"), {
+        name: otpName,
+        phone: user.phoneNumber,
+        project: currentProject.title,
+        timestamp: serverTimestamp(),
+      });
+
+      // Trigger Download
+      showNotification("Verified! Starting download...");
+      const link = document.createElement('a');
+      link.href = currentProject.link;
+      link.download = currentProject.title; // Suggest filename
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Close Modal & Reset
+      setIsOtpModalOpen(false);
+      setVerificationId(null);
+      setOtpName("");
+      setOtpPhone("");
+      setOtpCode("");
+
+    } catch (error) {
+      console.error("Error verifying OTP", error);
+      setOtpError("Invalid OTP. Please try again.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  // SYNC QUOTA WITH FIREBASE & AUTO-RESET LOGIC
   useEffect(() => {
     const fetchQuota = async () => {
       try {
@@ -1010,23 +1101,18 @@ function App() {
         const docSnap = await getDoc(docRef);
         
         const now = new Date();
-        const currentMonth = now.getMonth(); // 0-11
-        const currentYear = now.getFullYear(); // e.g., 2026
+        const currentMonth = now.getMonth(); 
+        const currentYear = now.getFullYear(); 
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          
-          // Reset if Month OR Year is different (OR if year was previously undefined)
           if (data.month !== currentMonth || data.year !== currentYear) {
-            // New Month/Year Detected -> Reset to 0 and update timestamps
             await updateDoc(docRef, { count: 0, month: currentMonth, year: currentYear });
             setDbQuota(0);
           } else {
-            // Same Month & Year -> Use Database Value
             setDbQuota(data.count);
           }
         } else {
-          // Initialize if doc missing (First time ever)
           await setDoc(docRef, { count: 6, month: currentMonth, year: currentYear });
           setDbQuota(6);
         }
@@ -1044,7 +1130,6 @@ function App() {
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
-    // Auto-dismiss after 3 seconds
     setTimeout(() => {
       setNotification(null);
     }, 3000);
@@ -1063,7 +1148,6 @@ function App() {
 
     try {
       if (isTelegram) {
-        // --- TELEGRAM SUBMISSION ---
         if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
            showNotification("Error: Missing Telegram Config.", 'error');
            setIsSubmitting(false);
@@ -1093,14 +1177,12 @@ function App() {
         }
 
       } else {
-        // --- WEB3FORMS SUBMISSION ---
         if (!WEB3FORMS_KEY) {
            showNotification("Error: Missing Web3Forms Key.", 'error');
            setIsSubmitting(false);
            return;
         }
 
-        // Check Quota
         if (dbQuota >= 250) {
            showNotification("Monthly email limit reached. Please use Telegram.", 'error');
            setIsSubmitting(false);
@@ -1120,7 +1202,6 @@ function App() {
         if (data.success) {
           showNotification("Message sent successfully!");
           
-          // Increment Firestore Count
           const docRef = doc(db, "stats", "email_quota");
           await updateDoc(docRef, { count: increment(1) });
           setDbQuota(prev => prev + 1);
@@ -1157,13 +1238,126 @@ function App() {
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         
-        /* Custom Scrollbar for Dropdown */
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
       `}</style>
 
-      {/* Profile Image Modal */}
+      {/* RECAPTCHA CONTAINER (Must be present for Phone Auth) */}
+      <div id="recaptcha-container"></div>
+
+      {/* OTP Verification Modal */}
+      <AnimatePresence>
+        {isOtpModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative shadow-2xl"
+            >
+              <button 
+                onClick={() => setIsOtpModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="flex flex-col items-center mb-6">
+                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mb-3">
+                  <Lock className="text-red-500 w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Sensitive Content Access</h3>
+                <p className="text-sm text-slate-400 text-center mt-2">
+                  This tool allows un-redacting sensitive documents. To prevent misuse, please verify your identity to proceed.
+                </p>
+              </div>
+
+              {!verificationId ? (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div>
+                    <label className="text-xs text-slate-400 ml-1">Your Full Name</label>
+                    <div className="relative mt-1">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={otpName}
+                        onChange={(e) => setOtpName(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none" 
+                        placeholder="John Doe" 
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 ml-1">Mobile Number</label>
+                    <div className="flex gap-2 mt-1">
+                      {/* UPDATED: Custom Country Selector with separate state */}
+                      <CountrySelector 
+                        name="otpCountryCode"
+                        selectedCode={otpCountryCode}
+                        onChange={setOtpCountryCode}
+                      />
+                      <input 
+                        type="tel" 
+                        required 
+                        value={otpPhone}
+                        onChange={(e) => setOtpPhone(e.target.value)}
+                        className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" 
+                        placeholder="9876543210" 
+                      />
+                    </div>
+                  </div>
+                  
+                  {otpError && <p className="text-red-500 text-xs text-center">{otpError}</p>}
+
+                  <button 
+                    type="submit" 
+                    disabled={isSendingOtp}
+                    className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isSendingOtp ? <Loader2 className="animate-spin w-5 h-5" /> : "Send OTP"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div>
+                    <label className="text-xs text-slate-400 ml-1">Enter OTP</label>
+                    <div className="relative mt-1">
+                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none tracking-widest text-center text-lg" 
+                        placeholder="123456" 
+                      />
+                    </div>
+                  </div>
+
+                  {otpError && <p className="text-red-500 text-xs text-center">{otpError}</p>}
+
+                  <button 
+                    type="submit" 
+                    disabled={isVerifyingOtp}
+                    className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isVerifyingOtp ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Download"}
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile Image Modal (Existing) */}
       <AnimatePresence>
         {isProfileOpen && (
           <motion.div 
@@ -1355,8 +1549,16 @@ function App() {
                   <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}><project.icon size={24} /></div>
                   <div className="flex justify-between items-center mb-3 relative z-10">
                     <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
+                    
+                    {/* UPDATED: Download Button now triggers Modal for Unredactor */}
                     {project.isDownload ? (
-                      <a href={project.link} download className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Download File"><Download size={16} /></a>
+                      <button 
+                        onClick={() => handleDownloadClick(project)}
+                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" 
+                        title={project.title.includes("Unredactor") ? "Verify & Download" : "Download File"}
+                      >
+                        <Download size={16} />
+                      </button>
                     ) : (
                       <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer" title="Visit Website"><ExternalLink size={16} /></a>
                     )}
