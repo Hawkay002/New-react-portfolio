@@ -48,7 +48,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- SHORTENED COUNTRY DATA (For Testing) ---
+// --- SHORTENED COUNTRY DATA (For Testing - Logic Supports Full List) ---
 const allCountries = [
   { name: "Afghanistan", dial_code: "+93", code: "AF" },
   { name: "Aland Islands", dial_code: "+358", code: "AX" },
@@ -308,7 +308,7 @@ const generateSessionId = () => {
   });
 };
 
-// --- COMPONENT: COUNTRY SELECTOR ---
+// --- COMPONENT: COUNTRY SELECTOR (With Pinned Logic) ---
 const CountrySelector = ({ selectedCode, onChange, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -324,14 +324,34 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Priority Pinned Countries Logic
   const filteredCountries = useMemo(() => {
-    if (!search) return allCountries;
-    return allCountries.filter(c => 
-      c.name.toLowerCase().includes(search.toLowerCase()) || c.dial_code.includes(search)
+    const priorityCodes = ["IN", "US", "GB", "DE", "FR"]; // Pinned at top
+    const priority = [];
+    const others = [];
+
+    allCountries.forEach(c => {
+      if (priorityCodes.includes(c.code)) {
+        priority.push(c);
+      } else {
+        others.push(c);
+      }
+    });
+
+    // Sort priority list to match the specific order defined in priorityCodes
+    priority.sort((a, b) => priorityCodes.indexOf(a.code) - priorityCodes.indexOf(b.code));
+    
+    // Combine lists
+    const sortedList = [...priority, ...others];
+
+    if (!search) return sortedList;
+    return sortedList.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.dial_code.includes(search)
     );
   }, [search]);
 
-  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries[0];
+  const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries.find(c => c.code === "IN");
 
   return (
     <div className="relative w-32" ref={dropdownRef}>
@@ -344,6 +364,7 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
         <div className="flex items-center gap-2 overflow-hidden">
           <img 
             src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} 
+            srcSet={`https://flagcdn.com/w40/${selectedCountry?.code.toLowerCase()}.png 2x`}
             width="20" 
             alt={selectedCountry?.code} 
             className="rounded-sm object-cover shrink-0"
@@ -359,31 +380,69 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
             className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
           >
             <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <input
-                type="text" 
-                placeholder="Search..." 
-                value={search} 
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-xs text-slate-300 focus:border-neon-green outline-none"
-                autoFocus
-              />
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search country..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none"
+                  autoFocus
+                />
+              </div>
             </div>
-            <div className="max-h-60 overflow-y-auto scrollbar-thin">
-              {filteredCountries.map((country) => (
-                <button
-                  key={country.code}
-                  type="button"
-                  onClick={() => { onChange(country.dial_code); setIsOpen(false); setSearch(""); }}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${selectedCountry?.code === country.code ? "bg-slate-800/50" : ""}`}
-                >
-                  <img src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} width="20" alt={country.name} />
-                  <span className="text-sm text-slate-200">{country.name}</span>
-                  <span className="text-xs text-slate-500 ml-auto">{country.dial_code}</span>
-                </button>
-              ))}
+
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+              {filteredCountries.length > 0 ? (
+                filteredCountries.map((country, index) => {
+                  // Separator logic: If not searching, and this is the last item of priority group (index 4 implies 5th item)
+                  // Note: Adjust index check based on how many priority codes exist in current list
+                  const isLastPinned = !search && index === (Math.min(filteredCountries.length, 5) - 1) && filteredCountries.length > 5;
+                  
+                  return (
+                    <React.Fragment key={country.code}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onChange(country.dial_code);
+                          setIsOpen(false);
+                          setSearch("");
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
+                          selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
+                        }`}
+                      >
+                        <img 
+                          src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                          srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
+                          width="20" 
+                          alt={country.name} 
+                          className="rounded-sm object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-slate-200 truncate">{country.name}</span>
+                            <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
+                          </div>
+                        </div>
+                      </button>
+                      {/* Optional Divider after pinned items */}
+                      {isLastPinned && (
+                        <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-1 mx-2" />
+                      )}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                <div className="p-4 text-center text-xs text-slate-500">
+                  No countries found
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -633,6 +692,7 @@ const Card = ({ children, className = "", style }) => (
   </div>
 );
 
+// --- COMPONENT: PROGRESS BAR (With Bubble Animation) ---
 const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between items-end mb-2">
@@ -654,10 +714,27 @@ const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
         transition={{ duration: 1.5, ease: "easeOut" }} 
         className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
       >
+        {/* Striped Background Animation */}
         <div 
           className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]" 
           style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}
         ></div>
+        
+        {/* Bubble Animation Particles */}
+        {[...Array(5)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute rounded-full bg-white/40 animate-[bubble-rise_3s_infinite_ease-in]"
+            style={{
+              width: Math.random() * 4 + 2 + 'px',
+              height: Math.random() * 4 + 2 + 'px',
+              left: Math.random() * 100 + '%',
+              bottom: '-5px',
+              animationDelay: Math.random() * 2 + 's',
+              animationDuration: Math.random() * 2 + 2 + 's'
+            }}
+          />
+        ))}
       </motion.div>
     </div>
   </div>
@@ -983,7 +1060,25 @@ function App() {
 
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
-      <style>{`@keyframes progress-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } } @keyframes bubble-rise { 0% { transform: translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-20px); opacity: 0; } } .perspective-1000 { perspective: 1000px; } .transform-style-3d { transform-style: preserve-3d; } .backface-hidden { backface-visibility: hidden; } .rotate-y-180 { transform: rotateY(180deg); } .scrollbar-thin::-webkit-scrollbar { width: 4px; } .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }`}</style>
+      {/* Global CSS for Bubble and Stripe Animations */}
+      <style>{`
+        @keyframes progress-stripes { 
+          from { background-position: 1rem 0; } 
+          to { background-position: 0 0; } 
+        } 
+        @keyframes bubble-rise { 
+          0% { transform: translateY(0); opacity: 0; } 
+          50% { opacity: 1; } 
+          100% { transform: translateY(-20px); opacity: 0; } 
+        } 
+        .perspective-1000 { perspective: 1000px; } 
+        .transform-style-3d { transform-style: preserve-3d; } 
+        .backface-hidden { backface-visibility: hidden; } 
+        .rotate-y-180 { transform: rotateY(180deg); } 
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; } 
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } 
+        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
+      `}</style>
 
       {/* --- OTP MODAL (Telegram Version) --- */}
       <AnimatePresence>
@@ -1036,7 +1131,7 @@ function App() {
                         value={otpCode} 
                         onChange={(e) => setOtpCode(e.target.value)} 
                         className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none tracking-widest text-center text-lg" 
-                        placeholder="123456" 
+                        placeholder="××××××" 
                         autoFocus 
                       />
                     </div>
