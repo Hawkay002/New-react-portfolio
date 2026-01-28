@@ -7,7 +7,8 @@ import {
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
-  ShieldCheck, FileLock, Heart, Mic, Zap, Clock
+  ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
+  PenTool, Terminal, FlaskConical, Sparkles, Trophy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -308,46 +309,120 @@ const generateSessionId = () => {
   });
 };
 
-// --- HELPER: FORMAT NUMBERS (1k, 1m) ---
+// --- HELPER: FORMAT NUMBERS ---
 const formatLikes = (num) => {
   if (!num) return 0;
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  }
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
   return num;
 };
 
-// --- COMPONENT: LIKE BUTTON (Kudos System) ---
+// --- COMPONENT: ROADMAP STATUS ANIMATIONS ---
+const RoadmapStatus = ({ status }) => {
+  // 1. Planning: Scribbling motion (Jitter)
+  if (status === "Planning") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400">
+        <motion.div
+          animate={{ 
+            x: [0, 2, -2, 1, -1, 0], 
+            y: [0, 1, -1, 0],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+        >
+          <PenTool size={14} />
+        </motion.div>
+        <span className="text-[10px] uppercase font-bold tracking-wider">Planning</span>
+      </div>
+    );
+  }
+
+  // 2. Implementing: Coding/Typing (Pulse & Shake)
+  if (status === "Implementing") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400">
+        <motion.div
+          animate={{ opacity: [1, 0.5, 1], scale: [1, 1.1, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity }}
+        >
+          <Terminal size={14} />
+        </motion.div>
+        <span className="text-[10px] uppercase font-bold tracking-wider">Coding</span>
+      </div>
+    );
+  }
+
+  // 3. In Progress: Testing Environment (Rocking Flask)
+  if (status === "In Progress") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500">
+        <motion.div
+          animate={{ rotate: [0, 15, -15, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <FlaskConical size={14} />
+        </motion.div>
+        <span className="text-[10px] uppercase font-bold tracking-wider">Testing</span>
+      </div>
+    );
+  }
+
+  // 4. Almost Done: Final Touches (Sparkle Spin)
+  if (status === "Almost Done") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400">
+        <motion.div
+          animate={{ rotate: [0, 180, 360], scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <Sparkles size={14} />
+        </motion.div>
+        <span className="text-[10px] uppercase font-bold tracking-wider">Polishing</span>
+      </div>
+    );
+  }
+
+  // 5. Done: Victory (Bouncing Trophy)
+  if (status === "Done") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">
+        <motion.div
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 0.6, repeat: Infinity, repeatType: "reverse" }}
+        >
+          <Trophy size={14} />
+        </motion.div>
+        <span className="text-[10px] uppercase font-bold tracking-wider">Complete</span>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// --- COMPONENT: LIKE BUTTON ---
 const ProjectLikeButton = ({ title }) => {
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
 
   useEffect(() => {
-    // Real-time listener for likes
     const docRef = doc(db, "project_stats", title);
     const unsubscribe = onSnapshot(docRef, (doc) => {
-      if (doc.exists()) {
-        setLikes(doc.data().likes || 0);
-      }
+      if (doc.exists()) setLikes(doc.data().likes || 0);
     });
     return () => unsubscribe();
   }, [title]);
 
   const handleLike = async (e) => {
-    e.stopPropagation(); // Stop card click
+    e.stopPropagation();
     if (hasLiked) return;
-    
-    setHasLiked(true); // Optimistic update
+    setHasLiked(true);
     const docRef = doc(db, "project_stats", title);
     try {
       await setDoc(docRef, { likes: increment(1) }, { merge: true });
     } catch (err) {
-      console.error("Like failed. Check Firestore Rules.", err);
-      // Don't revert hasLiked immediately to avoid UI flickering, 
-      // but the count won't go up if DB write fails.
+      console.error("Like failed", err);
     }
   };
 
@@ -374,9 +449,7 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -384,10 +457,7 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
   const filteredCountries = useMemo(() => {
     if (!search) return allCountries;
-    return allCountries.filter(c => 
-      c.name.toLowerCase().includes(search.toLowerCase()) || 
-      c.dial_code.includes(search)
-    );
+    return allCountries.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.dial_code.includes(search));
   }, [search]);
 
   const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries[0];
@@ -395,82 +465,30 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
   return (
     <div className="relative w-32" ref={dropdownRef}>
       <input type="hidden" name={name} value={selectedCountry?.dial_code} />
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors flex items-center justify-between gap-2"
-      >
+      <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 overflow-hidden">
-          <img 
-            src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} 
-            srcSet={`https://flagcdn.com/w40/${selectedCountry?.code.toLowerCase()}.png 2x`}
-            width="20" 
-            alt={selectedCountry?.code} 
-            className="rounded-sm object-cover shrink-0"
-          />
+          <img src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} width="20" alt={selectedCountry?.code} className="rounded-sm object-cover shrink-0" />
           <span className="text-slate-300 truncate">{selectedCountry?.dial_code}</span>
         </div>
         <ChevronDown size={14} className={`text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
-          >
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
             <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Search country..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none"
-                  autoFocus
-                />
+                <input type="text" placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none" autoFocus />
               </div>
             </div>
-
-            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-              {filteredCountries.length > 0 ? (
-                filteredCountries.map((country) => (
-                    <button
-                      key={country.code}
-                      type="button"
-                      onClick={() => {
-                        onChange(country.dial_code);
-                        setIsOpen(false);
-                        setSearch("");
-                      }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
-                        selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
-                      }`}
-                    >
-                      <img 
-                        src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
-                        srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
-                        width="20" 
-                        alt={country.name} 
-                        className="rounded-sm object-cover shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-200 truncate">{country.name}</span>
-                          <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
-                        </div>
-                      </div>
-                    </button>
-                ))
-              ) : (
-                <div className="p-4 text-center text-xs text-slate-500">
-                  No countries found
-                </div>
-              )}
+            <div className="max-h-60 overflow-y-auto scrollbar-thin">
+              {filteredCountries.map((country) => (
+                <button key={country.code} onClick={() => { onChange(country.dial_code); setIsOpen(false); setSearch(""); }} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 text-left">
+                  <img src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} width="20" alt={country.name} className="rounded-sm" />
+                  <span className="text-sm text-slate-200 truncate">{country.name}</span>
+                  <span className="text-xs text-slate-500 font-mono ml-auto">{country.dial_code}</span>
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
@@ -595,7 +613,6 @@ const data = {
       hoverBorder: "hover:border-red-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
-    // --- UPDATED PROJECT: RANSOMWARE ---
     {
       title: "Ransomware",
       desc: "An educational Python tool demonstrating ransomware mechanics, encryption protocols, and data recovery for security research.",
@@ -641,7 +658,7 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
   ],
-  // --- NEW ROADMAP SECTION DATA ---
+  // --- ROADMAP WITH NEW STATUSES ---
   roadmap: [
     {
       title: "Home Automation Hub",
@@ -656,6 +673,27 @@ const data = {
       eta: "Q4 2026",
       status: "Planning",
       icon: Mic
+    },
+    {
+      title: "Smart Garden System",
+      desc: "IoT sensors for soil moisture and automated watering.",
+      eta: "Q2 2026",
+      status: "Implementing",
+      icon: Zap
+    },
+    {
+      title: "Network Scanner",
+      desc: "Python tool to scan and visualize local network traffic.",
+      eta: "Q1 2026",
+      status: "Almost Done",
+      icon: Radio
+    },
+    {
+      title: "Legacy Portfolio",
+      desc: "My previous portfolio built with raw HTML/CSS.",
+      eta: "Completed",
+      status: "Done",
+      icon: Archive
     }
   ],
   education: [
@@ -1478,10 +1516,10 @@ function App() {
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
               {data.roadmap.map((item, idx) => (
-                <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
+                <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity relative overflow-hidden">
                   <div className="flex justify-between items-start mb-3">
                     <div className="p-2 bg-slate-900 rounded-lg text-yellow-400"><item.icon size={20}/></div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20">{item.status}</span>
+                    <RoadmapStatus status={item.status} />
                   </div>
                   <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
                   <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
