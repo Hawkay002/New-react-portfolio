@@ -48,7 +48,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- SHORTENED COUNTRY DATA ---
+// --- SHORTENED COUNTRY DATA (For Development) ---
 const allCountries = [
   { name: "Afghanistan", dial_code: "+93", code: "AF" },
   { name: "Aland Islands", dial_code: "+358", code: "AX" },
@@ -308,14 +308,17 @@ const generateSessionId = () => {
   });
 };
 
-// --- HELPER: FORMAT NUMBERS (1k, 1m) ---
+// --- HELPER: FORMAT NUMBERS (Fixed to 2 decimals without rounding up) ---
 const formatLikes = (num) => {
   if (!num) return 0;
   if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+    // Truncate to 2 decimal places for millions
+    return (Math.floor(num / 10000) / 100) + 'm';
   }
   if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    // Truncate to 2 decimal places for thousands
+    // Example: 1576 -> 157.6 -> 157 -> 1.57k
+    return (Math.floor(num / 10) / 100) + 'k';
   }
   return num;
 };
