@@ -8,7 +8,7 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, FileText, SlidersHorizontal, Trophy, Terminal
+  PenTool, SlidersHorizontal, Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -321,114 +321,15 @@ const formatLikes = (num) => {
   return num;
 };
 
-// --- COMPONENT: MICRO ANIMATIONS FOR ROADMAP (BOOSTED) ---
-const RoadmapStatusAnim = ({ status }) => {
+// --- HELPER: STATUS BADGE LOGIC ---
+const getStatusStyle = (status) => {
   const s = status.toLowerCase();
-
-  // 1. PLANNING: Aggressive Scribbling
-  if (s.includes("planning")) {
-    return (
-      <div className="relative w-8 h-8 flex items-center justify-center">
-        <FileText size={20} className="text-slate-500 absolute" />
-        <motion.div
-          animate={{ 
-            x: [0, 4, -2, 5, 0], 
-            y: [0, -4, 2, -3, 0],
-            rotate: [0, 15, -10, 0]
-          }}
-          transition={{ duration: 0.8, repeat: Infinity, repeatType: "mirror", ease: "linear" }}
-          className="absolute -right-2 -bottom-2 text-yellow-400 z-10"
-        >
-          <PenTool size={18} className="fill-yellow-400/20" />
-        </motion.div>
-      </div>
-    );
-  }
-
-  // 2. IMPLEMENTING: Expanding Brackets (Code Breathing)
-  if (s.includes("implementing")) {
-    return (
-      <div className="relative w-8 h-8 flex items-center justify-center bg-slate-900 rounded-md border border-slate-700">
-         <div className="flex gap-0.5 items-center justify-center w-full">
-           <motion.span 
-             animate={{ x: [-2, 0, -2], opacity: [0.5, 1, 0.5] }}
-             transition={{ duration: 1.5, repeat: Infinity }}
-             className="text-neon-green font-mono font-bold text-xs"
-           >{'<'}</motion.span>
-           <span className="text-slate-500 font-mono font-bold text-xs">/</span>
-           <motion.span 
-             animate={{ x: [2, 0, 2], opacity: [0.5, 1, 0.5] }}
-             transition={{ duration: 1.5, repeat: Infinity }}
-             className="text-neon-green font-mono font-bold text-xs"
-           >{'>'}</motion.span>
-         </div>
-      </div>
-    );
-  }
-
-  // 3. IN PROGRESS: High Visibility Spinner
-  if (s.includes("progress")) {
-    return (
-      <div className="relative w-8 h-8 flex items-center justify-center">
-        <Cpu size={20} className="text-blue-400 relative z-10" />
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-          className="absolute inset-[-4px] border-[3px] border-dashed border-blue-500/80 rounded-full z-0"
-        />
-      </div>
-    );
-  }
-
-  // 4. ALMOST DONE: Active Slider Adjustments
-  if (s.includes("almost") || s.includes("touch")) {
-    return (
-      <div className="relative w-8 h-8 flex items-center justify-center overflow-hidden">
-        <SlidersHorizontal size={24} className="text-purple-400" />
-        {/* Top Knob - Faster */}
-        <motion.div 
-          animate={{ x: [-6, 6, -6] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[9px] left-[10px] w-1.5 h-1.5 bg-white rounded-full shadow-sm"
-        />
-        {/* Bottom Knob - Slower */}
-         <motion.div 
-          animate={{ x: [6, -6, 6] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[9px] right-[10px] w-1.5 h-1.5 bg-white rounded-full shadow-sm"
-        />
-      </div>
-    );
-  }
-
-  // 5. DONE: Looping Trophy Drop
-  if (s.includes("done") || s.includes("completed")) {
-    return (
-      <div className="relative w-10 h-8 flex items-end justify-center gap-0.5 pb-1">
-        {/* Steps */}
-        <div className="w-2 h-2 bg-slate-700 rounded-t-sm"></div> {/* 2nd */}
-        <div className="w-2 h-4 bg-yellow-500/20 border border-yellow-500/50 rounded-t-sm relative flex justify-center"> {/* 1st */}
-           <motion.div
-             initial={{ y: -20, opacity: 0, scale: 0 }}
-             animate={{ y: -8, opacity: 1, scale: 1 }}
-             transition={{ 
-               duration: 0.8,
-               ease: "easeOut",
-               repeat: Infinity, 
-               repeatDelay: 3 // Waits 3 seconds before dropping again
-             }}
-             className="absolute -top-3 text-yellow-400"
-           >
-             <Trophy size={12} className="fill-yellow-400" />
-           </motion.div>
-        </div>
-        <div className="w-2 h-1 bg-slate-700 rounded-t-sm"></div> {/* 3rd */}
-      </div>
-    );
-  }
-
-  // Fallback
-  return <Clock size={20} className="text-slate-500" />;
+  if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" };
+  if (s.includes("implementing") || s.includes("coding")) return { icon: Code2, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" };
+  if (s.includes("progress")) return { icon: Loader2, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" };
+  if (s.includes("almost") || s.includes("testing")) return { icon: SlidersHorizontal, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" };
+  if (s.includes("done") || s.includes("completed")) return { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" };
+  return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" };
 };
 
 // --- COMPONENT: LIKE BUTTON (Kudos System) ---
@@ -639,6 +540,7 @@ const data = {
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "https://sdconnect.netlify.app/", 
       icon: Link, 
+      date: "Jan 18, 2026",
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       cardBorder: "border-blue-500/20",
@@ -652,7 +554,8 @@ const data = {
       tags: ["Web App", "Offline", "Local Storage"],
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "https://inv-henna.vercel.app/",
-      icon: Receipt, 
+      icon: Receipt,
+      date: "Nov 15, 2025", 
       color: "text-green-400", 
       bg: "bg-green-400/10",
       cardBorder: "border-green-500/20",
@@ -666,7 +569,8 @@ const data = {
       tags: ["POS", "Management", "Real-time"],
       image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
       link: "https://new-pos-ten.vercel.app/",
-      icon: Utensils, 
+      icon: Utensils,
+      date: "Dec 10, 2025", 
       color: "text-orange-400", 
       bg: "bg-orange-400/10",
       cardBorder: "border-orange-500/20",
@@ -681,6 +585,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800",
       link: "https://t.me/Wish_ind_bot",
       icon: Gift, 
+      date: "Oct 09, 2025",
       color: "text-pink-400", 
       bg: "bg-pink-400/10",
       cardBorder: "border-pink-500/20",
@@ -696,7 +601,8 @@ const data = {
       isDownload: true,
       locked: true,
       link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
-      icon: Eye, 
+      icon: Eye,
+      date: "Jan 05, 2026", 
       color: "text-red-400", 
       bg: "bg-red-400/10",
       cardBorder: "border-red-500/20",
@@ -712,7 +618,8 @@ const data = {
       isDownload: true,
       locked: true,
       link: "https://example.com/ransomware_tool.zip", 
-      icon: FileLock, 
+      icon: FileLock,
+      date: "Jan 27, 2026", 
       color: "text-cyan-400", 
       bg: "bg-cyan-400/10",
       cardBorder: "border-cyan-500/20",
@@ -726,7 +633,8 @@ const data = {
       tags: ["Management", "Admin", "Firestore"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
       link: "https://entryticket.netlify.app/",
-      icon: Ticket, 
+      icon: Ticket,
+      date: "Dec 30, 2025", 
       color: "text-purple-400", 
       bg: "bg-purple-400/10",
       cardBorder: "border-purple-500/20",
@@ -740,7 +648,8 @@ const data = {
       tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
       link: "https://react-portfolio-nine-wine.vercel.app/#home",
-      icon: Globe, 
+      icon: Globe,
+      date: "Jan 27, 2026", 
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
       cardBorder: "border-indigo-500/20",
@@ -749,37 +658,14 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
   ],
-  // --- UPDATED ROADMAP WITH NEW STATUSES ---
+  // --- UPDATED ROADMAP WITH SINGLE ENTRY ---
   roadmap: [
     {
-      title: "Home Automation Hub",
-      desc: "A centralized dashboard for IoT devices using React Native.",
-      eta: "Q3 2026",
-      status: "In Progress"
-    },
-    {
-      title: "AI Voice Assistant",
-      desc: "Custom LLM integration on Raspberry Pi for offline voice control.",
-      eta: "Q4 2026",
-      status: "Planning"
-    },
-    {
-      title: "Portfolio 2.0",
-      desc: "Refining animations and adding 3D elements for better UX.",
-      eta: "Feb 2026",
-      status: "Almost Done"
-    },
-    {
-      title: "Legacy Backend",
-      desc: "Old server architecture migration to Supabase.",
-      eta: "Jan 2026",
-      status: "Done"
-    },
-    {
-      title: "New Ticket API",
-      desc: "Writing core logic for the new ticketing qr system.",
-      eta: "Mar 2026",
-      status: "Implementing"
+      title: "16 Personalities Quiz - Valentines Day Special",
+      desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+      eta: "Feb 14, 2026",
+      status: "In Progress",
+      icon: Heart // Icon matches the "Valentines" theme
     }
   ],
   education: [
@@ -1589,10 +1475,16 @@ const text = `
                       )}
                     </div>
                     <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                    <div className="flex flex-wrap gap-2 relative z-10">
+                    <div className="flex flex-wrap gap-2 relative z-10 mb-4">
                       {project.tags.map((tag, tIdx) => (
                         <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
                       ))}
+                    </div>
+
+                    {/* Published Date Display */}
+                    <div className="flex items-center gap-1.5 pt-4 border-t border-white/5 relative z-10">
+                       <Calendar size={12} className="text-slate-500" />
+                       <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
                     </div>
                   </Card>
                 </RevealCard>
@@ -1600,35 +1492,40 @@ const text = `
             </AnimatePresence>
           </div>
 
-          {/* --- FUTURE ROADMAP (UPDATED WITH ANIMATIONS) --- */}
+          {/* --- FUTURE ROADMAP (UPDATED) --- */}
           <div className="mt-20 relative">
             <div className="absolute inset-0 bg-slate-900/50 -skew-y-3 transform origin-left w-full h-full -z-10 rounded-3xl" />
             <h3 className="text-center text-xl font-bold text-slate-300 mb-8 flex items-center justify-center gap-2">
               <Zap className="text-yellow-400" /> Future Roadmap
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
-              {data.roadmap.map((item, idx) => (
-                <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
-                  <div className="flex justify-between items-start mb-3">
-                    {/* Replaced Static Icon with Dynamic Animation Component */}
-                    <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                      <RoadmapStatusAnim status={item.status} />
+              {data.roadmap.map((item, idx) => {
+                // Get style based on status string
+                const badgeStyle = getStatusStyle(item.status);
+                const BadgeIcon = badgeStyle.icon;
+
+                return (
+                  <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="flex justify-between items-start mb-3">
+                      {/* Dynamic Project Icon */}
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-slate-200">
+                        <item.icon size={20}/>
+                      </div>
+                      
+                      {/* Status Badge */}
+                      <div className={`flex items-center gap-1.5 px-2 py-1 rounded border ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.color}`}>
+                        <BadgeIcon size={12} />
+                        <span className="text-[10px] uppercase font-bold tracking-wider">{item.status}</span>
+                      </div>
                     </div>
-                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border ${
-                      item.status === 'Done' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
-                      item.status === 'Planning' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                      'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                    }`}>
-                      {item.status}
-                    </span>
+                    <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
+                    <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                      <Clock size={12} /> ETA: {item.eta}
+                    </div>
                   </div>
-                  <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
-                  <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                    <Clock size={12} /> ETA: {item.eta}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
