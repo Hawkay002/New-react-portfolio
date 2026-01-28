@@ -572,7 +572,7 @@ const data = {
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
       tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
-      link: "https://react-portfolio-nine-wine.vercel.app/#home",
+      link: "https://shovith-dev.vercel.app",
       icon: Globe, 
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
