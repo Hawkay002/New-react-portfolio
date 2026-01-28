@@ -321,44 +321,44 @@ const formatLikes = (num) => {
   return num;
 };
 
-// --- COMPONENT: MICRO ANIMATIONS FOR ROADMAP ---
+// --- COMPONENT: MICRO ANIMATIONS FOR ROADMAP (BOOSTED) ---
 const RoadmapStatusAnim = ({ status }) => {
   const s = status.toLowerCase();
 
-  // 1. PLANNING: Scribbling/Journaling
+  // 1. PLANNING: Aggressive Scribbling
   if (s.includes("planning")) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center">
         <FileText size={20} className="text-slate-500 absolute" />
         <motion.div
           animate={{ 
-            x: [0, 2, -1, 3, 0], 
-            y: [0, -2, 1, -1, 0],
-            rotate: [0, 5, -5, 0]
+            x: [0, 4, -2, 5, 0], 
+            y: [0, -4, 2, -3, 0],
+            rotate: [0, 15, -10, 0]
           }}
-          transition={{ duration: 1.5, repeat: Infinity, repeatType: "mirror" }}
-          className="absolute -right-1 -bottom-1 text-yellow-400"
+          transition={{ duration: 0.8, repeat: Infinity, repeatType: "mirror", ease: "linear" }}
+          className="absolute -right-2 -bottom-2 text-yellow-400 z-10"
         >
-          <PenTool size={16} className="fill-yellow-400/20" />
+          <PenTool size={18} className="fill-yellow-400/20" />
         </motion.div>
       </div>
     );
   }
 
-  // 2. IMPLEMENTING: Writing Code (Brackets breathing)
+  // 2. IMPLEMENTING: Expanding Brackets (Code Breathing)
   if (s.includes("implementing")) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center bg-slate-900 rounded-md border border-slate-700">
-         <div className="flex gap-0.5">
+         <div className="flex gap-0.5 items-center justify-center w-full">
            <motion.span 
-             animate={{ x: [-1, 0, -1] }}
-             transition={{ duration: 1, repeat: Infinity }}
+             animate={{ x: [-2, 0, -2], opacity: [0.5, 1, 0.5] }}
+             transition={{ duration: 1.5, repeat: Infinity }}
              className="text-neon-green font-mono font-bold text-xs"
            >{'<'}</motion.span>
            <span className="text-slate-500 font-mono font-bold text-xs">/</span>
            <motion.span 
-             animate={{ x: [1, 0, 1] }}
-             transition={{ duration: 1, repeat: Infinity }}
+             animate={{ x: [2, 0, 2], opacity: [0.5, 1, 0.5] }}
+             transition={{ duration: 1.5, repeat: Infinity }}
              className="text-neon-green font-mono font-bold text-xs"
            >{'>'}</motion.span>
          </div>
@@ -366,41 +366,42 @@ const RoadmapStatusAnim = ({ status }) => {
     );
   }
 
-  // 3. IN PROGRESS: Code working/Testing (Spinning Gear/CPU)
+  // 3. IN PROGRESS: High Visibility Spinner
   if (s.includes("progress")) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center">
-        <Cpu size={24} className="text-blue-400" />
+        <Cpu size={20} className="text-blue-400 relative z-10" />
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-          className="absolute inset-0 border-2 border-dashed border-blue-400/50 rounded-full"
+          className="absolute inset-[-4px] border-[3px] border-dashed border-blue-500/80 rounded-full z-0"
         />
       </div>
     );
   }
 
-  // 4. ALMOST DONE: Adjustments (Sliders moving)
+  // 4. ALMOST DONE: Active Slider Adjustments
   if (s.includes("almost") || s.includes("touch")) {
     return (
       <div className="relative w-8 h-8 flex items-center justify-center overflow-hidden">
         <SlidersHorizontal size={24} className="text-purple-400" />
-        {/* Fake animating knobs */}
+        {/* Top Knob - Faster */}
         <motion.div 
-          animate={{ x: [-3, 3, -3] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[9px] left-[10px] w-1.5 h-1.5 bg-purple-200 rounded-full"
+          animate={{ x: [-6, 6, -6] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[9px] left-[10px] w-1.5 h-1.5 bg-white rounded-full shadow-sm"
         />
+        {/* Bottom Knob - Slower */}
          <motion.div 
-          animate={{ x: [3, -3, 3] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[9px] right-[10px] w-1.5 h-1.5 bg-purple-200 rounded-full"
+          animate={{ x: [6, -6, 6] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[9px] right-[10px] w-1.5 h-1.5 bg-white rounded-full shadow-sm"
         />
       </div>
     );
   }
 
-  // 5. DONE: Podium & Trophy
+  // 5. DONE: Looping Trophy Drop
   if (s.includes("done") || s.includes("completed")) {
     return (
       <div className="relative w-10 h-8 flex items-end justify-center gap-0.5 pb-1">
@@ -408,12 +409,17 @@ const RoadmapStatusAnim = ({ status }) => {
         <div className="w-2 h-2 bg-slate-700 rounded-t-sm"></div> {/* 2nd */}
         <div className="w-2 h-4 bg-yellow-500/20 border border-yellow-500/50 rounded-t-sm relative flex justify-center"> {/* 1st */}
            <motion.div
-             initial={{ y: -10, opacity: 0 }}
-             animate={{ y: -8, opacity: 1 }}
-             transition={{ delay: 0.5, type: "spring" }}
+             initial={{ y: -20, opacity: 0, scale: 0 }}
+             animate={{ y: -8, opacity: 1, scale: 1 }}
+             transition={{ 
+               duration: 0.8,
+               ease: "easeOut",
+               repeat: Infinity, 
+               repeatDelay: 3 // Waits 3 seconds before dropping again
+             }}
              className="absolute -top-3 text-yellow-400"
            >
-             <Trophy size={10} className="fill-yellow-400" />
+             <Trophy size={12} className="fill-yellow-400" />
            </motion.div>
         </div>
         <div className="w-2 h-1 bg-slate-700 rounded-t-sm"></div> {/* 3rd */}
