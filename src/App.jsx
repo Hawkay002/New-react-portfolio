@@ -7,7 +7,8 @@ import {
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
-  ShieldCheck, FileLock, Heart, Mic, Zap, Clock
+  ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
+  PenTool, FileText, SlidersHorizontal, Trophy, Terminal
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -308,19 +309,120 @@ const generateSessionId = () => {
   });
 };
 
-// --- HELPER: FORMAT NUMBERS (Fixed to 2 decimals without rounding up) ---
+// --- HELPER: FORMAT NUMBERS (Fixed to 2 decimals) ---
 const formatLikes = (num) => {
   if (!num) return 0;
   if (num >= 1000000) {
-    // Truncate to 2 decimal places for millions
     return (Math.floor(num / 10000) / 100) + 'm';
   }
   if (num >= 1000) {
-    // Truncate to 2 decimal places for thousands
-    // Example: 1576 -> 157.6 -> 157 -> 1.57k
     return (Math.floor(num / 10) / 100) + 'k';
   }
   return num;
+};
+
+// --- COMPONENT: MICRO ANIMATIONS FOR ROADMAP ---
+const RoadmapStatusAnim = ({ status }) => {
+  const s = status.toLowerCase();
+
+  // 1. PLANNING: Scribbling/Journaling
+  if (s.includes("planning")) {
+    return (
+      <div className="relative w-8 h-8 flex items-center justify-center">
+        <FileText size={20} className="text-slate-500 absolute" />
+        <motion.div
+          animate={{ 
+            x: [0, 2, -1, 3, 0], 
+            y: [0, -2, 1, -1, 0],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ duration: 1.5, repeat: Infinity, repeatType: "mirror" }}
+          className="absolute -right-1 -bottom-1 text-yellow-400"
+        >
+          <PenTool size={16} className="fill-yellow-400/20" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  // 2. IMPLEMENTING: Writing Code (Brackets breathing)
+  if (s.includes("implementing")) {
+    return (
+      <div className="relative w-8 h-8 flex items-center justify-center bg-slate-900 rounded-md border border-slate-700">
+         <div className="flex gap-0.5">
+           <motion.span 
+             animate={{ x: [-1, 0, -1] }}
+             transition={{ duration: 1, repeat: Infinity }}
+             className="text-neon-green font-mono font-bold text-xs"
+           >{'<'}</motion.span>
+           <span className="text-slate-500 font-mono font-bold text-xs">/</span>
+           <motion.span 
+             animate={{ x: [1, 0, 1] }}
+             transition={{ duration: 1, repeat: Infinity }}
+             className="text-neon-green font-mono font-bold text-xs"
+           >{'>'}</motion.span>
+         </div>
+      </div>
+    );
+  }
+
+  // 3. IN PROGRESS: Code working/Testing (Spinning Gear/CPU)
+  if (s.includes("progress")) {
+    return (
+      <div className="relative w-8 h-8 flex items-center justify-center">
+        <Cpu size={24} className="text-blue-400" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+          className="absolute inset-0 border-2 border-dashed border-blue-400/50 rounded-full"
+        />
+      </div>
+    );
+  }
+
+  // 4. ALMOST DONE: Adjustments (Sliders moving)
+  if (s.includes("almost") || s.includes("touch")) {
+    return (
+      <div className="relative w-8 h-8 flex items-center justify-center overflow-hidden">
+        <SlidersHorizontal size={24} className="text-purple-400" />
+        {/* Fake animating knobs */}
+        <motion.div 
+          animate={{ x: [-3, 3, -3] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[9px] left-[10px] w-1.5 h-1.5 bg-purple-200 rounded-full"
+        />
+         <motion.div 
+          animate={{ x: [3, -3, 3] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[9px] right-[10px] w-1.5 h-1.5 bg-purple-200 rounded-full"
+        />
+      </div>
+    );
+  }
+
+  // 5. DONE: Podium & Trophy
+  if (s.includes("done") || s.includes("completed")) {
+    return (
+      <div className="relative w-10 h-8 flex items-end justify-center gap-0.5 pb-1">
+        {/* Steps */}
+        <div className="w-2 h-2 bg-slate-700 rounded-t-sm"></div> {/* 2nd */}
+        <div className="w-2 h-4 bg-yellow-500/20 border border-yellow-500/50 rounded-t-sm relative flex justify-center"> {/* 1st */}
+           <motion.div
+             initial={{ y: -10, opacity: 0 }}
+             animate={{ y: -8, opacity: 1 }}
+             transition={{ delay: 0.5, type: "spring" }}
+             className="absolute -top-3 text-yellow-400"
+           >
+             <Trophy size={10} className="fill-yellow-400" />
+           </motion.div>
+        </div>
+        <div className="w-2 h-1 bg-slate-700 rounded-t-sm"></div> {/* 3rd */}
+      </div>
+    );
+  }
+
+  // Fallback
+  return <Clock size={20} className="text-slate-500" />;
 };
 
 // --- COMPONENT: LIKE BUTTON (Kudos System) ---
@@ -349,8 +451,6 @@ const ProjectLikeButton = ({ title }) => {
       await setDoc(docRef, { likes: increment(1) }, { merge: true });
     } catch (err) {
       console.error("Like failed. Check Firestore Rules.", err);
-      // Don't revert hasLiked immediately to avoid UI flickering, 
-      // but the count won't go up if DB write fails.
     }
   };
 
@@ -598,7 +698,6 @@ const data = {
       hoverBorder: "hover:border-red-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
-    // --- UPDATED PROJECT: RANSOMWARE ---
     {
       title: "Ransomware",
       desc: "An educational Python tool demonstrating ransomware mechanics, encryption protocols, and data recovery for security research.",
@@ -644,21 +743,37 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
   ],
-  // --- NEW ROADMAP SECTION DATA ---
+  // --- UPDATED ROADMAP WITH NEW STATUSES ---
   roadmap: [
     {
       title: "Home Automation Hub",
       desc: "A centralized dashboard for IoT devices using React Native.",
       eta: "Q3 2026",
-      status: "In Progress",
-      icon: Home
+      status: "In Progress"
     },
     {
       title: "AI Voice Assistant",
       desc: "Custom LLM integration on Raspberry Pi for offline voice control.",
       eta: "Q4 2026",
-      status: "Planning",
-      icon: Mic
+      status: "Planning"
+    },
+    {
+      title: "Portfolio 2.0",
+      desc: "Refining animations and adding 3D elements for better UX.",
+      eta: "Feb 2026",
+      status: "Almost Done"
+    },
+    {
+      title: "Legacy Backend",
+      desc: "Old server architecture migration to Supabase.",
+      eta: "Jan 2026",
+      status: "Done"
+    },
+    {
+      title: "New Ticket API",
+      desc: "Writing core logic for the new ticketing qr system.",
+      eta: "Mar 2026",
+      status: "Implementing"
     }
   ],
   education: [
@@ -1479,7 +1594,7 @@ const text = `
             </AnimatePresence>
           </div>
 
-          {/* --- FUTURE ROADMAP --- */}
+          {/* --- FUTURE ROADMAP (UPDATED WITH ANIMATIONS) --- */}
           <div className="mt-20 relative">
             <div className="absolute inset-0 bg-slate-900/50 -skew-y-3 transform origin-left w-full h-full -z-10 rounded-3xl" />
             <h3 className="text-center text-xl font-bold text-slate-300 mb-8 flex items-center justify-center gap-2">
@@ -1489,8 +1604,17 @@ const text = `
               {data.roadmap.map((item, idx) => (
                 <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
                   <div className="flex justify-between items-start mb-3">
-                    <div className="p-2 bg-slate-900 rounded-lg text-yellow-400"><item.icon size={20}/></div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20">{item.status}</span>
+                    {/* Replaced Static Icon with Dynamic Animation Component */}
+                    <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                      <RoadmapStatusAnim status={item.status} />
+                    </div>
+                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded border ${
+                      item.status === 'Done' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 
+                      item.status === 'Planning' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                      'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                    }`}>
+                      {item.status}
+                    </span>
                   </div>
                   <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
                   <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
