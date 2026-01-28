@@ -7,7 +7,7 @@ import {
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
-  ShieldCheck, FileLock, Heart, Mic, Zap, Calendar, Clock
+  ShieldCheck, FileLock, Heart, Mic, Zap, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -308,6 +308,18 @@ const generateSessionId = () => {
   });
 };
 
+// --- HELPER: FORMAT NUMBERS (1k, 1m) ---
+const formatLikes = (num) => {
+  if (!num) return 0;
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return num;
+};
+
 // --- COMPONENT: LIKE BUTTON (Kudos System) ---
 const ProjectLikeButton = ({ title }) => {
   const [likes, setLikes] = useState(0);
@@ -315,10 +327,11 @@ const ProjectLikeButton = ({ title }) => {
 
   useEffect(() => {
     // Real-time listener for likes
-    // Note: Ensure you create a 'project_stats' collection in Firestore or it will auto-create on first like
     const docRef = doc(db, "project_stats", title);
     const unsubscribe = onSnapshot(docRef, (doc) => {
-      if (doc.exists()) setLikes(doc.data().likes || 0);
+      if (doc.exists()) {
+        setLikes(doc.data().likes || 0);
+      }
     });
     return () => unsubscribe();
   }, [title]);
@@ -332,8 +345,9 @@ const ProjectLikeButton = ({ title }) => {
     try {
       await setDoc(docRef, { likes: increment(1) }, { merge: true });
     } catch (err) {
-      console.error("Like failed", err);
-      setHasLiked(false);
+      console.error("Like failed. Check Firestore Rules.", err);
+      // Don't revert hasLiked immediately to avoid UI flickering, 
+      // but the count won't go up if DB write fails.
     }
   };
 
@@ -347,7 +361,7 @@ const ProjectLikeButton = ({ title }) => {
       }`}
     >
       <Heart size={14} className={hasLiked ? "fill-pink-500 text-pink-500" : ""} />
-      <span>{likes}</span>
+      <span>{formatLikes(likes)}</span>
     </button>
   );
 };
@@ -589,7 +603,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
       locked: true,
-      link: "https://example.com/ransomware_tool.zip", // Replace with actual link
+      link: "https://example.com/ransomware_tool.zip", 
       icon: FileLock, 
       color: "text-cyan-400", 
       bg: "bg-cyan-400/10",
