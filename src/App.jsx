@@ -998,7 +998,13 @@ function App() {
            setIsSubmitting(false); 
            return;
         }
-        const text = `📩 *New Message*\n👤 *Name:* ${firstName} ${lastName}\n📧 *Email:* ${email}\n📱 *Phone:* ${phone}\n📝 *Message:* ${message}`;
+        const text = `
+📩 *New Message Reveived from Portfolio Contact form*
+👤 *Name:* ${firstName} ${lastName}
+📧 *Email:* ${email}
+📱 *Phone:* ${phone}
+📝 *Message:* ${message}
+        `;
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: "POST", 
           headers: { "Content-Type": "application/json" }, 
@@ -1168,7 +1174,7 @@ function App() {
             initial={{ opacity: 0, y: -50 }} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -50 }} 
-            className="fixed top-5 right-5 z-[70] flex items-center gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl"
+            className="fixed top-5 left-0 right-0 mx-auto w-fit z-[70] flex items-center gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl"
           >
             {notification.type === 'success' ? <CheckCircle2 className="text-green-500" /> : <AlertCircle className="text-red-500" />}
             <p className="text-sm font-medium text-white">{notification.message}</p>
