@@ -8,7 +8,7 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, Terminal, FlaskConical, Sparkles, Trophy, Archive
+  PenTool, Terminal, FlaskConical, Sparkles, Trophy, Archive // <--- ADDED ARCHIVE HERE
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -422,7 +422,7 @@ const ProjectLikeButton = ({ title }) => {
     try {
       await setDoc(docRef, { likes: increment(1) }, { merge: true });
     } catch (err) {
-      console.error("Like failed", err);
+      console.error("Like failed. Check Firestore Rules.", err);
     }
   };
 
@@ -658,7 +658,7 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     }
   ],
-  // --- ROADMAP WITH NEW STATUSES ---
+  // --- ROADMAP ---
   roadmap: [
     {
       title: "Home Automation Hub",
@@ -693,7 +693,7 @@ const data = {
       desc: "My previous portfolio built with raw HTML/CSS.",
       eta: "Completed",
       status: "Done",
-      icon: Archive
+      icon: Archive 
     }
   ],
   education: [
