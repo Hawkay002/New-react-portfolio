@@ -8,7 +8,7 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, Terminal, FlaskConical, Sparkles, Trophy
+  PenTool, Terminal, FlaskConical, Sparkles, Trophy, Archive
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
