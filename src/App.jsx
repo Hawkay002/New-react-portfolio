@@ -7,7 +7,7 @@ import {
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
-  ShieldCheck, FileLock
+  ShieldCheck, FileLock, Heart, Mic, Zap, Calendar, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,7 +24,7 @@ import { VscVscode } from 'react-icons/vsc';
 import { initializeApp } from "firebase/app";
 import { 
   getFirestore, doc, getDoc, setDoc, updateDoc, increment, 
-  collection, addDoc, serverTimestamp, deleteDoc 
+  collection, addDoc, serverTimestamp, deleteDoc, onSnapshot 
 } from "firebase/firestore";
 
 // --- CONFIGURATION ---
@@ -308,6 +308,50 @@ const generateSessionId = () => {
   });
 };
 
+// --- COMPONENT: LIKE BUTTON (Kudos System) ---
+const ProjectLikeButton = ({ title }) => {
+  const [likes, setLikes] = useState(0);
+  const [hasLiked, setHasLiked] = useState(false);
+
+  useEffect(() => {
+    // Real-time listener for likes
+    // Note: Ensure you create a 'project_stats' collection in Firestore or it will auto-create on first like
+    const docRef = doc(db, "project_stats", title);
+    const unsubscribe = onSnapshot(docRef, (doc) => {
+      if (doc.exists()) setLikes(doc.data().likes || 0);
+    });
+    return () => unsubscribe();
+  }, [title]);
+
+  const handleLike = async (e) => {
+    e.stopPropagation(); // Stop card click
+    if (hasLiked) return;
+    
+    setHasLiked(true); // Optimistic update
+    const docRef = doc(db, "project_stats", title);
+    try {
+      await setDoc(docRef, { likes: increment(1) }, { merge: true });
+    } catch (err) {
+      console.error("Like failed", err);
+      setHasLiked(false);
+    }
+  };
+
+  return (
+    <button 
+      onClick={handleLike} 
+      className={`flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-full transition-all border ${
+        hasLiked 
+          ? "border-pink-500/50 bg-pink-500/10 text-pink-500" 
+          : "border-slate-800 bg-slate-900 text-slate-400 hover:text-pink-400 hover:border-pink-500/30"
+      }`}
+    >
+      <Heart size={14} className={hasLiked ? "fill-pink-500 text-pink-500" : ""} />
+      <span>{likes}</span>
+    </button>
+  );
+};
+
 // --- COMPONENT: COUNTRY SELECTOR ---
 const CountrySelector = ({ selectedCode, onChange, name }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -537,14 +581,15 @@ const data = {
       hoverBorder: "hover:border-red-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
+    // --- UPDATED PROJECT: RANSOMWARE ---
     {
       title: "Ransomware",
-      desc: "Ransomware is malware that locks or encrypts data and demands payment to restore access.",
+      desc: "An educational Python tool demonstrating ransomware mechanics, encryption protocols, and data recovery for security research.",
       tags: ["Python", "Encryption", "Security"],
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
       locked: true,
-      link: "https://example.com/steganography_tool.zip", // Replace with actual link
+      link: "https://example.com/ransomware_tool.zip", // Replace with actual link
       icon: FileLock, 
       color: "text-cyan-400", 
       bg: "bg-cyan-400/10",
@@ -572,7 +617,7 @@ const data = {
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
       tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
-      link: "https://shovith-dev.vercel.app",
+      link: "https://react-portfolio-nine-wine.vercel.app/#home",
       icon: Globe, 
       color: "text-indigo-400", 
       bg: "bg-indigo-400/10",
@@ -580,6 +625,23 @@ const data = {
       hoverBg: "hover:bg-gradient-to-br hover:from-indigo-500/20 hover:via-indigo-500/5 hover:to-transparent",
       hoverBorder: "hover:border-indigo-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
+    }
+  ],
+  // --- NEW ROADMAP SECTION DATA ---
+  roadmap: [
+    {
+      title: "Home Automation Hub",
+      desc: "A centralized dashboard for IoT devices using React Native.",
+      eta: "Q3 2026",
+      status: "In Progress",
+      icon: Home
+    },
+    {
+      title: "AI Voice Assistant",
+      desc: "Custom LLM integration on Raspberry Pi for offline voice control.",
+      eta: "Q4 2026",
+      status: "Planning",
+      icon: Mic
     }
   ],
   education: [
@@ -863,6 +925,9 @@ function App() {
   const [otpError, setOtpError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // --- NEW STATE: CATEGORY FILTER ---
+  const [activeCategory, setActiveCategory] = useState("All");
+
   // --- QUOTA MANAGEMENT ---
   useEffect(() => {
     const fetchQuota = async () => {
@@ -943,18 +1008,15 @@ function App() {
         const data = docSnap.data();
         if (data.otp === otpCode.trim()) {
           
-          // --- UPDATED LOGGING SECTION ---
-          // Save Full Details to 'verified_downloads' before deleting temporary session
           await addDoc(collection(db, "verified_downloads"), {
             telegram_id: data.telegram_id,
             telegram_name: data.telegram_name || "Unknown",
-            telegram_username: data.telegram_username || "None", // Saved from Bot
-            phone_number: data.phone_number || "Not Shared",     // Saved from Bot
+            telegram_username: data.telegram_username || "None",
+            phone_number: data.phone_number || "Not Shared",
             project: currentProject.title,
             timestamp: serverTimestamp()
           });
 
-          // Trigger Download
           showNotification(`Verification Successful! Downloading ${currentProject.title}...`, "success");
           const link = document.createElement('a');
           link.href = currentProject.link;
@@ -963,7 +1025,6 @@ function App() {
           link.click();
           document.body.removeChild(link);
 
-          // Cleanup (Delete the temporary session)
           await deleteDoc(docRef);
           localStorage.removeItem('secure_download_session_id');
           setIsOtpModalOpen(false);
@@ -998,13 +1059,7 @@ function App() {
            setIsSubmitting(false); 
            return;
         }
-        const text = `
-📩 *New Message Reveived from Portfolio Contact form*
-👤 *Name:* ${firstName} ${lastName}
-📧 *Email:* ${email}
-📱 *Phone:* ${phone}
-📝 *Message:* ${message}
-        `;
+        const text = `📩 *New Message*\n👤 *Name:* ${firstName} ${lastName}\n📧 *Email:* ${email}\n📱 *Phone:* ${phone}\n📝 *Message:* ${message}`;
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: "POST", 
           headers: { "Content-Type": "application/json" }, 
@@ -1048,6 +1103,20 @@ function App() {
       setIsSubmitting(false); 
     }
   };
+
+  // --- FILTER LOGIC ---
+  const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
+  
+  const filteredProjects = useMemo(() => {
+    return data.projects.filter(project => {
+      if (activeCategory === "All") return true;
+      if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
+      if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
+      if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
+      if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
+      return false;
+    });
+  }, [activeCategory]);
 
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
@@ -1325,44 +1394,89 @@ function App() {
         {/* --- PROJECTS --- */}
         <section id="projects">
           <SectionTitle subtitle="" title="featured_projects" />
-          <div className="space-y-6">
-            {data.projects.map((project, idx) => (
-              <RevealCard key={idx} direction={idx % 2 === 0 ? "left" : "right"}>
-                <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                  <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                    <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
-                  </div>
-                  <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color} mb-4 relative z-10`}>
-                    <project.icon size={24} />
-                  </div>
-                  <div className="flex justify-between items-center mb-3 relative z-10">
-                    <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
-                    {project.isDownload ? (
-                      <button 
-                        onClick={() => handleDownloadClick(project)} 
-                        className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                      >
-                        {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
-                      </button>
-                    ) : (
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
-                        <ExternalLink size={16} />
-                      </a>
-                    )}
-                  </div>
-                  <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                  <div className="flex flex-wrap gap-2 relative z-10">
-                    {project.tags.map((tag, tIdx) => (
-                      <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
-                    ))}
-                  </div>
-                </Card>
-              </RevealCard>
+          
+          {/* CATEGORY TABS */}
+          <div className="flex justify-center mb-8 flex-wrap gap-2 px-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                  activeCategory === cat 
+                    ? "bg-neon-green text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
+                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"
+                }`}
+              >
+                {cat}
+              </button>
             ))}
-            <RevealCard className="mt-8">
-              <div className="text-center py-4 rounded-full border border-dashed border-slate-700 text-neon-green font-mono text-sm">More projects coming soon...</div>
-            </RevealCard>
+          </div>
+
+          <div className="space-y-6">
+            <AnimatePresence mode="popLayout">
+              {filteredProjects.map((project, idx) => (
+                <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
+                  <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
+                    <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                      <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
+                    </div>
+                    
+                    <div className="flex justify-between items-start mb-4 relative z-10">
+                      <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
+                        <project.icon size={24} />
+                      </div>
+                      <ProjectLikeButton title={project.title} />
+                    </div>
+
+                    <div className="flex justify-between items-center mb-3 relative z-10">
+                      <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
+                      {project.isDownload ? (
+                        <button 
+                          onClick={() => handleDownloadClick(project)} 
+                          className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                        >
+                          {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
+                        </button>
+                      ) : (
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                          <ExternalLink size={16} />
+                        </a>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
+                    <div className="flex flex-wrap gap-2 relative z-10">
+                      {project.tags.map((tag, tIdx) => (
+                        <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                      ))}
+                    </div>
+                  </Card>
+                </RevealCard>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* --- FUTURE ROADMAP --- */}
+          <div className="mt-20 relative">
+            <div className="absolute inset-0 bg-slate-900/50 -skew-y-3 transform origin-left w-full h-full -z-10 rounded-3xl" />
+            <h3 className="text-center text-xl font-bold text-slate-300 mb-8 flex items-center justify-center gap-2">
+              <Zap className="text-yellow-400" /> Future Roadmap
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {data.roadmap.map((item, idx) => (
+                <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="p-2 bg-slate-900 rounded-lg text-yellow-400"><item.icon size={20}/></div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded border border-yellow-500/20">{item.status}</span>
+                  </div>
+                  <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
+                  <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
+                  <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                    <Clock size={12} /> ETA: {item.eta}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
