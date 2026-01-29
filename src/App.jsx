@@ -8,9 +8,9 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, SlidersHorizontal, Calendar
+  PenTool, SlidersHorizontal, Calendar, Activity
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 
 // --- ICONS ---
 import { 
@@ -324,12 +324,172 @@ const formatLikes = (num) => {
 // --- HELPER: STATUS BADGE LOGIC ---
 const getStatusStyle = (status) => {
   const s = status.toLowerCase();
-  if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" }; /*Trigger Keywords: "Planning"*/
-  if (s.includes("implementing") || s.includes("coding")) return { icon: Code2, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" }; /*Trigger Keywords: "Implementing", "Coding"*/
-  if (s.includes("progress")) return { icon: Loader2, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" }; /*Trigger Keywords: "Progress" (e.g., "In Progress", "Work in Progress")*/
-  if (s.includes("almost") || s.includes("testing")) return { icon: SlidersHorizontal, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" }; /*Trigger Keywords: "Almost", "Testing" (e.g., "Almost Done", "Beta Testing")*/
-  if (s.includes("done") || s.includes("completed")) return { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" }; /*Trigger Keywords: "Done", "Completed"*/
-  return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" }; /*Trigger Keywords: Any other text not listed above (e.g., "Paused", "Review")*/
+  if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" };
+  if (s.includes("implementing") || s.includes("coding")) return { icon: Code2, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" };
+  if (s.includes("progress")) return { icon: Loader2, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" };
+  if (s.includes("almost") || s.includes("testing")) return { icon: SlidersHorizontal, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" };
+  if (s.includes("done") || s.includes("completed")) return { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" };
+  return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" };
+};
+
+// --- COMPONENT: SYSTEM STATUS DASHBOARD ---
+const SystemStatus = () => {
+  // Uses global variable from vite.config.js if available, else falls back to Dev Mode
+  // To enable real date, add define: { '__BUILD_DATE__': ... } in vite.config.js
+  const deployDate = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'DEV MODE';
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 2.5, duration: 0.8 }}
+      className="fixed z-[45] flex flex-col items-end gap-1 pointer-events-none
+        top-4 right-4 
+        md:top-20 md:right-8"
+    >
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-full shadow-lg">
+        <div className="relative flex items-center justify-center w-2 h-2">
+          <span className="absolute w-full h-full bg-green-500 rounded-full animate-ping opacity-75"></span>
+          <span className="relative w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+        </div>
+        <span className="text-[10px] font-mono text-slate-300 tracking-wider">SYSTEM: ONLINE</span>
+      </div>
+      <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-900/50 backdrop-blur-sm border border-slate-800/50 rounded-full">
+        <Activity size={10} className="text-slate-500" />
+        <span className="text-[10px] font-mono text-slate-500">LAST DEPLOY: {deployDate}</span>
+      </div>
+    </motion.div>
+  );
+};
+
+// --- COMPONENT: BOOT SEQUENCE ---
+const BootSequence = ({ onComplete }) => {
+  const [text, setText] = useState([]);
+  
+  useEffect(() => {
+    const sequence = [
+      { text: "> INITIALIZING CORE MODULES...", delay: 200 },
+      { text: "> ESTABLISHING SECURE CONNECTION...", delay: 800 },
+      { text: "> LOADING ASSETS...", delay: 1400 },
+      { text: "> ACCESS GRANTED.", delay: 2000, color: "text-neon-green" }
+    ];
+
+    let timeouts = [];
+
+    sequence.forEach((line) => {
+      const timeout = setTimeout(() => {
+        setText(prev => [...prev, line]);
+      }, line.delay);
+      timeouts.push(timeout);
+    });
+
+    const finishTimeout = setTimeout(() => {
+      onComplete();
+    }, 2600);
+    timeouts.push(finishTimeout);
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [onComplete]);
+
+  return (
+    <motion.div 
+      className="fixed inset-0 z-[100] bg-black flex items-center justify-center font-mono text-sm sm:text-base p-8"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+      transition={{ duration: 0.8, ease: "easeInOut" }}
+    >
+      <div className="w-full max-w-md">
+        {text.map((line, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className={`mb-2 ${line.color || "text-slate-400"}`}
+          >
+            {line.text}
+          </motion.div>
+        ))}
+        <motion.div 
+          animate={{ opacity: [0, 1, 0] }} 
+          transition={{ repeat: Infinity, duration: 0.8 }}
+          className="w-2 h-4 bg-neon-green inline-block ml-1 align-middle" 
+        />
+      </div>
+    </motion.div>
+  );
+};
+
+// --- COMPONENT: HOLOGRAPHIC 3D CARD ---
+const HoloCard = ({ children, className = "", onClick }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useTransform(y, [-100, 100], [10, -10]); // Inverted for tilt effect
+  const rotateY = useTransform(x, [-100, 100], [-10, 10]);
+  
+  // Glare position
+  const glareX = useTransform(x, [-100, 100], [0, 100]);
+  const glareY = useTransform(y, [-100, 100], [0, 100]);
+
+  const handleMove = (clientX, clientY, rect) => {
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Calculate distance from center
+    const moveX = clientX - centerX;
+    const moveY = clientY - centerY;
+
+    // Normalize values roughly between -100 and 100 based on card size
+    // 200 is the sensitivity factor
+    x.set((moveX / rect.width) * 200);
+    y.set((moveY / rect.height) * 200);
+  };
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    handleMove(e.clientX, e.clientY, rect);
+  };
+
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    handleMove(touch.clientX, touch.clientY, rect);
+  };
+
+  const handleLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      style={{ perspective: 1000 }}
+      className={`relative h-full ${className}`}
+      onClick={onClick}
+    >
+      <motion.div
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        className="w-full h-full relative"
+        whileHover={{ scale: 1.02 }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleLeave}
+        onTouchCancel={handleLeave}
+      >
+        {children}
+        
+        {/* Holographic Glare Overlay */}
+        <motion.div 
+          style={{ 
+            background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.1) 0%, transparent 80%)`,
+            zIndex: 20
+          }}
+          className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        />
+      </motion.div>
+    </motion.div>
+  );
 };
 
 // --- COMPONENT: LIKE BUTTON (Persistent & Toggleable) ---
@@ -337,7 +497,6 @@ const ProjectLikeButton = ({ title }) => {
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
 
-  // 1. Initialize state from LocalStorage on mount
   useEffect(() => {
     const likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
     if (likedProjects.includes(title)) {
@@ -345,7 +504,6 @@ const ProjectLikeButton = ({ title }) => {
     }
   }, [title]);
 
-  // 2. Real-time listener for global likes count
   useEffect(() => {
     const docRef = doc(db, "project_stats", title);
     const unsubscribe = onSnapshot(docRef, (doc) => {
@@ -356,41 +514,32 @@ const ProjectLikeButton = ({ title }) => {
     return () => unsubscribe();
   }, [title]);
 
-  // 3. Handle Like/Unlike Logic
   const handleLike = async (e) => {
-    e.stopPropagation(); // Stop card click
-    
+    e.stopPropagation();
     const docRef = doc(db, "project_stats", title);
     let likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
 
     try {
       if (hasLiked) {
-        // --- UNLIKE LOGIC ---
-        setHasLiked(false); // Optimistic UI update
+        setHasLiked(false);
         likedProjects = likedProjects.filter(t => t !== title);
         localStorage.setItem('liked_projects', JSON.stringify(likedProjects));
-        
-        // Decrement in Firestore
         await setDoc(docRef, { likes: increment(-1) }, { merge: true });
       } else {
-        // --- LIKE LOGIC ---
-        setHasLiked(true); // Optimistic UI update
+        setHasLiked(true);
         likedProjects.push(title);
         localStorage.setItem('liked_projects', JSON.stringify(likedProjects));
-        
-        // Increment in Firestore
         await setDoc(docRef, { likes: increment(1) }, { merge: true });
       }
     } catch (err) {
       console.error("Like action failed:", err);
-      // Optional: Revert UI state if needed, but rarely necessary for likes
     }
   };
 
   return (
     <button 
       onClick={handleLike} 
-      className={`flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-full transition-all border ${
+      className={`relative z-30 flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-full transition-all border ${
         hasLiked 
           ? "border-pink-500/50 bg-pink-500/10 text-pink-500" 
           : "border-slate-800 bg-slate-900 text-slate-400 hover:text-pink-400 hover:border-pink-500/30"
@@ -993,6 +1142,7 @@ const Navbar = () => {
 // --- MAIN APP COMPONENT ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showBootSequence, setShowBootSequence] = useState(true);
   const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; 
 
   // Contact Form States
@@ -1229,6 +1379,14 @@ const text = `
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } 
         .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
       `}</style>
+
+      {/* --- BOOT SEQUENCE --- */}
+      <AnimatePresence>
+        {showBootSequence && <BootSequence onComplete={() => setShowBootSequence(false)} />}
+      </AnimatePresence>
+
+      {/* --- SYSTEM STATUS DASHBOARD --- */}
+      <SystemStatus />
 
       {/* --- OTP MODAL --- */}
       <AnimatePresence>
@@ -1507,47 +1665,49 @@ const text = `
             <AnimatePresence mode="popLayout">
               {filteredProjects.map((project, idx) => (
                 <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
-                  <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                    <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                      <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
-                    </div>
-                    
-                    <div className="flex justify-between items-start mb-4 relative z-10">
-                      <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
-                        <project.icon size={24} />
+                  <HoloCard>
+                    <Card className={`group relative overflow-hidden transition-all duration-300 h-full ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
+                      <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                        <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                       </div>
-                      <ProjectLikeButton title={project.title} />
-                    </div>
+                      
+                      <div className="flex justify-between items-start mb-4 relative z-30">
+                        <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
+                          <project.icon size={24} />
+                        </div>
+                        <ProjectLikeButton title={project.title} />
+                      </div>
 
-                    <div className="flex justify-between items-center mb-3 relative z-10">
-                      <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
-                      {project.isDownload ? (
-                        <button 
-                          onClick={() => handleDownloadClick(project)} 
-                          className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                        >
-                          {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
-                        </button>
-                      ) : (
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
-                          <ExternalLink size={16} />
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                    <div className="flex flex-wrap gap-2 relative z-10 mb-4">
-                      {project.tags.map((tag, tIdx) => (
-                        <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
-                      ))}
-                    </div>
+                      <div className="flex justify-between items-center mb-3 relative z-30">
+                        <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
+                        {project.isDownload ? (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDownloadClick(project); }} 
+                            className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                          >
+                            {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
+                          </button>
+                        ) : (
+                          <a href={project.link} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                            <ExternalLink size={16} />
+                          </a>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-30">{project.desc}</p>
+                      <div className="flex flex-wrap gap-2 relative z-30 mb-4">
+                        {project.tags.map((tag, tIdx) => (
+                          <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                        ))}
+                      </div>
 
-                    {/* Published Date Display */}
-                    <div className="flex items-center gap-1.5 pt-4 border-t border-white/5 relative z-10">
-                       <Calendar size={12} className="text-slate-500" />
-                       <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
-                    </div>
-                  </Card>
+                      {/* Published Date Display */}
+                      <div className="flex items-center gap-1.5 pt-4 border-t border-white/5 relative z-30">
+                        <Calendar size={12} className="text-slate-500" />
+                        <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
+                      </div>
+                    </Card>
+                  </HoloCard>
                 </RevealCard>
               ))}
             </AnimatePresence>
