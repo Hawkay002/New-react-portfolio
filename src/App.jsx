@@ -548,7 +548,7 @@ const data = {
       { name: "Raspberry Pi", level: 75, color: "from-pink-500 to-rose-600", icon: SiRaspberrypi, iconColor: "#C51A4A" },
       { name: "Sensors & Actuators", level: 80, color: "from-purple-500 to-violet-600", icon: Cpu, iconColor: "#A78BFA" },
       { name: "Flipper Zero", level: 90, color: "from-orange-500 to-red-600", icon: Radio, iconColor: "#E88C30" },
-      { name: "Kode", level: 85, color: "from-indigo-400 to-blue-600", icon: Code2, iconColor: "#818CF8" },
+      { name: "Kode.", level: 85, color: "from-indigo-400 to-blue-600", icon: Code2, iconColor: "#818CF8" },
     ],
     tools: [
       { name: "Adobe Suite", level: 95, color: "from-pink-500 to-rose-600", icon: SiAdobecreativecloud, iconColor: "#DA4943" },
@@ -566,7 +566,7 @@ const data = {
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
       link: "https://connect-liv2.onrender.com", 
       icon: Link, 
-      date: "Jan 18, 2026",
+      date: "May 14, 2025",
       color: "text-blue-400", 
       bg: "bg-blue-400/10",
       cardBorder: "border-blue-500/20",
@@ -581,7 +581,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
       link: "https://inv-henna.vercel.app/",
       icon: Receipt,
-      date: "Nov 15, 2025", 
+      date: "Apr 15, 2025", 
       color: "text-green-400", 
       bg: "bg-green-400/10",
       cardBorder: "border-green-500/20",
@@ -596,7 +596,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&q=80&w=800",
       link: "https://new-pos-ten.vercel.app/",
       icon: Utensils,
-      date: "Dec 10, 2025", 
+      date: "Jun 10, 2025", 
       color: "text-orange-400", 
       bg: "bg-orange-400/10",
       cardBorder: "border-orange-500/20",
@@ -628,7 +628,7 @@ const data = {
       locked: true,
       link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/unredactor.py-main.zip", 
       icon: Eye,
-      date: "Jan 05, 2026", 
+      date: "Dec 11, 2025", 
       color: "text-red-400", 
       bg: "bg-red-400/10",
       cardBorder: "border-red-500/20",
@@ -658,9 +658,9 @@ const data = {
       desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
       tags: ["Management", "Admin", "Firestore"],
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=800",
-      link: "https://entryticket.netlify.app/",
+      link: "https://entry-pass-seven.vercel.app/",
       icon: Ticket,
-      date: "Dec 30, 2025", 
+      date: "Dec 27, 2025", 
       color: "text-purple-400", 
       bg: "bg-purple-400/10",
       cardBorder: "border-purple-500/20",
@@ -673,7 +673,7 @@ const data = {
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
       tags: ["React", "Showcase", "Hobby"],
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800",
-      link: "https://react-portfolio-nine-wine.vercel.app/#home",
+      link: "https://shovith-dev.vercel.app/",
       icon: Globe,
       date: "Jan 27, 2026", 
       color: "text-indigo-400", 
@@ -722,7 +722,7 @@ const data = {
   icon: Heart // Icon matches the "Valentines" theme
 },
 {
-  title: "16 Personalities Quiz - Valentines Day Special",
+  title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
   desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
   eta: "Feb 14, 2026",
   status: "Paused",
@@ -1169,7 +1169,7 @@ const text = `
           return; 
         }
         if (dbQuota >= 250) { 
-          showNotification("Monthly limit reached. Use Telegram.", 'error'); 
+          showNotification("Monthly limit reached. Use other Contact Form.", 'error'); 
           setIsSubmitting(false); 
           return; 
         }
@@ -1295,7 +1295,7 @@ const text = `
                     disabled={isVerifying} 
                     className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Unlock Download"}
+                    {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Unlock"}
                   </button>
                   <button type="button" onClick={() => setVerificationStep(1)} className="w-full text-xs text-slate-500 hover:text-slate-300 underline">Restart Verification</button>
                 </form>
@@ -1720,7 +1720,7 @@ const text = `
       </main>
 
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
-        <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">♥</span> and React.js</p>
+        <p>© 2025 Shovith Debnath. Crafted with <span className="text-red-500">ᡣ𐭩</span></p>
       </footer>
     </div>
   )
