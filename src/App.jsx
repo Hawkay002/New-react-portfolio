@@ -664,9 +664,86 @@ const data = {
       title: "16 Personalities Quiz - Valentines Day Special",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
-      status: "In Progress",
+      status: "Planning",
       icon: Heart // Icon matches the "Valentines" theme
-    }
+    },
+    {
+  title: "16 Personalities Quiz - Valentines Day Special",
+  desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+  eta: "Feb 14, 2026",
+  status: "Implementing",
+  icon: Heart // Icon matches the "Valentines" theme
+},
+{
+  title: "16 Personalities Quiz - Valentines Day Special",
+  desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+  eta: "Feb 14, 2026",
+  status: "In Progress",
+  icon: Heart // Icon matches the "Valentines" theme
+},
+{
+  title: "16 Personalities Quiz - Valentines Day Special",
+  desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+  eta: "Feb 14, 2026",
+  status: "Testing",
+  icon: Heart // Icon matches the "Valentines" theme
+},
+{
+  title: "16 Personalities Quiz - Valentines Day Special",
+  desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+  eta: "Feb 14, 2026",
+  status: "Done",
+  icon: Heart // Icon matches the "Valentines" theme
+},
+{
+  title: "16 Personalities Quiz - Valentines Day Special",
+  desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
+  eta: "Feb 14, 2026",
+  status: "",
+  icon: Heart // Icon matches the "Valentines" theme
+}
+/* HELPER - DO NOT DELETE
+### 1. Planning
+
+* Trigger Keywords: "Planning"
+* Icon: `PenTool` (Pen)
+* Color: Blue
+* Meaning: Early stage, brainstorming, or design phase.
+
+### 2. Implementing / Coding
+
+* Trigger Keywords: "Implementing", "Coding"
+* Icon: `Code2` (Code Brackets)
+* Color: Cyan (Neon Blue)
+* Meaning: Active development and writing code.
+
+### 3. In Progress
+
+* Trigger Keywords: "Progress" (e.g., "In Progress", "Work in Progress")
+* Icon: `Loader2` (Spinning Loader)
+* Color: Orange
+* Meaning: General active status, midway through development.
+
+### 4. Testing / Polishing
+
+* Trigger Keywords: "Almost", "Testing" (e.g., "Almost Done", "Beta Testing")
+* Icon: `SlidersHorizontal` (Adjustment Sliders)
+* Color: Purple
+* Meaning: Final touches, bug fixing, or fine-tuning.
+
+### 5. Completed
+
+* Trigger Keywords: "Done", "Completed"
+* Icon: `CheckCircle2` (Checkmark)
+* Color: Green
+* Meaning: Project finished and live.
+
+### 6. Default (Fallback)
+
+* Trigger Keywords: Any other text not listed above (e.g., "Paused", "Review")
+* Icon: `Clock`
+* Color: Slate (Grey)
+* Meaning: Used for generic or undefined statuses.*/
   ],
   education: [
     { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "96%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
