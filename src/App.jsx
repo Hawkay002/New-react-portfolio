@@ -8,7 +8,7 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, SlidersHorizontal, Calendar, Activity
+  PenTool, SlidersHorizontal, Calendar, Activity, Terminal
 } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 
@@ -334,9 +334,14 @@ const getStatusStyle = (status) => {
 
 // --- COMPONENT: SYSTEM STATUS DASHBOARD ---
 const SystemStatus = () => {
-  // Uses global variable from vite.config.js if available, else falls back to Dev Mode
-  // To enable real date, add define: { '__BUILD_DATE__': ... } in vite.config.js
-  const deployDate = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'DEV MODE';
+  const [deployDate, setDeployDate] = useState("INITIALIZING...");
+
+  useEffect(() => {
+    // CRASH FIX: We use a safe local date instead of relying on the build variable immediately
+    // ensuring the app doesn't break if vite.config.js isn't updated.
+    const date = new Date();
+    setDeployDate(`${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`);
+  }, []);
 
   return (
     <motion.div 
@@ -383,9 +388,10 @@ const BootSequence = ({ onComplete }) => {
       timeouts.push(timeout);
     });
 
+    // Failsafe: Ensure completion triggers even if logic lags
     const finishTimeout = setTimeout(() => {
       onComplete();
-    }, 2600);
+    }, 3000);
     timeouts.push(finishTimeout);
 
     return () => timeouts.forEach(clearTimeout);
@@ -393,12 +399,13 @@ const BootSequence = ({ onComplete }) => {
 
   return (
     <motion.div 
-      className="fixed inset-0 z-[100] bg-black flex items-center justify-center font-mono text-sm sm:text-base p-8"
+      className="fixed inset-0 z-[100] bg-black flex items-center justify-center font-mono text-sm sm:text-base p-8 cursor-pointer"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
       transition={{ duration: 0.8, ease: "easeInOut" }}
+      onClick={onComplete} // Tap to skip feature
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md pointer-events-none">
         {text.map((line, i) => (
           <motion.div 
             key={i}
@@ -415,6 +422,16 @@ const BootSequence = ({ onComplete }) => {
           className="w-2 h-4 bg-neon-green inline-block ml-1 align-middle" 
         />
       </div>
+      
+      {/* Skip Hint */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.5 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-10 text-[10px] text-slate-600"
+      >
+        [ TAP ANYWHERE TO SKIP ]
+      </motion.div>
     </motion.div>
   );
 };
