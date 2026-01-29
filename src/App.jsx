@@ -324,21 +324,29 @@ const formatLikes = (num) => {
 // --- HELPER: STATUS BADGE LOGIC ---
 const getStatusStyle = (status) => {
   const s = status.toLowerCase();
-  if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" };
-  if (s.includes("implementing") || s.includes("coding")) return { icon: Code2, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" };
-  if (s.includes("progress")) return { icon: Loader2, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" };
-  if (s.includes("almost") || s.includes("testing")) return { icon: SlidersHorizontal, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" };
-  if (s.includes("done") || s.includes("completed")) return { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" };
-  return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" };
+  if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" }; /*Trigger Keywords: "Planning"*/
+  if (s.includes("implementing") || s.includes("coding")) return { icon: Code2, color: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" }; /*Trigger Keywords: "Implementing", "Coding"*/
+  if (s.includes("progress")) return { icon: Loader2, color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" }; /*Trigger Keywords: "Progress" (e.g., "In Progress", "Work in Progress")*/
+  if (s.includes("almost") || s.includes("testing")) return { icon: SlidersHorizontal, color: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-400/20" }; /*Trigger Keywords: "Almost", "Testing" (e.g., "Almost Done", "Beta Testing")*/
+  if (s.includes("done") || s.includes("completed")) return { icon: CheckCircle2, color: "text-green-400", bg: "bg-green-400/10", border: "border-green-400/20" }; /*Trigger Keywords: "Done", "Completed"*/
+  return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" }; /*Trigger Keywords: Any other text not listed above (e.g., "Paused", "Review")*/
 };
 
-// --- COMPONENT: LIKE BUTTON (Kudos System) ---
+// --- COMPONENT: LIKE BUTTON (Persistent & Toggleable) ---
 const ProjectLikeButton = ({ title }) => {
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
 
+  // 1. Initialize state from LocalStorage on mount
   useEffect(() => {
-    // Real-time listener for likes
+    const likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
+    if (likedProjects.includes(title)) {
+      setHasLiked(true);
+    }
+  }, [title]);
+
+  // 2. Real-time listener for global likes count
+  useEffect(() => {
     const docRef = doc(db, "project_stats", title);
     const unsubscribe = onSnapshot(docRef, (doc) => {
       if (doc.exists()) {
@@ -348,16 +356,34 @@ const ProjectLikeButton = ({ title }) => {
     return () => unsubscribe();
   }, [title]);
 
+  // 3. Handle Like/Unlike Logic
   const handleLike = async (e) => {
     e.stopPropagation(); // Stop card click
-    if (hasLiked) return;
     
-    setHasLiked(true); // Optimistic update
     const docRef = doc(db, "project_stats", title);
+    let likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
+
     try {
-      await setDoc(docRef, { likes: increment(1) }, { merge: true });
+      if (hasLiked) {
+        // --- UNLIKE LOGIC ---
+        setHasLiked(false); // Optimistic UI update
+        likedProjects = likedProjects.filter(t => t !== title);
+        localStorage.setItem('liked_projects', JSON.stringify(likedProjects));
+        
+        // Decrement in Firestore
+        await setDoc(docRef, { likes: increment(-1) }, { merge: true });
+      } else {
+        // --- LIKE LOGIC ---
+        setHasLiked(true); // Optimistic UI update
+        likedProjects.push(title);
+        localStorage.setItem('liked_projects', JSON.stringify(likedProjects));
+        
+        // Increment in Firestore
+        await setDoc(docRef, { likes: increment(1) }, { merge: true });
+      }
     } catch (err) {
-      console.error("Like failed. Check Firestore Rules.", err);
+      console.error("Like action failed:", err);
+      // Optional: Revert UI state if needed, but rarely necessary for likes
     }
   };
 
@@ -699,51 +725,9 @@ const data = {
   title: "16 Personalities Quiz - Valentines Day Special",
   desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
   eta: "Feb 14, 2026",
-  status: "",
+  status: "Paused",
   icon: Heart // Icon matches the "Valentines" theme
 }
-/* HELPER - DO NOT DELETE
-### 1. Planning
-
-* Trigger Keywords: "Planning"
-* Icon: `PenTool` (Pen)
-* Color: Blue
-* Meaning: Early stage, brainstorming, or design phase.
-
-### 2. Implementing / Coding
-
-* Trigger Keywords: "Implementing", "Coding"
-* Icon: `Code2` (Code Brackets)
-* Color: Cyan (Neon Blue)
-* Meaning: Active development and writing code.
-
-### 3. In Progress
-
-* Trigger Keywords: "Progress" (e.g., "In Progress", "Work in Progress")
-* Icon: `Loader2` (Spinning Loader)
-* Color: Orange
-* Meaning: General active status, midway through development.
-
-### 4. Testing / Polishing
-
-* Trigger Keywords: "Almost", "Testing" (e.g., "Almost Done", "Beta Testing")
-* Icon: `SlidersHorizontal` (Adjustment Sliders)
-* Color: Purple
-* Meaning: Final touches, bug fixing, or fine-tuning.
-
-### 5. Completed
-
-* Trigger Keywords: "Done", "Completed"
-* Icon: `CheckCircle2` (Checkmark)
-* Color: Green
-* Meaning: Project finished and live.
-
-### 6. Default (Fallback)
-
-* Trigger Keywords: Any other text not listed above (e.g., "Paused", "Review")
-* Icon: `Clock`
-* Color: Slate (Grey)
-* Meaning: Used for generic or undefined statuses.*/
   ],
   education: [
     { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "96%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
