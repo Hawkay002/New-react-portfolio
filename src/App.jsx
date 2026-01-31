@@ -643,7 +643,7 @@ const data = {
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
       isDownload: true,
       locked: true,
-      link: "https://example.com/ransomware_tool.zip", 
+      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/Ransomware-main.zip", 
       icon: FileLock,
       date: "Jan 27, 2026", 
       color: "text-cyan-400", 
@@ -685,8 +685,8 @@ const data = {
     }
   ],
   // --- UPDATED ROADMAP WITH SINGLE ENTRY ---
-  roadmap: [
-    {
+  roadmap:[
+/*    {
       title: "16 Personalities Quiz - Valentines Day Special",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
@@ -720,12 +720,12 @@ const data = {
   eta: "Feb 14, 2026",
   status: "Done",
   icon: Heart // Icon matches the "Valentines" theme
-},
+},*/
 {
   title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
   desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
   eta: "Feb 14, 2026",
-  status: "Paused",
+  status: "In Progress",
   icon: Heart // Icon matches the "Valentines" theme
 }
   ],
