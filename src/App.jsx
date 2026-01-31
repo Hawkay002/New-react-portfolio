@@ -1399,62 +1399,71 @@ const text = `
           {/* CONTENT SWITCHER */}
           <AnimatePresence mode="wait">
             {!isEduUnlocked ? (
-              // --- LOCKED STATE: 3 SUMMARY CARDS ---
+              // --- LOCKED STATE: PYRAMID LAYOUT ---
               <motion.div 
                 key="summary"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid gap-4"
               >
-                {/* Postgraduate Card */}
-                <Card className="flex items-center justify-between p-5 group hover:border-neon-green/30 transition-colors cursor-pointer" style={{}} >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400">
-                      <GraduationCap size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-white">Postgraduate Studies</h3>
-                      <p className="text-sm text-slate-400">{postGradCount} Masters Degrees</p>
-                    </div>
-                  </div>
-                  <button onClick={() => setIsEduModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-neon-green group-hover:bg-neon-green group-hover:text-black transition-all">
-                    Show Details <ChevronDown size={14} />
-                  </button>
-                </Card>
+                {/* ROW 1: Side by Side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Card 1: Postgraduate */}
+                  <ScaleRevealCard delay={0.1}>
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-purple-500/20 bg-purple-500/5">
+                      <div className="p-3 rounded-xl mb-3 bg-purple-500/10 text-purple-400">
+                        <GraduationCap size={24} />
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Postgraduate</span>
+                      <span className="text-5xl font-bold text-white mb-2">{postGradCount}</span>
+                      <span className="text-xs text-slate-500">Masters Degrees</span>
+                    </Card>
+                  </ScaleRevealCard>
 
-                {/* Undergraduate Card */}
-                <Card className="flex items-center justify-between p-5 group hover:border-blue-500/30 transition-colors cursor-pointer" style={{}}>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400">
-                      <GraduationCap size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-white">Undergraduate Studies</h3>
-                      <p className="text-sm text-slate-400">{underGradCount} Bachelors Degrees</p>
-                    </div>
-                  </div>
-                  <button onClick={() => setIsEduModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-blue-400 group-hover:bg-blue-400 group-hover:text-black transition-all">
-                    Show Details <ChevronDown size={14} />
-                  </button>
-                </Card>
+                  {/* Card 2: Undergraduate */}
+                  <ScaleRevealCard delay={0.2}>
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-blue-500/20 bg-blue-500/5">
+                      <div className="p-3 rounded-xl mb-3 bg-blue-500/10 text-blue-400">
+                        <GraduationCap size={24} />
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Undergraduate</span>
+                      <span className="text-5xl font-bold text-white mb-2">{underGradCount}</span>
+                      <span className="text-xs text-slate-500">Bachelors Degrees</span>
+                    </Card>
+                  </ScaleRevealCard>
+                </div>
 
-                {/* Schooling Card */}
-                <Card className="flex items-center justify-between p-5 group hover:border-orange-500/30 transition-colors cursor-pointer" style={{}}>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-orange-500/10 text-orange-400">
-                      <BookOpen size={24} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-white">Schooling</h3>
-                      <p className="text-sm text-slate-400">{schoolCount} Certifications</p>
-                    </div>
+                {/* ROW 2: Centered 3rd Card */}
+                <div className="flex justify-center mb-8">
+                  {/* w-[calc(50%-0.5rem)] ensures it is exactly the same width as the cards above in the grid */}
+                  <div className="w-full md:w-[calc(50%-0.5rem)]">
+                    <ScaleRevealCard delay={0.3}>
+                      <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-orange-500/20 bg-orange-500/5">
+                        <div className="p-3 rounded-xl mb-3 bg-orange-500/10 text-orange-400">
+                          <BookOpen size={24} />
+                        </div>
+                        <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Schooling</span>
+                        <span className="text-5xl font-bold text-white mb-2">{schoolCount}</span>
+                        <span className="text-xs text-slate-500">Certifications</span>
+                        
+                        {/* SINGLE REVEAL BUTTON (Inside the bottom card as requested or below? Placed below for cleaner UI flow) */}
+                      </Card>
+                    </ScaleRevealCard>
                   </div>
-                  <button onClick={() => setIsEduModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-orange-400 group-hover:bg-orange-400 group-hover:text-black transition-all">
-                    Show Details <ChevronDown size={14} />
-                  </button>
-                </Card>
+                </div>
+
+                {/* SINGLE REVEAL BUTTON */}
+                <ScaleRevealCard delay={0.4}>
+                  <div className="flex justify-center">
+                    <button 
+                      onClick={() => setIsEduModalOpen(true)} 
+                      className="group flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:border-neon-green hover:bg-slate-800 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                    >
+                      Show Detailed List <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
+                    </button>
+                  </div>
+                </ScaleRevealCard>
               </motion.div>
             ) : (
               // --- UNLOCKED STATE: DETAILED LIST ---
