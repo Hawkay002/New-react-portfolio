@@ -33,8 +33,10 @@ const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = import.meta.env.VITE_TELEGRAM_CHAT_ID;
 
+// ⚠️ REPLACE THIS WITH YOUR BOT USERNAME (No @ symbol)
 const BOT_USERNAME = "great_portfolio_bot"; 
 
+// --- FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -47,13 +49,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- SHORTENED COUNTRY DATA ---
+// --- SHORTENED COUNTRY DATA (As Requested) ---
 const allCountries = [
   { name: "India", dial_code: "+91", code: "IN" },
   { name: "United States", dial_code: "+1", code: "US" }
 ];
 
-// --- HELPERS ---
+// --- HELPER: GENERATE SESSION UUID ---
 const generateSessionId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -61,13 +63,19 @@ const generateSessionId = () => {
   });
 };
 
+// --- HELPER: FORMAT NUMBERS (Fixed to 2 decimals) ---
 const formatLikes = (num) => {
   if (!num) return 0;
-  if (num >= 1000000) return (Math.floor(num / 10000) / 100) + 'm';
-  if (num >= 1000) return (Math.floor(num / 10) / 100) + 'k';
+  if (num >= 1000000) {
+    return (Math.floor(num / 10000) / 100) + 'm';
+  }
+  if (num >= 1000) {
+    return (Math.floor(num / 10) / 100) + 'k';
+  }
   return num;
 };
 
+// --- HELPER: STATUS BADGE LOGIC ---
 const getStatusStyle = (status) => {
   const s = status.toLowerCase();
   if (s.includes("planning")) return { icon: PenTool, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20" };
@@ -78,21 +86,24 @@ const getStatusStyle = (status) => {
   return { icon: Clock, color: "text-slate-400", bg: "bg-slate-800", border: "border-slate-700" };
 };
 
-// --- COMPONENTS ---
-
+// --- COMPONENT: LIKE BUTTON (Persistent & Toggleable) ---
 const ProjectLikeButton = ({ title }) => {
   const [likes, setLikes] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
 
   useEffect(() => {
     const likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
-    if (likedProjects.includes(title)) setHasLiked(true);
+    if (likedProjects.includes(title)) {
+      setHasLiked(true);
+    }
   }, [title]);
 
   useEffect(() => {
     const docRef = doc(db, "project_stats", title);
     const unsubscribe = onSnapshot(docRef, (doc) => {
-      if (doc.exists()) setLikes(doc.data().likes || 0);
+      if (doc.exists()) {
+        setLikes(doc.data().likes || 0);
+      }
     });
     return () => unsubscribe();
   }, [title]);
@@ -101,6 +112,7 @@ const ProjectLikeButton = ({ title }) => {
     e.stopPropagation(); 
     const docRef = doc(db, "project_stats", title);
     let likedProjects = JSON.parse(localStorage.getItem('liked_projects') || '[]');
+
     try {
       if (hasLiked) {
         setHasLiked(false);
@@ -113,17 +125,27 @@ const ProjectLikeButton = ({ title }) => {
         localStorage.setItem('liked_projects', JSON.stringify(likedProjects));
         await setDoc(docRef, { likes: increment(1) }, { merge: true });
       }
-    } catch (err) { console.error("Like error:", err); }
+    } catch (err) {
+      console.error("Like action failed:", err);
+    }
   };
 
   return (
-    <button onClick={handleLike} className={`flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-full transition-all border ${hasLiked ? "border-pink-500/50 bg-pink-500/10 text-pink-500" : "border-slate-800 bg-slate-900 text-slate-400 hover:text-pink-400 hover:border-pink-500/30"}`}>
+    <button 
+      onClick={handleLike} 
+      className={`flex items-center gap-1.5 text-xs font-mono px-2 py-1 rounded-full transition-all border ${
+        hasLiked 
+          ? "border-pink-500/50 bg-pink-500/10 text-pink-500" 
+          : "border-slate-800 bg-slate-900 text-slate-400 hover:text-pink-400 hover:border-pink-500/30"
+      }`}
+    >
       <Heart size={14} className={hasLiked ? "fill-pink-500 text-pink-500" : ""} />
       <span>{formatLikes(likes)}</span>
     </button>
   );
 };
 
+// --- COMPONENT: COUNTRY SELECTOR ---
 const CountrySelector = ({ selectedCode, onChange, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -131,7 +153,9 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -139,7 +163,10 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
   const filteredCountries = useMemo(() => {
     if (!search) return allCountries;
-    return allCountries.filter(c => c.name.toLowerCase().includes(search.toLowerCase()) || c.dial_code.includes(search));
+    return allCountries.filter(c => 
+      c.name.toLowerCase().includes(search.toLowerCase()) || 
+      c.dial_code.includes(search)
+    );
   }, [search]);
 
   const selectedCountry = allCountries.find(c => c.dial_code === selectedCode) || allCountries[0];
@@ -147,9 +174,19 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
   return (
     <div className="relative w-32" ref={dropdownRef}>
       <input type="hidden" name={name} value={selectedCountry?.dial_code} />
-      <button type="button" onClick={() => setIsOpen(!isOpen)} className="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors flex items-center justify-between gap-2">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors flex items-center justify-between gap-2"
+      >
         <div className="flex items-center gap-2 overflow-hidden">
-          <img src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} width="20" alt={selectedCountry?.code} className="rounded-sm shrink-0" />
+          <img 
+            src={`https://flagcdn.com/w20/${selectedCountry?.code.toLowerCase()}.png`} 
+            srcSet={`https://flagcdn.com/w40/${selectedCountry?.code.toLowerCase()}.png 2x`}
+            width="20" 
+            alt={selectedCountry?.code} 
+            className="rounded-sm object-cover shrink-0"
+          />
           <span className="text-slate-300 truncate">{selectedCountry?.dial_code}</span>
         </div>
         <ChevronDown size={14} className={`text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -157,23 +194,62 @@ const CountrySelector = ({ selectedCode, onChange, name }) => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute bottom-full left-0 mb-2 w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
+          >
             <div className="p-2 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input type="text" placeholder="Search country..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none" autoFocus />
+                <input
+                  type="text"
+                  placeholder="Search country..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 pl-9 pr-3 text-xs text-slate-300 focus:border-neon-green outline-none"
+                  autoFocus
+                />
               </div>
             </div>
-            <div className="max-h-60 overflow-y-auto scrollbar-thin">
-              {filteredCountries.map((country) => (
-                <button key={country.code} type="button" onClick={() => { onChange(country.dial_code); setIsOpen(false); setSearch(""); }} className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${selectedCountry?.code === country.code ? "bg-slate-800/50" : ""}`}>
-                  <img src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} width="20" alt={country.name} className="rounded-sm shrink-0" />
-                  <div className="flex-1 min-w-0 flex justify-between items-center">
-                    <span className="text-sm text-slate-200 truncate">{country.name}</span>
-                    <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
-                  </div>
-                </button>
-              ))}
+
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+              {filteredCountries.length > 0 ? (
+                filteredCountries.map((country) => (
+                    <button
+                      key={country.code}
+                      type="button"
+                      onClick={() => {
+                        onChange(country.dial_code);
+                        setIsOpen(false);
+                        setSearch("");
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-800 transition-colors text-left ${
+                        selectedCountry?.code === country.code ? "bg-slate-800/50" : ""
+                      }`}
+                    >
+                      <img 
+                        src={`https://flagcdn.com/w20/${country.code.toLowerCase()}.png`} 
+                        srcSet={`https://flagcdn.com/w40/${country.code.toLowerCase()}.png 2x`}
+                        width="20" 
+                        alt={country.name} 
+                        className="rounded-sm object-cover shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-slate-200 truncate">{country.name}</span>
+                          <span className="text-xs text-slate-500 font-mono ml-2">{country.dial_code}</span>
+                        </div>
+                      </div>
+                    </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-xs text-slate-500">
+                  No countries found
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -353,7 +429,7 @@ const data = {
   ],
   roadmap:[
     {
-      title: "Cupid x Us - Quiz",
+      title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
       status: "In Progress",
@@ -373,14 +449,20 @@ const data = {
   ]
 };
 
-// --- DISPLAY HELPERS ---
+// --- HELPER COMPONENTS ---
+
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   useEffect(() => {
-    let i = 0; setDisplayText('');
+    let i = 0; 
+    setDisplayText('');
     const timer = setInterval(() => { 
-      if (i < text.length) { setDisplayText(text.substring(0, i + 1)); i++; } 
-      else clearInterval(timer); 
+      if (i < text.length) { 
+        setDisplayText(text.substring(0, i + 1)); 
+        i++; 
+      } else { 
+        clearInterval(timer); 
+      } 
     }, speed);
     return () => clearInterval(timer);
   }, [text, speed]);
@@ -388,7 +470,12 @@ const Typewriter = ({ text, speed = 50 }) => {
 };
 
 const ScaleRevealCard = ({ children, delay = 0 }) => (
-  <motion.div initial={{ scale: 0.5, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay, type: "spring", stiffness: 60 }}>
+  <motion.div 
+    initial={{ scale: 0.5, opacity: 0 }} 
+    whileInView={{ scale: 1, opacity: 1 }} 
+    viewport={{ once: true }} 
+    transition={{ duration: 0.5, delay: delay, type: "spring", stiffness: 60 }}
+  >
     {children}
   </motion.div>
 );
@@ -399,7 +486,14 @@ const RevealCard = ({ children, delay = 0, className = "", direction = "bottom" 
     visible: { opacity: 1, y: 0, x: 0 } 
   };
   return (
-    <motion.div variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.6, delay, type: "spring", stiffness: 40 }} className={className}>
+    <motion.div 
+      variants={variants} 
+      initial="hidden" 
+      whileInView="visible" 
+      viewport={{ once: true, margin: "-50px" }} 
+      transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 40 }} 
+      className={className}
+    >
       {children}
     </motion.div>
   );
@@ -409,7 +503,16 @@ const AnimatedCounter = ({ value, color }) => (
   <div className="relative h-4 overflow-hidden inline-flex items-center justify-center">
     <span className="invisible font-mono text-[10px] px-px">{value}</span>
     <AnimatePresence mode="popLayout">
-      <motion.span key={value} initial={{ y: -15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 15, opacity: 0 }} transition={{ duration: 0.3 }} className={`absolute font-mono text-[10px] ${color} left-0 right-0 text-center`}>{value}</motion.span>
+      <motion.span 
+        key={value} 
+        initial={{ y: -15, opacity: 0 }} 
+        animate={{ y: 0, opacity: 1 }} 
+        exit={{ y: 15, opacity: 0 }} 
+        transition={{ duration: 0.3, ease: "easeOut" }} 
+        className={`absolute font-mono text-[10px] ${color} left-0 right-0 text-center`}
+      >
+        {value}
+      </motion.span>
     </AnimatePresence>
   </div>
 );
@@ -417,26 +520,60 @@ const AnimatedCounter = ({ value, color }) => (
 const SectionTitle = ({ subtitle, title }) => (
   <div className="flex flex-col items-center mb-12 mt-20">
     <span className="text-neon-green text-lg font-mono mb-2">{'>'} {subtitle}</span>
-    <h2 className="text-3xl font-bold text-white relative inline-block">{title}<span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-neon-green rounded-full"></span></h2>
+    <h2 className="text-3xl font-bold text-white relative inline-block">
+      {title}
+      <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-neon-green rounded-full"></span>
+    </h2>
   </div>
 );
 
 const Card = ({ children, className = "", style }) => (
-  <div style={style} className={`bg-card-bg rounded-2xl border border-white/5 p-6 glow-card transition-all duration-300 ${className}`}>{children}</div>
+  <div style={style} className={`bg-card-bg rounded-2xl border border-white/5 p-6 glow-card transition-all duration-300 ${className}`}>
+    {children}
+  </div>
 );
 
+// --- COMPONENT: PROGRESS BAR ---
 const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
   <div className="mb-5 last:mb-0">
     <div className="flex justify-between items-end mb-2">
       <div className="flex items-center gap-2">
-        {Icon && <div className="p-1.5 rounded-md bg-white/5 border border-white/5 shadow-sm"><Icon size={16} style={{ color: iconColor }} /></div>}
+        {Icon && (
+          <div className="p-1.5 rounded-md bg-white/5 border border-white/5 shadow-sm">
+            <Icon size={16} style={{ color: iconColor }} />
+          </div>
+        )}
         <span className="text-sm font-medium text-slate-200">{name}</span>
       </div>
       <span className="text-xs text-slate-400 font-mono">{level}%</span>
     </div>
     <div className="w-full bg-slate-800 rounded-full h-3 relative overflow-hidden">
-      <motion.div initial={{ width: 0 }} whileInView={{ width: `${level}%` }} viewport={{ once: true }} transition={{ duration: 1.5, ease: "easeOut" }} className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}>
-        <div className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]" style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}></div>
+      <motion.div 
+        initial={{ width: 0 }} 
+        whileInView={{ width: `${level}%` }} 
+        viewport={{ once: true }} 
+        transition={{ duration: 1.5, ease: "easeOut" }} 
+        className={`h-full rounded-full absolute top-0 left-0 bg-gradient-to-r ${color} relative overflow-hidden`}
+      >
+        <div 
+          className="absolute inset-0 w-full h-full opacity-30 animate-[progress-stripes_1s_linear_infinite]" 
+          style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,0.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}
+        ></div>
+        
+        {[...Array(5)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute rounded-full bg-white/40 animate-[bubble-rise_3s_infinite_ease-in]"
+            style={{
+              width: Math.random() * 4 + 2 + 'px',
+              height: Math.random() * 4 + 2 + 'px',
+              left: Math.random() * 100 + '%',
+              bottom: '-5px',
+              animationDelay: Math.random() * 2 + 's',
+              animationDuration: Math.random() * 2 + 2 + 's'
+            }}
+          />
+        ))}
       </motion.div>
     </div>
   </div>
@@ -445,8 +582,24 @@ const ProgressBar = ({ name, level, color, icon: Icon, iconColor }) => (
 const Navbar = () => {
   const [activeTab, setActiveTab] = useState('home');
   const isManualScroll = useRef(false);
-  const navLinks = [{ name: 'Home', href: '#home' }, { name: 'About', href: '#about' }, { name: 'Skills', href: '#skills' }, { name: 'Projects', href: '#projects' }, { name: 'Education', href: '#education' }, { name: 'Contact', href: '#contact' }];
-  const mobileDockItems = [{ id: 'home', icon: Home, href: '#home' }, { id: 'about', icon: User, href: '#about' }, { id: 'skills', icon: Cpu, href: '#skills' }, { id: 'projects', icon: Briefcase, href: '#projects' }, { id: 'education', icon: GraduationCap, href: '#education' }, { id: 'contact', icon: Mail, href: '#contact' }];
+  
+  const navLinks = [
+    { name: 'Home', href: '#home' }, 
+    { name: 'About', href: '#about' }, 
+    { name: 'Skills', href: '#skills' }, 
+    { name: 'Projects', href: '#projects' }, 
+    { name: 'Education', href: '#education' }, 
+    { name: 'Contact', href: '#contact' }
+  ];
+  
+  const mobileDockItems = [
+    { id: 'home', icon: Home, href: '#home' }, 
+    { id: 'about', icon: User, href: '#about' }, 
+    { id: 'skills', icon: Cpu, href: '#skills' }, 
+    { id: 'projects', icon: Briefcase, href: '#projects' }, 
+    { id: 'education', icon: GraduationCap, href: '#education' }, 
+    { id: 'contact', icon: Mail, href: '#contact' }
+  ];
 
   const scrollToSection = (e, id) => {
     e.preventDefault();
@@ -455,7 +608,12 @@ const Navbar = () => {
     if (element) {
       isManualScroll.current = true;
       setActiveTab(targetId);
-      window.scrollTo({ top: element.offsetTop - 80, behavior: 'smooth' });
+      const offset = 80; 
+      const bodyRect = document.body.getBoundingClientRect().top; 
+      const elementRect = element.getBoundingClientRect().top; 
+      const elementPosition = elementRect - bodyRect; 
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
       history.pushState(null, null, id);
       setTimeout(() => { isManualScroll.current = false; }, 1000);
     }
@@ -465,11 +623,16 @@ const Navbar = () => {
     const handleScroll = () => {
       if (isManualScroll.current) return;
       const sections = ['home', 'about', 'skills', 'projects', 'education', 'contact'];
-      const scrollPos = window.scrollY + 300;
-      sections.forEach(s => {
-        const el = document.getElementById(s);
-        if (el && scrollPos >= el.offsetTop && scrollPos < el.offsetTop + el.offsetHeight) setActiveTab(s);
-      });
+      const scrollPosition = window.scrollY + 300;
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) { 
+          const { offsetTop, offsetHeight } = element; 
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveTab(section);
+          }
+        }
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -477,26 +640,54 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="hidden md:flex fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 h-16 items-center justify-between px-8">
-        <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
-          <div className="bg-neon-green/20 p-1.5 rounded-lg"><Code2 className="text-neon-green w-5 h-5" /></div>
-          <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
-        </a>
-        <div className="flex space-x-8">
-          {navLinks.map((link) => (
-            <a key={link.name} href={link.href} onClick={(e) => scrollToSection(e, link.href)} className={`text-sm font-medium transition-colors ${activeTab === link.href.replace('#', '') ? 'text-neon-green' : 'text-gray-300 hover:text-neon-green'}`}>{link.name}</a>
-          ))}
+      <nav className="hidden md:flex fixed top-0 left-0 w-full z-50 bg-black/30 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 w-full flex items-center justify-between h-16">
+          <div className="flex items-center gap-2">
+            <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
+              <div className="bg-neon-green/20 p-1.5 rounded-lg"><Code2 className="text-neon-green w-5 h-5" /></div>
+              <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
+            </a>
+          </div>
+          <div className="ml-10 flex items-baseline space-x-8">
+            {navLinks.map((link) => (
+              <a 
+                key={link.name} 
+                href={link.href} 
+                onClick={(e) => scrollToSection(e, link.href)} 
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-300 ${activeTab === link.href.replace('#', '') ? 'text-neon-green bg-white/5' : 'text-gray-300 hover:text-neon-green hover:bg-white/5'}`}
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
         </div>
       </nav>
+      
+      <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5 flex items-center gap-2">
+        <Code2 className="text-neon-green w-5 h-5" />
+        <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
+      </div>
+      
       <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
-        <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 flex gap-5">
+        <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-6 py-1.5 shadow-2xl flex items-center gap-5">
           {mobileDockItems.map((item) => { 
             const isActive = activeTab === item.id; 
             return (
-              <a key={item.id} href={item.href} onClick={(e) => scrollToSection(e, item.href)} className={`relative p-2 transition-colors ${isActive ? 'text-white' : 'text-slate-400'}`}>
-                {isActive && <motion.div layoutId="active-dock-pill" className="absolute inset-0 bg-slate-800 rounded-full" transition={{ type: "spring", bounce: 0, duration: 0.6 }} />}
-                {isActive && <motion.div layoutId="active-dock-indicator" className="absolute -bottom-1.5 w-6 h-1.5 bg-white/60 z-20" style={{ clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' }} />}
-                <item.icon size={18} className="relative z-10" />
+              <a 
+                key={item.id} 
+                href={item.href} 
+                onClick={(e) => scrollToSection(e, item.href)} 
+                className={`relative p-2 rounded-full transition-colors duration-300 flex items-center justify-center ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                {isActive && (
+                  <motion.div layoutId="active-dock-pill" className="absolute inset-0 bg-slate-800 rounded-full" transition={{ type: "spring", bounce: 0, duration: 0.6 }} />
+                )}
+                {isActive && (
+                  <motion.div layoutId="active-dock-indicator" className="absolute -bottom-1.5 w-6 h-1.5 bg-white/60 shadow-[0_0_8px_rgba(255,255,255,0.4)] z-20" style={{ clipPath: 'polygon(0% 100%, 100% 100%, 75% 0%, 25% 0%)' }} transition={{ type: "spring", bounce: 0, duration: 0.6 }} />
+                )}
+                <span className="relative z-10">
+                  <item.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                </span>
               </a>
             ); 
           })}
@@ -506,17 +697,19 @@ const Navbar = () => {
   );
 };
 
-// --- MAIN APP ---
+// --- MAIN APP COMPONENT ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileImage = "https://raw.githubusercontent.com/Hawkay002/React-portfolio/d6f210fd03713af59270c31f4872d7d3001cd418/img/Picsart_26-01-18_00-00-17-928.png"; 
 
+  // Contact Form States
   const [notification, setNotification] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTelegram, setIsTelegram] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState("+91"); 
-  const [dbQuota, setDbQuota] = useState(0); 
+  const [dbQuota, setDbQuota] = useState(6); 
 
+  // --- TELEGRAM OTP STATES ---
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
   const [verificationStep, setVerificationStep] = useState(1);
@@ -524,18 +717,22 @@ function App() {
   const [otpError, setOtpError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
+  // --- EDUCATION SECURITY STATE ---
   const [isEduUnlocked, setIsEduUnlocked] = useState(false);
   const [isEduModalOpen, setIsEduModalOpen] = useState(false);
   const [eduPassword, setEduPassword] = useState("");
   const [eduError, setEduError] = useState("");
   const [isEduVerifying, setIsEduVerifying] = useState(false);
 
+  // --- NEW STATE: CATEGORY FILTER ---
   const [activeCategory, setActiveCategory] = useState("All");
 
+  // --- DATA GROUPING FOR EDUCATION ---
   const postGradCount = data.education.filter(e => e.title.includes("Master")).length;
   const underGradCount = data.education.filter(e => e.title.includes("Bachelor")).length;
   const schoolCount = data.education.filter(e => e.title.includes("Secondary")).length;
 
+  // --- QUOTA MANAGEMENT ---
   useEffect(() => {
     const fetchQuota = async () => {
       try {
@@ -546,116 +743,225 @@ function App() {
         const currentYear = now.getFullYear();
 
         if (docSnap.exists()) {
-          const d = docSnap.data();
-          if (d.month !== currentMonth || d.year !== currentYear) {
+          const data = docSnap.data();
+          if (data.month !== currentMonth || data.year !== currentYear) {
             await updateDoc(docRef, { count: 0, month: currentMonth, year: currentYear });
             setDbQuota(0);
-          } else setDbQuota(d.count);
+          } else {
+            setDbQuota(data.count);
+          }
         } else {
-          await setDoc(docRef, { count: 0, month: currentMonth, year: currentYear });
-          setDbQuota(0);
+          await setDoc(docRef, { count: 6, month: currentMonth, year: currentYear });
+          setDbQuota(6);
         }
-      } catch (err) { console.error("Quota fetch fail:", err); }
+      } catch (error) { 
+        console.error("Quota Error:", error); 
+      }
     };
     fetchQuota();
   }, []);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 5000); 
+    setTimeout(() => setNotification(null), 3000);
   };
 
+  // --- UNIVERSAL SECURE DOWNLOAD LOGIC ---
   const handleDownloadClick = (project) => {
     if (project.locked) {
       setCurrentProject(project);
       setIsOtpModalOpen(true);
-      setVerificationStep(1);
+      setVerificationStep(1); 
       setOtpCode("");
       setOtpError("");
-    } else window.open(project.link, '_blank');
+    } else {
+      window.open(project.link, '_blank');
+    }
   };
 
+  // --- TELEGRAM VERIFICATION LOGIC ---
   const handleStartVerification = () => {
-    let sid = localStorage.getItem('secure_download_session_id') || generateSessionId();
-    localStorage.setItem('secure_download_session_id', sid);
-    window.open(`https://t.me/${BOT_USERNAME}?start=${sid}`, '_blank');
+    let sessionId = localStorage.getItem('secure_download_session_id');
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      localStorage.setItem('secure_download_session_id', sessionId);
+    }
+    const botUrl = `https://t.me/${BOT_USERNAME}?start=${sessionId}`;
+    window.open(botUrl, '_blank');
     setVerificationStep(2);
   };
 
   const handleVerifyCode = async (e) => {
     e.preventDefault();
+    if (!otpCode) return;
     setIsVerifying(true);
     setOtpError("");
-    const sid = localStorage.getItem('secure_download_session_id');
+
+    const sessionId = localStorage.getItem('secure_download_session_id');
+    if (!sessionId) {
+      setOtpError("Session expired. Please start again.");
+      setIsVerifying(false);
+      return;
+    }
+
     try {
-      const docSnap = await getDoc(doc(db, "otp_sessions", sid));
-      if (docSnap.exists() && docSnap.data().otp === otpCode.trim()) {
-        const d = docSnap.data();
-        await addDoc(collection(db, "verified_downloads"), {
-          telegram_id: d.telegram_id,
-          project: currentProject.title,
-          timestamp: serverTimestamp()
-        });
-        showNotification(`Success! Downloading ${currentProject.title}...`);
-        window.open(currentProject.link, '_blank');
-        setIsOtpModalOpen(false);
-      } else setOtpError("Invalid code.");
-    } catch (err) { setOtpError("Verification error."); }
-    finally { setIsVerifying(false); }
+      const docRef = doc(db, "otp_sessions", sessionId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.otp === otpCode.trim()) {
+          
+          await addDoc(collection(db, "verified_downloads"), {
+            telegram_id: data.telegram_id,
+            telegram_name: data.telegram_name || "Unknown",
+            telegram_username: data.telegram_username || "None",
+            phone_number: data.phone_number || "Not Shared",
+            project: currentProject.title,
+            timestamp: serverTimestamp()
+          });
+
+          showNotification(`Verification Successful! Downloading ${currentProject.title}...`, "success");
+          const link = document.createElement('a');
+          link.href = currentProject.link;
+          link.download = currentProject.title;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          await deleteDoc(docRef);
+          localStorage.removeItem('secure_download_session_id');
+          setIsOtpModalOpen(false);
+        } else {
+          setOtpError("Incorrect code. Check your Telegram.");
+        }
+      } else {
+        setOtpError("Session not found. Please click 'Verify via Telegram' again.");
+      }
+    } catch (error) {
+      console.error("Verify Error:", error);
+      setOtpError("System error. Try again.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
+  // --- HANDLER: UNLOCK EDUCATION ---
   const handleUnlockEducation = async (e) => {
     e.preventDefault();
     setIsEduVerifying(true);
+    setEduError("");
+
     try {
-      const docSnap = await getDoc(doc(db, "settings", "security"));
-      if (docSnap.exists() && eduPassword === docSnap.data().education_password) {
-        setIsEduUnlocked(true);
-        setIsEduModalOpen(false);
-        setEduPassword("");
-        showNotification("Education Unlocked!");
-      } else setEduError("Incorrect Password.");
-    } catch (err) { setEduError("Auth Failed."); }
-    finally { setIsEduVerifying(false); }
+      const docRef = doc(db, "settings", "security");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const correctPassword = docSnap.data().education_password;
+        if (eduPassword === correctPassword) {
+          setIsEduUnlocked(true);
+          setIsEduModalOpen(false);
+          setEduPassword("");
+          showNotification("Education Details Unlocked!", "success");
+        } else {
+          setEduError("Incorrect Password");
+        }
+      } else {
+        // Fallback for testing if DB entry doesn't exist
+        if (eduPassword === "admin123") {
+            setIsEduUnlocked(true);
+            setIsEduModalOpen(false);
+            setEduPassword("");
+        } else {
+            setEduError("Security configuration missing or password wrong.");
+        }
+      }
+    } catch (error) {
+      console.error("Auth Error:", error);
+      setEduError("Verification failed. Try again.");
+    } finally {
+      setIsEduVerifying(false);
+    }
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (event) => {
+    event.preventDefault();
     setIsSubmitting(true);
-    const fd = new FormData(e.target);
-    const phone = `${fd.get("countryCode")} ${fd.get("phone")}`;
+    const formData = new FormData(event.target);
+    const firstName = formData.get("firstName");
+    const lastName = formData.get("lastName");
+    const email = formData.get("email");
+    const phone = `${formData.get("countryCode")} ${formData.get("phone")}`;
+    const message = formData.get("message");
+
     try {
       if (isTelegram) {
-        const text = `📩 New Message: ${fd.get("firstName")} ${fd.get("lastName")}\n📱 ${phone}\n📝 ${fd.get("message")}`;
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
+        if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+           showNotification("Error: Missing Telegram Config.", 'error'); 
+           setIsSubmitting(false); 
+           return;
+        }
+const text = `
+📩 *New Message Reveived from Portfolio Contact form*
+👤 *Name:* ${firstName} ${lastName}
+📧 *Email:* ${email}
+📱 *Phone:* ${phone}
+📝 *Message:* ${message}
+        `;
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST", 
+          headers: { "Content-Type": "application/json" }, 
           body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: "Markdown" })
         });
-        showNotification("Message sent!");
-        e.target.reset();
+        if (await response.json().then(d => d.ok)) { 
+          showNotification("Message sent!"); 
+          event.target.reset(); 
+        } else { 
+          showNotification("Failed to send.", 'error'); 
+        }
       } else {
-        if (dbQuota >= 250) { showNotification("Monthly limit reached.", 'error'); return; }
-        fd.append("access_key", WEB3FORMS_KEY);
-        fd.append("phone", phone);
-        const res = await fetch("https://api.web3forms.com/submit", { method: "POST", body: fd });
-        const d = await res.json();
-        if (d.success) {
+        if (!WEB3FORMS_KEY) { 
+          showNotification("Error: Missing Web3Forms Key.", 'error'); 
+          setIsSubmitting(false); 
+          return; 
+        }
+        if (dbQuota >= 250) { 
+          showNotification("Monthly limit reached. Use other Contact Form.", 'error'); 
+          setIsSubmitting(false); 
+          return; 
+        }
+        formData.append("access_key", WEB3FORMS_KEY); 
+        formData.append("name", `${firstName} ${lastName}`); 
+        formData.append("phone", phone);
+        const response = await fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
+        const data = await response.json();
+        if (data.success) {
+          showNotification("Message sent!");
           await updateDoc(doc(db, "stats", "email_quota"), { count: increment(1) });
           setDbQuota(prev => prev + 1);
-          showNotification("Sent!");
-          e.target.reset();
-        } else showNotification("Error sending.", 'error');
+          event.target.reset();
+        } else { 
+          showNotification(data.message || "Error.", 'error'); 
+        }
       }
-    } catch (err) { showNotification("Network Error.", "error"); }
-    finally { setIsSubmitting(false); }
+    } catch (error) { 
+      console.error(error); 
+      showNotification("Error occurred.", 'error'); 
+    } finally { 
+      setIsSubmitting(false); 
+    }
   };
 
+  // --- FILTER LOGIC ---
+  const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
+  
   const filteredProjects = useMemo(() => {
-    return data.projects.filter(p => {
+    return data.projects.filter(project => {
       if (activeCategory === "All") return true;
-      if (activeCategory === "Web Dev") return p.tags.some(t => ["React", "HTML", "CSS"].includes(t));
-      if (activeCategory === "Python & AI") return p.tags.some(t => ["Python", "Bot"].includes(t));
-      if (activeCategory === "Security") return p.tags.some(t => ["Security", "Encryption"].includes(t));
+      if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
+      if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
+      if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
+      if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
       return false;
     });
   }, [activeCategory]);
@@ -663,259 +969,672 @@ function App() {
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
       <style>{`
-        @keyframes progress-stripes { from { background-position: 1rem 0; } to { background-position: 0 0; } }
-        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        @keyframes progress-stripes { 
+          from { background-position: 1rem 0; } 
+          to { background-position: 0 0; } 
+        } 
+        @keyframes bubble-rise { 
+          0% { transform: translateY(0); opacity: 0; } 
+          50% { opacity: 1; } 
+          100% { transform: translateY(-20px); opacity: 0; } 
+        } 
+        .perspective-1000 { perspective: 1000px; } 
+        .transform-style-3d { transform-style: preserve-3d; } 
+        .backface-hidden { backface-visibility: hidden; } 
+        .rotate-y-180 { transform: rotateY(180deg); } 
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; } 
+        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; } 
+        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 20px; }
       `}</style>
 
       {/* --- OTP MODAL --- */}
       <AnimatePresence>
         {isOtpModalOpen && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative shadow-2xl">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.9, opacity: 0 }} 
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative shadow-2xl"
+            >
               <button onClick={() => setIsOtpModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white"><X size={20} /></button>
-              <div className="text-center mb-6">
-                <ShieldCheck className="text-blue-500 w-12 h-12 mx-auto mb-2" />
+
+              <div className="flex flex-col items-center mb-6">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-3">
+                  <ShieldCheck className="text-blue-500 w-6 h-6" />
+                </div>
                 <h3 className="text-xl font-bold text-white">Security Verification</h3>
-                <p className="text-sm text-slate-400">Verify identity to download <strong className="text-white">{currentProject?.title}</strong></p>
+                <p className="text-sm text-slate-400 text-center mt-2">
+                  To download <strong className="text-white">{currentProject?.title}</strong>, please verify your identity via Telegram.
+                </p>
               </div>
+
               {verificationStep === 1 ? (
-                <button onClick={handleStartVerification} className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-blue-600">
-                  <Send size={18} /> Verify via Telegram
-                </button>
+                <div className="space-y-4">
+                  <div className="bg-slate-950 border border-slate-800 rounded-lg p-4 text-sm text-slate-300">
+                    <p className="mb-2"><strong className="text-neon-green">Step 1:</strong> Click the button below.</p>
+                    <p className="mb-2"><strong className="text-neon-green">Step 2:</strong> Press <strong>Start</strong> in the Telegram Bot.</p>
+                    <p className="mb-2"><strong className="text-neon-green">Step 3:</strong> Tap <strong>"Share Phone Number"</strong> when asked.</p>
+                    <p><strong className="text-neon-green">Step 4:</strong> The bot will send you a code.</p>
+                  </div>
+                  <button 
+                    onClick={handleStartVerification} 
+                    className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Send size={18} /> Verify via Telegram
+                  </button>
+                </div>
               ) : (
                 <form onSubmit={handleVerifyCode} className="space-y-4">
-                  <input type="text" required value={otpCode} onChange={(e) => setOtpCode(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 text-center text-lg focus:border-neon-green outline-none" placeholder="××××××" autoFocus />
-                  {otpError && <p className="text-red-500 text-xs text-center">{otpError}</p>}
-                  <button type="submit" disabled={isVerifying} className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">
-                    {isVerifying ? <Loader2 className="animate-spin mx-auto" size={20}/> : "Verify & Unlock"}
+                  <div>
+                    <label className="text-xs text-slate-400 ml-1">Enter 6-Digit Code</label>
+                    <div className="relative mt-1">
+                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+                      <input 
+                        type="text" 
+                        required 
+                        value={otpCode} 
+                        onChange={(e) => setOtpCode(e.target.value)} 
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 pl-10 pr-3 text-sm focus:border-neon-green outline-none tracking-widest text-center text-lg" 
+                        placeholder="××××××" 
+                        autoFocus 
+                      />
+                    </div>
+                  </div>
+                  {otpError && <p className="text-red-500 text-xs text-center animate-pulse">{otpError}</p>}
+                  <button 
+                    type="submit" 
+                    disabled={isVerifying} 
+                    className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isVerifying ? <Loader2 className="animate-spin w-5 h-5" /> : "Verify & Unlock"}
                   </button>
+                  <button type="button" onClick={() => setVerificationStep(1)} className="w-full text-xs text-slate-500 hover:text-slate-300 underline">Restart Verification</button>
                 </form>
               )}
             </motion.div>
-          </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isProfileOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" 
+            onClick={() => setIsProfileOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.8 }} 
+              animate={{ scale: 1 }} 
+              exit={{ scale: 0.8 }} 
+              className="relative max-w-2xl w-full" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={() => setIsProfileOpen(false)} className="absolute -top-12 right-0 p-2 text-white hover:text-neon-green"><X size={32} /></button>
+              <img src={profileImage} alt="Profile" className="w-full h-auto rounded-2xl border border-neon-green/30 shadow-[0_0_50px_rgba(16,185,129,0.3)]" />
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
         {notification && (
-          <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }} className="fixed top-5 left-0 right-0 mx-auto w-fit z-[70] flex items-center gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl">
+          <motion.div 
+            initial={{ opacity: 0, y: -50 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -50 }} 
+            className="fixed top-5 left-0 right-0 mx-auto w-fit z-[70] flex items-center gap-3 bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl"
+          >
             {notification.type === 'success' ? <CheckCircle2 className="text-green-500" /> : <AlertCircle className="text-red-500" />}
-            <div className="text-sm font-medium text-white">{notification.message}</div>
+            <p className="text-sm font-medium text-white">{notification.message}</p>
           </motion.div>
         )}
       </AnimatePresence>
 
       <Navbar />
 
-      <main className="max-w-md mx-auto px-5 pt-28 pb-32">
+      <main className="max-w-md mx-auto px-5 pt-28 pb-32 md:pb-20">
+        
+        {/* --- HERO --- */}
         <section id="home" className="flex flex-col items-center text-center mb-16">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} onClick={() => setIsProfileOpen(true)} className="relative w-32 h-32 mb-8 cursor-pointer group">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70"></div>
-            <div className="absolute inset-1 rounded-full overflow-hidden z-10">
-              <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><ZoomIn className="text-neon-green" /></div>
+          <motion.div 
+            initial={{ scale: 0 }} 
+            animate={{ scale: 1 }} 
+            className="relative w-32 h-32 mb-8 group cursor-pointer" 
+            onClick={() => setIsProfileOpen(true)}
+          >
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-neon-green to-cyan-400 animate-spin-slow blur-md opacity-70 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-1 rounded-full overflow-hidden z-10 relative">
+              <img src={profileImage} alt="Profile" className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <ZoomIn className="text-neon-green w-8 h-8" />
+              </div>
             </div>
           </motion.div>
           <RevealCard>
             <h1 className="text-4xl font-bold text-white mb-3">Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-cyan-400">Shovith</span></h1>
-            <div className="text-lg text-slate-300 h-8"><Typewriter text="Hobbyist Full Stack Developer & IoT Engineer" /></div>
+            <div className="text-lg text-slate-300 mb-6 flex items-center justify-center gap-2 h-8">
+              <Typewriter text="Hobbyist Full Stack Developer & IoT Engineer" />
+            </div>
           </RevealCard>
-          <RevealCard delay={0.2} className="w-full mt-6">
-            <button onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })} className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-lg">Get In Touch</button>
+          <RevealCard delay={0.1}>
+            <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">Passionate about creating innovative digital solutions with modern technologies. Currently on active duty under IDS HQ as JOO for India's MoD.</p>
+          </RevealCard>
+          <RevealCard delay={0.2} className="flex flex-col w-full gap-4">
+            <button 
+              onClick={() => document.getElementById('contact').scrollIntoView({ behavior: 'smooth' })} 
+              className="w-full py-3.5 bg-gradient-to-r from-neon-green to-teal-500 rounded-full text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:opacity-90 transition-opacity"
+            >
+              Get In Touch
+            </button>
+            <div className="flex justify-center gap-4">
+              <a href="mailto:shovith2@gmail.com" className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"><Mail size={20} /></a>
+              <a href="https://t.me/X_o_x_o_002" target="_blank" rel="noreferrer" className="p-3 rounded-full bg-slate-900 border border-slate-800 text-neon-green hover:bg-slate-800 transition-colors"><Send size={20} /></a>
+            </div>
           </RevealCard>
         </section>
 
+        {/* --- ABOUT --- */}
         <section id="about">
-          <SectionTitle subtitle="who_am_i" title="about_me" />
-          <Card className="mb-8"><p className="text-slate-300 text-sm leading-7">{data.about.bio}</p></Card>
+          <SectionTitle subtitle="" title="about_me" />
+          <RevealCard className="mb-8">
+            <Card>
+              <div className="flex gap-1.5 mb-4">
+                <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+              </div>
+              <p className="text-slate-300 text-sm leading-7">{data.about.bio}</p>
+            </Card>
+          </RevealCard>
           <div className="grid grid-cols-2 gap-3">
-            {data.about.highlights.map((h, i) => (
-              <ScaleRevealCard key={i} delay={i * 0.1}>
-                <Card className="flex flex-col items-center justify-center p-4 text-center h-full">
-                  <div className={`p-3 rounded-xl mb-3 ${h.bg} ${h.color}`}><h.icon size={22} /></div>
-                  <span className="text-xs text-slate-300">{h.label}</span>
+            {data.about.highlights.map((item, idx) => (
+              <ScaleRevealCard key={idx} delay={idx * 0.1}>
+                <Card className="flex flex-col items-center justify-center p-4 h-full text-center hover:bg-slate-900/80">
+                  <div className={`p-3 rounded-xl mb-3 border ${item.bg} ${item.color}`}>
+                    <item.icon size={22} />
+                  </div>
+                  <span className="text-xs font-medium text-slate-300">{item.label}</span>
                 </Card>
               </ScaleRevealCard>
             ))}
           </div>
+          <RevealCard className="mt-8">
+            <Card className="flex flex-col items-center justify-center py-8 relative">
+              <div className="mb-6 relative w-24 h-24 flex items-center justify-center">
+                <div className="absolute -top-3 -right-5 z-20 w-16 h-24 pointer-events-none">
+                  <div className="absolute top-3 right-4 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-600 shadow-xl flex items-center justify-center z-10">
+                    <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full"></div>
+                  </div>
+                  <div className="absolute top-5 right-6 w-1.5 h-14 bg-zinc-700 origin-top rotate-[25deg] rounded-full border-r border-zinc-600/50 shadow-lg">
+                    <div className="absolute bottom-0 -left-1 w-3.5 h-5 bg-zinc-800 rounded-sm border border-zinc-600 flex justify-center">
+                      <div className="w-0.5 h-full bg-zinc-900/50"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-20 h-20 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center animate-[spin_3s_linear_infinite] shadow-lg relative z-10">
+                  <div className="absolute inset-1 rounded-full border border-zinc-800 opacity-50"></div>
+                  <div className="absolute inset-3 rounded-full border border-zinc-800 opacity-50"></div>
+                  <div className="absolute inset-5 rounded-full border border-zinc-800 opacity-50"></div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center z-10">
+                    <Music size={14} className="text-white" />
+                  </div>
+                </div>
+              </div>
+              <p className="font-mono text-xs sm:text-sm text-slate-300 leading-6 max-w-xs text-center">"Music and programming share the same foundation - patterns, rhythm, and harmony."</p>
+            </Card>
+          </RevealCard>
         </section>
 
-        <section id="skills" className="space-y-4">
-          <SectionTitle subtitle="expertise" title="technical_skills" />
-          {Object.entries(data.skills).map(([key, list], idx) => (
-            <RevealCard key={key} delay={idx * 0.1}>
+        {/* --- SKILLS --- */}
+        <section id="skills">
+          <SectionTitle subtitle="" title="technical_skills" />
+          <div className="space-y-4">
+            <RevealCard>
               <Card>
-                <h3 className="text-lg font-bold text-neon-green mb-4 capitalize">{key}</h3>
-                {list.map((s, i) => <ProgressBar key={i} {...s} />)}
+                <h3 className="text-lg font-bold text-neon-green mb-4">Frontend</h3>
+                {data.skills.frontend.map((s, i) => <ProgressBar key={i} {...s} />)}
               </Card>
             </RevealCard>
-          ))}
-        </section>
-
-        <section id="projects">
-          <SectionTitle subtitle="my_work" title="featured_projects" />
-          <div className="flex justify-center mb-8 gap-2 overflow-x-auto pb-2">
-            {["All", "Web Dev", "Python & AI", "Security"].map(c => (
-              <button key={c} onClick={() => setActiveCategory(c)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${activeCategory === c ? "bg-neon-green text-black" : "bg-slate-900 text-slate-400 border border-slate-800"}`}>{c}</button>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Backend</h3>
+                {data.skills.backend.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">IoT & Hardware</h3>
+                {data.skills.iot.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+            <RevealCard>
+              <Card>
+                <h3 className="text-lg font-bold text-neon-green mb-4">Tools & Others</h3>
+                {data.skills.tools.map((s, i) => <ProgressBar key={i} {...s} />)}
+              </Card>
+            </RevealCard>
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {["React", "Node.js", "TypeScript", "Arduino", "Firebase", "Supabase", "IoT", "Flipper Zero", "Adobe", "3D Modeling"].map((tag, i) => (
+              <motion.span 
+                key={i} 
+                initial={{ opacity: 0, scale: 0.5 }} 
+                whileInView={{ opacity: 1, scale: 1 }} 
+                viewport={{ once: true }} 
+                transition={{ delay: i * 0.05, type: "spring", stiffness: 100 }} 
+                className="px-3 py-1.5 rounded-full bg-slate-900 border border-white/10 text-xs text-neon-green font-mono cursor-default hover:border-neon-green hover:shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all"
+              >
+                {tag}
+              </motion.span>
             ))}
           </div>
+        </section>
+
+        {/* --- PROJECTS --- */}
+        <section id="projects">
+          <SectionTitle subtitle="" title="featured_projects" />
+          
+          {/* CATEGORY TABS */}
+          <div className="flex justify-center mb-8 flex-wrap gap-2 px-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                  activeCategory === cat 
+                    ? "bg-neon-green text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
+                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
           <div className="space-y-6">
-            {filteredProjects.map((project, idx) => (
-              <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
-                <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                  <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 overflow-hidden">
-                    <img src={project.image} alt="" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="flex justify-between items-start mb-4">
-                    <div className={`p-3 rounded-xl ${project.bg} ${project.color}`}><project.icon size={24} /></div>
-                    <ProjectLikeButton title={project.title} />
-                  </div>
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-bold text-lg text-white">{project.title}</h3>
-                    <div className="flex gap-2">
+            <AnimatePresence mode="popLayout">
+              {filteredProjects.map((project, idx) => (
+                <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
+                  <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
+                    <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                      <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
+                    </div>
+                    
+                    <div className="flex justify-between items-start mb-4 relative z-10">
+                      <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
+                        <project.icon size={24} />
+                      </div>
+                      <ProjectLikeButton title={project.title} />
+                    </div>
+
+                    <div className="flex justify-between items-center mb-3 relative z-10">
+                      <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
                       {project.isDownload ? (
-                        <button onClick={() => handleDownloadClick(project)} className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-white">
+                        <button 
+                          onClick={() => handleDownloadClick(project)} 
+                          className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
+                        >
                           {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
                         </button>
                       ) : (
-                        <a href={project.link} target="_blank" rel="noreferrer" className="p-2 bg-slate-900 border border-slate-800 rounded-full text-slate-400 hover:text-white"><ExternalLink size={16} /></a>
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                          <ExternalLink size={16} />
+                        </a>
                       )}
                     </div>
-                  </div>
-                  <p className="text-sm text-slate-400 mb-5 leading-relaxed">{project.desc}</p>
-                  
-                  {/* --- UNIVERSAL FOOTER --- */}
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar size={12} className="text-slate-500" />
-                      <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
+                    <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
+                    <div className="flex flex-wrap gap-2 relative z-10 mb-4">
+                      {project.tags.map((tag, tIdx) => (
+                        <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                      ))}
                     </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        showNotification(
-                          <span className="text-xs">
-                            By downloading, you agree to our{' '}
-                            <a href="https://my-portfolio-bot-m0xm.onrender.com/privacy.html" target="_blank" rel="noreferrer" className="underline text-neon-green">privacy policy</a>
-                            {' '}and{' '}
-                            <a href="https://my-portfolio-bot-m0xm.onrender.com/terms.html" target="_blank" rel="noreferrer" className="underline text-neon-green">terms of use</a>.
-                          </span>
-                        );
-                      }}
-                      className="text-slate-500 hover:text-neon-green transition-colors p-1"
-                      title="Legal Information"
-                    >
-                      <Info size={14} />
-                    </button>
+
+                    {/* UPDATED: UNIVERSAL PUBLISHED ON & INFO BUTTON */}
+                    <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={12} className="text-slate-500" />
+                        <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+                          Published on: {project.date}
+                        </span>
+                      </div>
+                      <div className="relative group/info">
+                        <button 
+                          type="button" 
+                          className="text-slate-500 hover:text-neon-green transition-colors p-1"
+                        >
+                          <Info size={14} />
+                        </button>
+                        <div className="absolute bottom-full right-0 mb-2 w-56 p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-200 z-50">
+                          <p className="text-[10px] text-slate-300 leading-relaxed">
+                            By downloading this project, you're agreeing to this{' '}
+                            <a 
+                              href="https://my-portfolio-bot-m0xm.onrender.com/privacy.html" 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="text-neon-green hover:underline font-bold"
+                            >
+                              privacy policy
+                            </a>{' '}
+                            and my{' '}
+                            <a 
+                              href="https://my-portfolio-bot-m0xm.onrender.com/terms.html" 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="text-neon-green hover:underline font-bold"
+                            >
+                              terms of use
+                            </a>.
+                          </p>
+                          <div className="absolute top-full right-2 -mt-1 border-8 border-transparent border-t-slate-700"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </RevealCard>
+              ))}
+            </AnimatePresence>
+          </div>
+
+          {/* --- FUTURE ROADMAP --- */}
+          <div className="mt-20 relative">
+            <div className="absolute inset-0 bg-slate-900/50 -skew-y-3 transform origin-left w-full h-full -z-10 rounded-3xl" />
+            <h3 className="text-center text-xl font-bold text-slate-300 mb-8 flex items-center justify-center gap-2">
+              <Zap className="text-yellow-400" /> Future Roadmap
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {data.roadmap.map((item, idx) => {
+                const badgeStyle = getStatusStyle(item.status);
+                const BadgeIcon = badgeStyle.icon;
+
+                return (
+                  <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-slate-200">
+                        <item.icon size={20}/>
+                      </div>
+                      <div className={`flex items-center gap-1.5 px-2 py-1 rounded border ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.color}`}>
+                        <BadgeIcon size={12} />
+                        <span className="text-[10px] uppercase font-bold tracking-wider">{item.status}</span>
+                      </div>
+                    </div>
+                    <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
+                    <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
+                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                      <Clock size={12} /> ETA: {item.eta}
+                    </div>
                   </div>
-                </Card>
-              </RevealCard>
-            ))}
+                );
+              })}
+            </div>
           </div>
         </section>
 
-        <section id="education">
-          <SectionTitle subtitle="credentials" title="education" />
+        {/* --- EDUCATION SECTION --- */}
+        <section id="education" className="scroll-mt-24">
+          <SectionTitle subtitle="" title="education_achievements" />
+
+          {/* PASSWORD MODAL FOR EDUCATION */}
+          <AnimatePresence>
+            {isEduModalOpen && (
+              <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+                className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+              >
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} 
+                  className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm relative shadow-2xl"
+                >
+                  <button onClick={() => setIsEduModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white"><X size={20} /></button>
+                  
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 rounded-full bg-neon-green/10 flex items-center justify-center mx-auto mb-3">
+                      <Lock size={20} className="text-neon-green" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Restricted Access</h3>
+                    <p className="text-sm text-slate-400 mt-1">Enter admin password to view details.</p>
+                  </div>
+
+                  <form onSubmit={handleUnlockEducation} className="space-y-4">
+                    <input 
+                      type="password" 
+                      value={eduPassword} 
+                      onChange={(e) => setEduPassword(e.target.value)} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 text-center tracking-widest text-white focus:border-neon-green outline-none transition-colors"
+                      placeholder="••••••" 
+                      autoFocus
+                    />
+                    {eduError && <p className="text-red-500 text-xs text-center">{eduError}</p>}
+                    <button 
+                      type="submit" 
+                      disabled={isEduVerifying} 
+                      className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isEduVerifying ? <Loader2 className="animate-spin" size={18} /> : "Unlock Details"}
+                    </button>
+                  </form>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* CONTENT SWITCHER */}
           <AnimatePresence mode="wait">
             {!isEduUnlocked ? (
-              <motion.div key="locked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <motion.div 
+                key="summary"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <Card className="text-center border-purple-500/20 bg-purple-500/5">
-                    <div className="p-3 bg-purple-500/10 text-purple-400 w-fit mx-auto rounded-xl mb-2"><GraduationCap size={24} /></div>
-                    <span className="text-sm text-slate-300 uppercase tracking-wider">Masters</span>
-                    <span className="block text-4xl font-bold text-white my-1">{postGradCount}</span>
-                  </Card>
-                  <Card className="text-center border-blue-500/20 bg-blue-500/5">
-                    <div className="p-3 bg-blue-500/10 text-blue-400 w-fit mx-auto rounded-xl mb-2"><GraduationCap size={24} /></div>
-                    <span className="text-sm text-slate-300 uppercase tracking-wider">Bachelors</span>
-                    <span className="block text-4xl font-bold text-white my-1">{underGradCount}</span>
-                  </Card>
+                  <ScaleRevealCard delay={0.1}>
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-purple-500/20 bg-purple-500/5">
+                      <div className="p-3 rounded-xl mb-3 bg-purple-500/10 text-purple-400">
+                        <GraduationCap size={24} />
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Postgraduate</span>
+                      <span className="text-5xl font-bold text-white mb-2">{postGradCount}</span>
+                      <span className="text-xs text-slate-500">Masters Degrees</span>
+                    </Card>
+                  </ScaleRevealCard>
+
+                  <ScaleRevealCard delay={0.2}>
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-blue-500/20 bg-blue-500/5">
+                      <div className="p-3 rounded-xl mb-3 bg-blue-500/10 text-blue-400">
+                        <GraduationCap size={24} />
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Undergraduate</span>
+                      <span className="text-5xl font-bold text-white mb-2">{underGradCount}</span>
+                      <span className="text-xs text-slate-500">Bachelors Degrees</span>
+                    </Card>
+                  </ScaleRevealCard>
                 </div>
+
                 <div className="flex justify-center mb-8">
-                  <Card className="text-center border-orange-500/20 bg-orange-500/5 w-full">
-                    <div className="p-3 bg-orange-500/10 text-orange-400 w-fit mx-auto rounded-xl mb-2"><BookOpen size={24} /></div>
-                    <span className="text-sm text-slate-300 uppercase tracking-wider">Certifications</span>
-                    <span className="block text-4xl font-bold text-white my-1">{schoolCount}</span>
-                  </Card>
+                  <div className="w-full md:w-[calc(50%-0.5rem)]">
+                    <ScaleRevealCard delay={0.3}>
+                      <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-orange-500/20 bg-orange-500/5">
+                        <div className="p-3 rounded-xl mb-3 bg-orange-500/10 text-orange-400">
+                          <BookOpen size={24} />
+                        </div>
+                        <span className="text-sm font-medium text-slate-300 uppercase tracking-wider mb-2">Schooling</span>
+                        <span className="text-5xl font-bold text-white mb-2">{schoolCount}</span>
+                        <span className="text-xs text-slate-500">Certifications</span>
+                      </Card>
+                    </ScaleRevealCard>
+                  </div>
                 </div>
-                <button onClick={() => setIsEduModalOpen(true)} className="w-full py-3 bg-slate-900 border border-slate-700 rounded-full text-slate-300 flex items-center justify-center gap-2 hover:border-neon-green transition-all">Show Details <ChevronDown size={16} /></button>
+
+                <ScaleRevealCard delay={0.4}>
+                  <div className="flex justify-center">
+                    <button 
+                      onClick={() => setIsEduModalOpen(true)} 
+                      className="group flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:border-neon-green hover:bg-slate-800 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+                    >
+                      Show Detailed List <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
+                    </button>
+                  </div>
+                </ScaleRevealCard>
               </motion.div>
             ) : (
-              <motion.div key="unlocked" className="space-y-4">
-                {data.education.map((e, i) => (
-                  <Card key={i} className="flex gap-4 items-center">
-                    <div className={`p-3 rounded-xl ${e.bg} ${e.color}`}><e.icon size={24} /></div>
-                    <div>
-                      <h4 className="font-bold text-white">{e.title}</h4>
-                      <p className="text-xs text-slate-400">{e.place}</p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${e.bg} ${e.color}`}>{e.status}</span>
-                    </div>
-                  </Card>
+              <motion.div 
+                key="details"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-4"
+              >
+                {data.education.map((edu, idx) => (
+                  <RevealCard key={idx} delay={idx * 0.1}>
+                    <Card className="flex gap-4 items-center">
+                      <div className={`shrink-0 p-3 rounded-xl ${edu.bg} ${edu.color}`}>
+                        <edu.icon size={24} />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-base text-white">{edu.title}</h3>
+                        <p className="text-sm text-slate-400 mt-0.5">{edu.place}</p>
+                        <span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${edu.bg} ${edu.color}`}>{edu.status}</span>
+                      </div>
+                    </Card>
+                  </RevealCard>
                 ))}
-                <button onClick={() => setIsEduUnlocked(false)} className="w-full text-slate-500 text-xs mt-4 hover:text-white flex items-center justify-center gap-1"><ChevronUp size={14}/> Hide Details</button>
+
+                <motion.button
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                  onClick={() => setIsEduUnlocked(false)}
+                  className="w-full mt-6 py-3 border border-slate-800 bg-slate-900/50 text-slate-400 rounded-xl hover:bg-slate-800 hover:text-white transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                >
+                  <ChevronUp size={16} /> Hide Details
+                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
         </section>
 
+        {/* --- CONTACT --- */}
         <section id="contact">
-          <SectionTitle subtitle="hello" title="get_in_touch" />
-          <div className="flex justify-center mb-6">
-            <div className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" onClick={() => setIsTelegram(!isTelegram)}>
-              <motion.div className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50" animate={{ left: isTelegram ? '50%' : '4px' }} />
-              <button className={`flex-1 py-2 text-xs font-bold z-10 ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Email</button>
-              <button className={`flex-1 py-2 text-xs font-bold z-10 ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Telegram</button>
-            </div>
+          <SectionTitle subtitle="" title="get_in_touch" />
+          <div className="space-y-3 mb-10">
+            <RevealCard delay={0.1}>
+              <Card className="flex items-center gap-4 py-4">
+                <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-neon-green">
+                  <MapPin size={18} />
+                </div>
+                <div className="overflow-hidden">
+                  <p className="text-xs text-slate-500 mb-0.5">Location</p>
+                  <p className="text-sm font-medium text-white truncate">Based in India</p>
+                </div>
+              </Card>
+            </RevealCard>
           </div>
-          <Card className={`border-t-4 transition-colors duration-500 ${isTelegram ? 'border-t-blue-500' : 'border-t-neon-green'}`}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold flex items-center gap-2">{isTelegram ? <><Send size={20} className="text-blue-400"/> Direct Message</> : <><Mail size={20} className="text-neon-green"/> Send Email</>}</h3>
-              <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded-full text-[10px] font-mono text-slate-400">Limit: <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />/250</div>
+
+          <RevealCard>
+            <div className="flex justify-center mb-6">
+              <div 
+                className="bg-slate-900 p-1 rounded-full border border-slate-800 flex relative w-64 cursor-pointer" 
+                onClick={() => { setIsTelegram(!isTelegram); setNotification(null); }}
+              >
+                <motion.div 
+                  className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-neon-green/20 rounded-full border border-neon-green/50" 
+                  animate={{ left: isTelegram ? '50%' : '4px' }} 
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }} 
+                />
+                <button className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${!isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Send Email</button>
+                <button className={`flex-1 py-2 text-xs font-bold text-center z-10 transition-colors ${isTelegram ? 'text-neon-green' : 'text-slate-400'}`}>Direct Message</button>
+              </div>
             </div>
-            <form onSubmit={onSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <input required name="firstName" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" placeholder="First Name" />
-                <input required name="lastName" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" placeholder="Last Name" />
-              </div>
-              <input required name="email" type="email" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" placeholder="Email" />
-              <div className="flex gap-2">
-                <CountrySelector name="countryCode" selectedCode={selectedCountryCode} onChange={setSelectedCountryCode} />
-                <input required name="phone" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" placeholder="Phone" />
-              </div>
-              <textarea required name="message" rows={3} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none" placeholder="Your message..." />
-              <button type="submit" disabled={isSubmitting} className={`w-full py-3 rounded-lg text-black font-bold transition-colors ${isTelegram ? 'bg-blue-500 hover:bg-blue-600' : 'bg-neon-green hover:bg-emerald-400'} disabled:opacity-50`}>
-                {isSubmitting ? <Loader2 className="animate-spin mx-auto" /> : "Send"}
-              </button>
-            </form>
-          </Card>
+
+            <div className="relative perspective-1000 h-[550px] md:h-[600px]">
+              <motion.div 
+                animate={{ rotateY: isTelegram ? 180 : 0 }} 
+                transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }} 
+                className="relative w-full h-full transform-style-3d"
+              >
+                
+                {/* FRONT (WEB3FORMS) */}
+                <Card className="border-t-4 border-t-neon-green absolute w-full h-full backface-hidden">
+                   <div className="flex justify-between items-start mb-6">
+                     <h3 className="text-lg font-bold text-neon-green flex items-center gap-2"><Mail size={20}/> Send Email</h3>
+                     <div className="group relative">
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
+                         <span>Limit: </span>
+                         <AnimatedCounter value={dbQuota} color={dbQuota >= 250 ? "text-red-500" : "text-neon-green"} />
+                         <span>/250</span>
+                       </div>
+                     </div>
+                   </div>
+                   <form onSubmit={onSubmit} className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                       <div><label className="text-xs text-slate-400 ml-1">First Name</label><input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="John" /></div>
+                       <div><label className="text-xs text-slate-400 ml-1">Last Name</label><input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-neon-green outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" /></div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Email</label><input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="john@example.com" /></div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                       <div className="flex gap-2 mt-1">
+                         <CountrySelector name="countryCode" selectedCode={selectedCountryCode} onChange={setSelectedCountryCode} />
+                         <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
+                       </div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Message</label><textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." /></div>
+                     <button type="submit" disabled={isSubmitting || dbQuota >= 250} className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send Email"}
+                     </button>
+                   </form>
+                </Card>
+
+                {/* BACK (TELEGRAM) */}
+                <Card className="border-t-4 border-t-blue-500 absolute w-full h-full backface-hidden rotate-y-180" style={{ transform: "rotateY(180deg)" }}>
+                   <div className="flex justify-between items-start mb-6">
+                     <h3 className="text-lg font-bold text-blue-400 flex items-center gap-2"><Send size={20}/> Direct Message</h3>
+                     <div className="group relative">
+                       <div className="px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400 cursor-help flex items-center gap-1">
+                         <span>Limit: </span><Infinity size={12} className="text-blue-400" />
+                       </div>
+                     </div>
+                   </div>
+                   <form onSubmit={onSubmit} className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                       <div><label className="text-xs text-slate-400 ml-1">First Name</label><input required name="firstName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Jane" /></div>
+                       <div><label className="text-xs text-slate-400 ml-1">Last Name</label><input required name="lastName" type="text" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Doe" /></div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Email</label><input required name="email" type="email" className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="jane@example.com" /></div>
+                     <div>
+                       <label className="text-xs text-slate-400 ml-1">Phone Number</label>
+                       <div className="flex gap-2 mt-1">
+                         <CountrySelector name="countryCode" selectedCode={selectedCountryCode} onChange={setSelectedCountryCode} />
+                         <input required name="phone" type="tel" className="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="9876543210" />
+                       </div>
+                     </div>
+                     <div><label className="text-xs text-slate-400 ml-1">Message</label><textarea required name="message" rows={3} className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none transition-colors placeholder:text-slate-600" placeholder="Your message..." /></div>
+                     <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+                       {isSubmitting ? <><Loader2 className="animate-spin" size={18} /> Sending...</> : "Send"}
+                     </button>
+                   </form>
+                </Card>
+              </motion.div>
+            </div>
+          </RevealCard>
         </section>
       </main>
 
-      {/* --- PASSWORD MODAL --- */}
-      <AnimatePresence>
-        {isEduModalOpen && (
-          <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-sm relative shadow-2xl">
-              <button onClick={() => setIsEduModalOpen(false)} className="absolute top-4 right-4 text-slate-400"><X size={20}/></button>
-              <h3 className="text-lg font-bold text-white mb-4 text-center">Restricted Access</h3>
-              <form onSubmit={handleUnlockEducation} className="space-y-4">
-                <input type="password" value={eduPassword} onChange={(e) => setEduPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 text-center tracking-widest outline-none focus:border-neon-green" placeholder="••••••" autoFocus />
-                {eduError && <p className="text-red-500 text-xs text-center">{eduError}</p>}
-                <button type="submit" className="w-full py-3 bg-neon-green text-black font-bold rounded-lg hover:bg-emerald-400">
-                  {isEduVerifying ? <Loader2 className="animate-spin mx-auto" /> : "Unlock Details"}
-                </button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
-        <p>© 2026 Shovith Debnath. Crafted with ᡣ𐭩</p>
+        <p>© 2026 Shovith Debnath. Crafted with <span className="text-red-500">ᡣ𐭩</span></p>
       </footer>
     </div>
-  );
+  )
 }
 
 export default App;
