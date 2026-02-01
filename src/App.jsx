@@ -741,7 +741,7 @@ const data = {
       title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
-      status: "In Progress",
+      status: "Testing Ongoing",
       icon: Heart 
     }
   ],
