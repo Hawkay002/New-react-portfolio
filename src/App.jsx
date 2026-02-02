@@ -752,13 +752,13 @@ const data = {
    }*/
   ],
   roadmap:[
-    {
+    /*{
       title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
       status: "Done & Dusted",
       icon: Heart 
-    }
+    }*/
   ],
   education: [
     { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "Distinction(96%)", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
@@ -1675,31 +1675,47 @@ const text = `
             <h3 className="text-center text-xl font-bold text-slate-300 mb-8 flex items-center justify-center gap-2">
               <Zap className="text-yellow-400" /> Future Roadmap
             </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              {data.roadmap.map((item, idx) => {
-                const badgeStyle = getStatusStyle(item.status);
-                const BadgeIcon = badgeStyle.icon;
 
-                return (
-                  <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-slate-200">
-                        <item.icon size={20}/>
+            {data.roadmap.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {data.roadmap.map((item, idx) => {
+                  const badgeStyle = getStatusStyle(item.status);
+                  const BadgeIcon = badgeStyle.icon;
+                  return (
+                    <div key={idx} className="bg-slate-950 border border-dashed border-slate-700 p-5 rounded-2xl opacity-70 hover:opacity-100 transition-opacity">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="p-2 bg-slate-900 rounded-lg border border-slate-800 text-slate-200">
+                          <item.icon size={20}/>
+                        </div>
+                        <div className={`flex items-center gap-1.5 px-2 py-1 rounded border ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.color}`}>
+                          <BadgeIcon size={12} />
+                          <span className="text-[10px] uppercase font-bold tracking-wider">{item.status}</span>
+                        </div>
                       </div>
-                      <div className={`flex items-center gap-1.5 px-2 py-1 rounded border ${badgeStyle.bg} ${badgeStyle.border} ${badgeStyle.color}`}>
-                        <BadgeIcon size={12} />
-                        <span className="text-[10px] uppercase font-bold tracking-wider">{item.status}</span>
+                      <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
+                      <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                        <Clock size={12} /> ETA: {item.eta}
                       </div>
                     </div>
-                    <h4 className="font-bold text-slate-200 mb-1">{item.title}</h4>
-                    <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                      <Clock size={12} /> ETA: {item.eta}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="w-full py-12 px-6 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center text-center bg-slate-900/20">
+                <div className="p-3 rounded-full bg-slate-800/50 text-slate-500 mb-4 animate-pulse">
+                  <Cpu size={32} strokeWidth={1.5} />
+                </div>
+                <h4 className="text-slate-300 font-bold mb-1">System Standby</h4>
+                <p className="text-xs text-slate-500 max-w-[280px] leading-relaxed">
+                  No active projects in the roadmap queue.
+                </p>
+                <div className="mt-6 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Monitoring for next task</span>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
