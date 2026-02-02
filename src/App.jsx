@@ -752,13 +752,13 @@ const data = {
    }*/
   ],
   roadmap:[
-    /*{
+    {
       title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
       desc: "A fun, themed personality test to find your perfect match type this Valentine's.",
       eta: "Feb 14, 2026",
       status: "Done & Dusted",
       icon: Heart 
-    }*/
+    }
   ],
   education: [
     { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "Distinction(96%)", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
