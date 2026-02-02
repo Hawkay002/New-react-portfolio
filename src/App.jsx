@@ -689,23 +689,6 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]",
     },
     {
-      title: "Ransomware",
-      desc: "An educational Python tool demonstrating ransomware mechanics, encryption protocols, and data recovery for security research.",
-      tags: ["Python", "Encryption", "Security"],
-      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
-      isDownload: true,
-      locked: true,
-      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/Ransomware-main.zip", 
-      icon: FileLock,
-      date: "Jan 27, 2026", 
-      color: "text-cyan-400", 
-      bg: "bg-cyan-400/10",
-      cardBorder: "border-cyan-500/20",
-      hoverBg: "hover:bg-gradient-to-br hover:from-cyan-500/20 hover:via-cyan-500/5 hover:to-transparent",
-      hoverBorder: "hover:border-cyan-400/50",
-      hoverShadow: "hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
-    },
-    {
       title: "Event Ticketing System",
       desc: "A fast and Reliable source to manage events, issue tickets, check guestlists, and scan entries offline.",
       tags: ["Management", "Admin", "Firestore"],
@@ -721,6 +704,23 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]",
     },
     {
+      title: "Ransomware",
+      desc: "An educational Python tool demonstrating ransomware mechanics, encryption protocols, and data recovery for security research.",
+      tags: ["Python", "Encryption", "Security"],
+      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+      isDownload: true,
+      locked: true,
+      link: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/docs/Ransomware-main.zip", 
+      icon: FileLock,
+      date: "Jan 18, 2026", 
+      color: "text-cyan-400", 
+      bg: "bg-cyan-400/10",
+      cardBorder: "border-cyan-500/20",
+      hoverBg: "hover:bg-gradient-to-br hover:from-cyan-500/20 hover:via-cyan-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-cyan-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
+    },
+    {
       title: "Portfolio Website",
       desc: "A website to showcase my developer skills as an AI full-stack developer.",
       tags: ["React", "Showcase", "Hobby"],
@@ -734,7 +734,22 @@ const data = {
       hoverBg: "hover:bg-gradient-to-br hover:from-indigo-500/20 hover:via-indigo-500/5 hover:to-transparent",
       hoverBorder: "hover:border-indigo-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
-    }
+    },
+    {
+      title: "Cupid x Us",
+      desc: "A fun, themed personality test based on the 16 personalities to find your perfect match type this Valentine's Day.",
+      tags: ["React", "Valentine", "Quiz", "Personality"],
+      image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800", // Themed placeholder
+      link: "https://cupid-x-us.vercel.app/", // Replace with actual link if different
+      icon: Heart,
+      date: "Feb 14, 2026", 
+      color: "text-rose-400", 
+      bg: "bg-rose-400/10",
+      cardBorder: "border-rose-500/20",
+      hoverBg: "hover:bg-gradient-to-br hover:from-rose-500/20 hover:via-rose-500/5 hover:to-transparent",
+      hoverBorder: "hover:border-rose-400/50",
+      hoverShadow: "hover:shadow-[0_0_20px_rgba(251,113,133,0.3)]",
+   }
   ],
   roadmap:[
     {
