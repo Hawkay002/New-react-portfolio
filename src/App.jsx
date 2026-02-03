@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Code2, Menu, Mail, Send, MapPin, ExternalLink, 
   Link, Receipt, Utensils, Gift, Eye, Ticket, Globe, 
-  GraduationCap, BookOpen, Download, Loader2,
+  GraduationCap, BookOpen, Download, Loader2, AirVent,
   CheckCircle2, AlertCircle, Music, ZoomIn, X, 
   Database, Smartphone, Origami, Plane, Target,
   Home, Briefcase, Cpu, User, Infinity, Info,
