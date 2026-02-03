@@ -969,7 +969,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <a href="#home" onClick={(e) => scrollToSection(e, '#home')} className="flex items-center gap-2">
               <div className="bg-neon-green/20 p-1.5 rounded-lg"><Code2 className="text-neon-green w-5 h-5" /></div>
-              <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith-dev</span>
             </a>
           </div>
           <div className="ml-10 flex items-baseline space-x-8">
