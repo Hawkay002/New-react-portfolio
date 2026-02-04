@@ -5,7 +5,7 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
+    extend: { 
       colors: {
         'app-bg': '#020617',     // The deep dark background
         'card-bg': '#0f172a',    // Slightly lighter for cards
