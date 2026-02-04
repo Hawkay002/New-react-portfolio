@@ -775,25 +775,40 @@ const data = {
 
 // --- HELPER COMPONENTS ---
 
-// Add this new component
+// --- COMPONENT: TRENDING LEGEND ---
 const TrendingLegend = () => (
   <motion.div 
-    initial={{ opacity: 0 }}
-    whileInView={{ opacity: 1 }}
+    initial={{ opacity: 0, y: 10 }}
+    whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    className="flex flex-wrap justify-center gap-3 mb-8 px-4"
+    className="flex justify-center mb-8 px-4"
   >
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-bold">
-       <Zap size={12} className="fill-emerald-400" /> 
-       <span>Suddenly Trending</span>
-    </div>
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] text-cyan-400 font-bold">
-       <TrendingUp size={12} /> 
-       <span>Steadily Growing</span>
-    </div>
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 border border-slate-700/50 text-[10px] text-slate-500">
-       <Minus size={12} /> 
-       <span>Stable</span>
+    <div className="inline-flex flex-wrap items-center justify-center gap-x-5 gap-y-2 px-6 py-2.5 rounded-full bg-slate-900 border border-slate-800 shadow-lg">
+      
+      {/* Item 1 */}
+      <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400">
+         <Zap size={12} className="fill-emerald-400" /> 
+         <span>Suddenly Trending</span>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px h-3 bg-slate-700 hidden sm:block"></div>
+
+      {/* Item 2 */}
+      <div className="flex items-center gap-1.5 text-[10px] font-bold text-cyan-400">
+         <TrendingUp size={12} /> 
+         <span>Steadily Growing</span>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px h-3 bg-slate-700 hidden sm:block"></div>
+
+      {/* Item 3 */}
+      <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
+         <Minus size={12} /> 
+         <span>Stable</span>
+      </div>
+
     </div>
   </motion.div>
 );
