@@ -342,7 +342,7 @@ const TrendingIndicator = ({ current, base }) => {
 
   if (percent > 20) return (
     <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md text-[10px] font-bold animate-pulse border border-emerald-500/20">
-      <Zap size={10} className="fill-emerald-400" /> 🚀 +{percent}%
+      <Zap size={10} className="fill-emerald-400" /> +{percent}%
     </motion.div>
   );
   
@@ -616,7 +616,7 @@ const data = {
       desc: "Easiest way to connect with me along with my gaming stats for others to play and compete with me.",
       tags: ["HTML", "CSS", "JS", "Gaming", "Social"],
       image: "https://raw.githubusercontent.com/Hawkay002/React-portfolio/main/img/Screenshot_20260118_111726_Chrome.jpg", 
-      link: "https://connect-liv2.onrender.com", 
+      link: "https://sd-connect.netlify.app/", 
       icon: Link, 
       date: "May 14, 2025",
       color: "text-blue-400", 
