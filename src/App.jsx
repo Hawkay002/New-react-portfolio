@@ -775,6 +775,29 @@ const data = {
 
 // --- HELPER COMPONENTS ---
 
+// Add this new component
+const TrendingLegend = () => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    viewport={{ once: true }}
+    className="flex flex-wrap justify-center gap-3 mb-8 px-4"
+  >
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-400 font-bold">
+       <Zap size={12} className="fill-emerald-400" /> 
+       <span>Suddenly Trending</span>
+    </div>
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] text-cyan-400 font-bold">
+       <TrendingUp size={12} /> 
+       <span>Steadily Growing</span>
+    </div>
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-800/50 border border-slate-700/50 text-[10px] text-slate-500">
+       <Minus size={12} /> 
+       <span>Stable</span>
+    </div>
+  </motion.div>
+);
+
 const Typewriter = ({ text, speed = 50 }) => {
   const [displayText, setDisplayText] = useState('');
   useEffect(() => {
@@ -1583,6 +1606,9 @@ const text = `
               </button>
             ))}
           </div>
+
+          {/* New Legend Added Here */}
+          <TrendingLegend />
 
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">
