@@ -1779,7 +1779,7 @@ const text = `
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <ScaleRevealCard delay={0.1}>
-                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-purple-500/20 bg-purple-500/5">
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center border border-purple-500/20 bg-purple-500/5">
                       <div className="p-3 rounded-xl mb-3 bg-purple-500/10 text-purple-400">
                         <GraduationCap size={24} />
                       </div>
@@ -1790,7 +1790,7 @@ const text = `
                   </ScaleRevealCard>
 
                   <ScaleRevealCard delay={0.2}>
-                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-blue-500/20 bg-blue-500/5">
+                    <Card className="flex flex-col items-center justify-center p-6 h-full text-center border border-blue-500/20 bg-blue-500/5">
                       <div className="p-3 rounded-xl mb-3 bg-blue-500/10 text-blue-400">
                         <GraduationCap size={24} />
                       </div>
@@ -1804,7 +1804,7 @@ const text = `
                 <div className="flex justify-center mb-8">
                   <div className="w-full md:w-[calc(50%-0.5rem)]">
                     <ScaleRevealCard delay={0.3}>
-                      <Card className="flex flex-col items-center justify-center p-6 h-full text-center hover:bg-slate-900/80 transition-all border border-orange-500/20 bg-orange-500/5">
+                      <Card className="flex flex-col items-center justify-center p-6 h-full text-center border border-orange-500/20 bg-orange-500/5">
                         <div className="p-3 rounded-xl mb-3 bg-orange-500/10 text-orange-400">
                           <BookOpen size={24} />
                         </div>
