@@ -989,7 +989,7 @@ const Navbar = () => {
       
       <div className="md:hidden fixed top-5 left-5 z-40 bg-black/20 backdrop-blur-sm p-2 rounded-xl border border-white/5 flex items-center gap-2">
         <Code2 className="text-neon-green w-5 h-5" />
-        <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith.dev</span>
+        <span className="text-sm font-bold bg-gradient-to-r from-neon-green to-cyan-400 bg-clip-text text-transparent">Shovith-dev</span>
       </div>
       
       <div className="md:hidden fixed bottom-12 inset-x-0 flex justify-center z-50 pointer-events-none">
