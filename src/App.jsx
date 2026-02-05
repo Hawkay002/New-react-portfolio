@@ -760,8 +760,7 @@ const data = {
       desc: "A fully responsive React admin template with dark mode and charts.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
       value: "Paid",
-      price: "499", 
-      link: "https://github.com/your-repo/admin-dashboard/archive/refs/heads/main.zip", 
+      price: "512",
       tags: ["React", "Tailwind", "Admin"]
     },
     {
@@ -1101,62 +1100,87 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
     }
   }, [isOpen]);
   
-  const handleSendResource = async () => {
-    setIsSending(true);
-    try {
-      const response = await fetch('/api/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userName: formData.name,
-          userEmail: formData.email,
-          serviceName: resource.title,
-          fileLink: resource.link
-        }),
-      });
-      
-      if (!response.ok) throw new Error("Email failed");
-      
-      if (resource.value === "Paid") {
-        const codesRef = collection(db, "access_codes");
-        const q = query(codesRef, where("code", "==", accessCode));
-        const snapshot = await getDocs(q);
-        snapshot.forEach(async (doc) => {
-          await deleteDoc(doc.ref);
-        });
-      }
-      
-      setStatusMsg("Resource Sent Successfully!");
-      setTimeout(() => { onClose(); }, 2000);
-    } catch (error) {
-      console.error(error);
-      setStatusMsg("Error sending resource.");
-    } finally {
-      setIsSending(false);
-    }
-  };
+// PASTE THIS NEW BLOCK
+const handleSendResource = async () => {
+  if (resource.value === "Paid") {
+    // For paid items, the download is handled by validateCode()
+    validateCode();
+    return;
+  }
   
-  const validateCode = async () => {
-    if (!accessCode) return;
-    setIsVerifying(true);
-    try {
-      const codesRef = collection(db, "access_codes");
-      const q = query(codesRef, where("code", "==", accessCode));
-      const snapshot = await getDocs(q);
+  // Logic for FREE resources (Emailing the link)
+  setIsSending(true);
+  try {
+    const response = await fetch('/api/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userName: formData.name,
+        userEmail: formData.email,
+        serviceName: resource.title,
+        fileLink: resource.link // Free links can stay in the frontend
+      }),
+    });
+    
+    if (!response.ok) throw new Error("Email failed");
+    setStatusMsg("Resource Sent to your Email!");
+    setTimeout(() => onClose(), 2000);
+  } catch (error) {
+    setStatusMsg("Error sending resource.");
+  } finally {
+    setIsSending(false);
+  }
+};
+  
+// PASTE THIS NEW BLOCK
+const validateCode = async () => {
+  if (!accessCode) return;
+  setIsVerifying(true);
+  setStatusMsg("");
+  
+  try {
+    const codesRef = collection(db, "access_codes");
+    
+    // Strict Query: Code + Matching Resource Title + Not Used
+    const q = query(
+      codesRef,
+      where("code", "==", accessCode.trim()),
+      where("resourceName", "==", resource.title),
+      where("isUsed", "==", false)
+    );
+    
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const codeDoc = snapshot.docs[0];
+      const secureData = codeDoc.data();
       
-      if (!snapshot.empty) {
-        setIsValidated(true);
-        setStatusMsg("Code Validated! You can now obtain the file.");
-      } else {
-        setStatusMsg("Invalid or Expired Code.");
-        setIsValidated(false);
-      }
-    } catch (err) {
-      setStatusMsg("Validation Error.");
-    } finally {
-      setIsVerifying(false);
+      // Use this to immediately destroy the code so it can't be used again
+await deleteDoc(doc(db, "access_codes", codeDoc.id));
+      
+      setIsValidated(true);
+      setStatusMsg("Code Verified! Starting download...");
+      
+      // 2. Secretly trigger download using the URL from Firestore
+      const link = document.createElement('a');
+      link.href = secureData.downloadUrl;
+      link.setAttribute('download', resource.title);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => onClose(), 3000);
+    } else {
+      setStatusMsg("Invalid code, wrong resource, or already used.");
+      setIsValidated(false);
     }
-  };
+  } catch (err) {
+    console.error("Auth Error:", err);
+    setStatusMsg("Security verification failed.");
+  } finally {
+    setIsVerifying(false);
+  }
+};
   
   if (!isOpen || !resource) return null;
   
