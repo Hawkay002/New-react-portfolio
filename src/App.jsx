@@ -8,7 +8,9 @@ import {
   Home, Briefcase, Cpu, User, Infinity, Info,
   Radio, Film, Search, ChevronDown, ChevronUp, Lock, Key,
   ShieldCheck, FileLock, Heart, Mic, Zap, Clock,
-  PenTool, SlidersHorizontal, Calendar, TrendingUp, Minus
+  PenTool, SlidersHorizontal, Calendar, TrendingUp, Minus,
+  // NEW ICONS ADDED BELOW:
+  CreditCard, MessageCircle, ShoppingBag, ArrowRight, Tag 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -751,6 +753,27 @@ const data = {
       hoverShadow: "hover:shadow-[0_0_20px_rgba(251,113,133,0.3)]",
    }*/
   ],
+  // NEW RESOURCES SECTION ADDED HERE:
+  resources: [
+    {
+      title: "Premium Admin Dashboard",
+      desc: "A fully responsive React admin template with dark mode and charts.",
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
+      value: "Paid",
+      price: "499", 
+      link: "https://github.com/your-repo/admin-dashboard/archive/refs/heads/main.zip", 
+      tags: ["React", "Tailwind", "Admin"]
+    },
+    {
+      title: "3D Animal Icons Pack",
+      desc: "A collection of 50+ high-quality 3D animal illustrations.",
+      image: "https://images.unsplash.com/photo-1634152962476-4b8a00e1915c?auto=format&fit=crop&q=80&w=800",
+      value: "Free",
+      price: "0",
+      link: "https://github.com/your-repo/icons/archive/refs/heads/main.zip",
+      tags: ["Assets", "Design", "3D"]
+    }
+  ],
   roadmap:[
     {
       title: "Cupid x Us - 16 personalities based quiz for Valentine's Day",
@@ -1059,6 +1082,157 @@ const Navbar = () => {
   );
 };
 
+// --- NEW RESOURCE MODAL COMPONENT ---
+const ResourceModal = ({ isOpen, onClose, resource }) => {
+  const [activeTab, setActiveTab] = useState("obtain");
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [accessCode, setAccessCode] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+  
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab("obtain");
+      setIsValidated(false);
+      setStatusMsg("");
+      setAccessCode("");
+    }
+  }, [isOpen]);
+  
+  const handleSendResource = async () => {
+    setIsSending(true);
+    try {
+      const response = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: formData.name,
+          userEmail: formData.email,
+          serviceName: resource.title,
+          fileLink: resource.link
+        }),
+      });
+      
+      if (!response.ok) throw new Error("Email failed");
+      
+      if (resource.value === "Paid") {
+        const codesRef = collection(db, "access_codes");
+        const q = query(codesRef, where("code", "==", accessCode));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+      }
+      
+      setStatusMsg("Resource Sent Successfully!");
+      setTimeout(() => { onClose(); }, 2000);
+    } catch (error) {
+      console.error(error);
+      setStatusMsg("Error sending resource.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+  
+  const validateCode = async () => {
+    if (!accessCode) return;
+    setIsVerifying(true);
+    try {
+      const codesRef = collection(db, "access_codes");
+      const q = query(codesRef, where("code", "==", accessCode));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        setIsValidated(true);
+        setStatusMsg("Code Validated! You can now obtain the file.");
+      } else {
+        setStatusMsg("Invalid or Expired Code.");
+        setIsValidated(false);
+      }
+    } catch (err) {
+      setStatusMsg("Validation Error.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+  
+  if (!isOpen || !resource) return null;
+  
+  const isPaid = resource.value === "Paid";
+  // NOTE: Ensure VITE_UPI_ID and VITE_WHATSAPP_NUMBER are in your .env file
+  const upiLink = `upi://pay?pa=${import.meta.env.VITE_UPI_ID}&pn=ShovithDev&am=${resource.price}&cu=INR&tn=${resource.title.replace(/\s/g, '%20')}`;
+  const whatsappLink = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi,%20I%20just%20paid%20for%20${resource.title}.%20My%20Name%20is%20${formData.name || 'User'}.%20Please%20send%20access%20code.`;
+  
+  return (
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+      >
+        <motion.div 
+          initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+          className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative"
+        >
+          <div className="p-6 border-b border-slate-800 flex justify-between items-start bg-slate-900/50">
+            <div>
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider mb-2 ${isPaid ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
+                {isPaid ? <ShoppingBag size={12} /> : <Gift size={12} />}
+                {resource.value} {isPaid && `- ₹${resource.price}`}
+              </div>
+              <h3 className="text-xl font-bold text-white">{resource.title}</h3>
+            </div>
+            <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-800 text-slate-400"><X size={20} /></button>
+          </div>
+
+          {isPaid && (
+            <div className="flex border-b border-slate-800">
+              <button onClick={() => setActiveTab("obtain")} className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "obtain" ? "text-neon-green bg-slate-800/50" : "text-slate-400 hover:text-white"}`}>1. Obtain Access Code</button>
+              <button onClick={() => setActiveTab("validate")} className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "validate" ? "text-neon-green bg-slate-800/50" : "text-slate-400 hover:text-white"}`}>2. Validate & Download</button>
+            </div>
+          )}
+
+          <div className="p-6">
+            {(!isPaid || (isPaid && activeTab === "obtain")) && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <input placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none"/>
+                  <input placeholder="Your Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none"/>
+                </div>
+                {isPaid ? (
+                  <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl space-y-3">
+                    <p className="text-xs text-amber-200/80">Step 1: Pay using any UPI App. Step 2: Contact on WhatsApp for code.</p>
+                    <a href={upiLink} className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 border border-slate-600 transition-all"><CreditCard size={18} className="text-neon-green"/> Pay ₹{resource.price} via UPI</a>
+                    <a href={whatsappLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-black font-bold rounded-lg hover:opacity-90 transition-all"><MessageCircle size={18} /> Get Code on WhatsApp</a>
+                  </div>
+                ) : (
+                  <button onClick={handleSendResource} disabled={isSending || !formData.email} className="w-full py-4 bg-neon-green text-black font-bold rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
+                    {isSending ? <Loader2 className="animate-spin" /> : <>Obtain Now <ArrowRight size={18} /></>}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {isPaid && activeTab === "validate" && (
+              <div className="space-y-4">
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <input placeholder="Enter One-Time Access Code" value={accessCode} onChange={(e) => { setAccessCode(e.target.value); setIsValidated(false); }} className="w-full pl-10 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none font-mono tracking-widest"/>
+                  <button onClick={validateCode} disabled={isVerifying || isValidated} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-slate-800 px-3 py-1.5 rounded-md text-neon-green hover:bg-slate-700 disabled:opacity-50">{isValidated ? "Verified" : "Verify"}</button>
+                </div>
+                <button onClick={handleSendResource} disabled={!isValidated || isSending} className="w-full py-4 bg-neon-green text-black font-bold rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale">
+                  {isSending ? <Loader2 className="animate-spin" /> : <>Obtain Now <ArrowRight size={18} /></>}
+                </button>
+              </div>
+            )}
+            {statusMsg && <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 p-3 bg-slate-950 border border-slate-800 rounded-lg text-center text-xs text-slate-300">{statusMsg}</motion.div>}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
 // --- MAIN APP COMPONENT ---
 function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -1087,7 +1261,13 @@ function App() {
   const [isEduVerifying, setIsEduVerifying] = useState(false);
 
   // --- NEW STATE: CATEGORY FILTER ---
+  // --- NEW STATE: CATEGORY FILTER ---
   const [activeCategory, setActiveCategory] = useState("All");
+
+  // --- NEW STATES FOR RESOURCES ---
+  const [activeSectionTab, setActiveSectionTab] = useState('projects'); 
+  const [selectedResource, setSelectedResource] = useState(null);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
 
   // --- DATA GROUPING FOR EDUCATION ---
   const postGradCount = data.education.filter(e => e.title.includes("Master")).length;
@@ -1602,113 +1782,120 @@ const text = `
         </section>
 
         {/* --- PROJECTS --- */}
-        <section id="projects">
-          <SectionTitle subtitle="" title="featured_projects" />
-          
-          {/* CATEGORY TABS */}
-          <div className="flex justify-center mb-8 flex-wrap gap-2 px-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
-                  activeCategory === cat 
-                    ? "bg-neon-green text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]" 
-                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"
-                }`}
-              >
-                {cat}
+<section id="projects">
+          <SectionTitle subtitle="" title="my_work" />
+
+          {/* MASTER TAB SWITCHER */}
+          <div className="flex justify-center mb-10">
+            <div className="p-1 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-1 relative">
+              <motion.div 
+                className="absolute top-1 bottom-1 bg-slate-800 rounded-lg shadow-sm z-0"
+                initial={false}
+                animate={{ left: activeSectionTab === 'projects' ? '4px' : '50%', width: 'calc(50% - 4px)' }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+              <button onClick={() => setActiveSectionTab('projects')} className={`relative z-10 px-8 py-2.5 text-sm font-bold transition-colors duration-300 flex items-center gap-2 ${activeSectionTab === 'projects' ? 'text-white' : 'text-slate-400'}`}>
+                <Code2 size={16} /> Projects
               </button>
-            ))}
+              <button onClick={() => setActiveSectionTab('resources')} className={`relative z-10 px-8 py-2.5 text-sm font-bold transition-colors duration-300 flex items-center gap-2 ${activeSectionTab === 'resources' ? 'text-white' : 'text-slate-400'}`}>
+                <ShoppingBag size={16} /> Resources
+              </button>
+            </div>
           </div>
 
-          {/* New Legend Added Here */}
           <TrendingLegend />
 
-          <div className="space-y-6">
-            <AnimatePresence mode="popLayout">
-              {filteredProjects.map((project, idx) => (
-                <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
-                  <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                    <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                      <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
-                    </div>
-                    
-                    <div className="flex justify-between items-start mb-4 relative z-10">
-                      <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
-                        <project.icon size={24} />
-                      </div>
-                      <ProjectLikeButton title={project.title} />
-                    </div>
+          <AnimatePresence mode="wait">
+            {activeSectionTab === 'projects' ? (
+              <motion.div
+                key="projects-grid"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                {/* OLD CATEGORY TABS MOVED HERE */}
+                <div className="flex justify-center mb-8 flex-wrap gap-2 px-2">
+                  {categories.map((cat) => (
+                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${activeCategory === cat ? "bg-neon-green text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"}`}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
 
-                    <div className="flex justify-between items-center mb-3 relative z-10">
-                      <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
-                      {project.isDownload ? (
-                        <button 
-                          onClick={() => handleDownloadClick(project)} 
-                          className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"
-                        >
-                          {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
-                        </button>
-                      ) : (
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
-                          <ExternalLink size={16} />
-                        </a>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                    <div className="flex flex-wrap gap-2 relative z-10 mb-4">
-                      {project.tags.map((tag, tIdx) => (
-                        <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
-                      ))}
-                    </div>
-
-                    {/* UNIVERSAL PUBLISHED ON & INFO BUTTON */}
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar size={12} className="text-slate-500" />
-                        <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
-                          Published on: {project.date}
-                        </span>
+                {filteredProjects.map((project, idx) => (
+                  <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
+                    <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
+                      {/* ... COPY YOUR EXISTING PROJECT CARD CONTENT HERE ... */}
+                      {/* Make sure to paste the exact content of your old Project Card here. 
+                          I am omitting it to save space, but it's the code with <img src={project.image}>, <ProjectLikeButton>, etc. 
+                      */}
+                      <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                        <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                       </div>
-                      <div className="relative group/info">
-                        <button 
-                          type="button" 
-                          className="text-slate-500 hover:text-neon-green transition-colors p-1"
-                        >
-                          <Info size={14} />
-                        </button>
-                        <div className="absolute bottom-full right-0 mb-2 w-56 p-3 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all duration-200 z-50">
-                          <p className="text-[10px] text-slate-300 leading-relaxed">
-                            By using/downloading this project, you're agreeing to this{' '}
-                            <a 
-                              href="https://my-portfolio-bot-m0xm.onrender.com/privacy.html" 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="text-neon-green hover:underline font-bold"
-                            >
-                              Privacy Policy
-                            </a>{' '}
-                            and {' '}
-                            <a 
-                              href="https://my-portfolio-bot-m0xm.onrender.com/terms.html" 
-                              target="_blank" 
-                              rel="noreferrer" 
-                              className="text-neon-green hover:underline font-bold"
-                            >
-                              Terms of Use
-                            </a>.
-                          </p>
-                          <div className="absolute top-full right-2 -mt-1 border-8 border-transparent border-t-slate-700"></div>
+                      <div className="flex justify-between items-start mb-4 relative z-10">
+                        <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
+                          <project.icon size={24} />
+                        </div>
+                        <ProjectLikeButton title={project.title} />
+                      </div>
+                      <div className="flex justify-between items-center mb-3 relative z-10">
+                        <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
+                        {project.isDownload ? (
+                          <button onClick={() => handleDownloadClick(project)} className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                            {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
+                          </button>
+                        ) : (
+                          <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"><ExternalLink size={16} /></a>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
+                      <div className="flex flex-wrap gap-2 relative z-10 mb-4">
+                        {project.tags.map((tag, tIdx) => (
+                          <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={12} className="text-slate-500" />
+                          <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                </RevealCard>
-              ))}
-            </AnimatePresence>
-          </div>
+                    </Card>
+                  </RevealCard>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="resources-grid"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="space-y-6"
+              >
+                {data.resources.map((res, idx) => (
+                  <motion.div key={idx} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                    <Card className="group relative overflow-hidden">
+                      <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden">
+                        <img src={res.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-80" />
+                        <div className="absolute top-4 right-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-md ${res.value === 'Paid' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}`}>
+                            {res.value} {res.value === 'Paid' && `- ₹${res.price}`}
+                          </span>
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">{res.title}</h3>
+                      <p className="text-sm text-slate-400 mb-4">{res.desc}</p>
+                      <button 
+                        onClick={() => { setSelectedResource(res); setIsResourceModalOpen(true); }}
+                        className="w-full py-3 bg-slate-800 hover:bg-neon-green hover:text-black text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group/btn border border-slate-700 hover:border-neon-green"
+                      >
+                        <ShoppingBag size={18} /> Obtain Now
+                      </button>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* --- FUTURE ROADMAP --- */}
           <div className="mt-20 relative">
@@ -2010,6 +2197,13 @@ const text = `
           </RevealCard>
         </section>
       </main>
+
+{/* RESOURCE MODAL TRIGGER */}
+      <ResourceModal 
+        isOpen={isResourceModalOpen} 
+        onClose={() => setIsResourceModalOpen(false)} 
+        resource={selectedResource} 
+      />
 
       <footer className="py-8 text-center text-xs text-slate-600 border-t border-slate-900">
         <p>© 2026 Shovith Debnath. Crafted with <span className="text-red-500">ᡣ𐭩</span></p>
