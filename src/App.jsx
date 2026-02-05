@@ -1086,8 +1086,10 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
   const [activeTab, setActiveTab] = useState("obtain");
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [accessCode, setAccessCode] = useState("");
-  const [isVerifying, setIsVerifying] = useState(false);
-  const [isValidated, setIsValidated] = useState(false);
+const [isVerifying, setIsVerifying] = useState(false);
+const [isValidated, setIsValidated] = useState(false);
+// New state to hold the link until "Obtain Now" is clicked
+const [unlockedLink, setUnlockedLink] = useState(null);
   const [isSending, setIsSending] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   
@@ -1102,15 +1104,13 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
   
 // PASTE THIS NEW BLOCK
 const handleSendResource = async () => {
-  if (resource.value === "Paid") {
-    // For paid items, the download is handled by validateCode()
-    validateCode();
-    return;
-  }
-  
-  // Logic for FREE resources (Emailing the link)
   setIsSending(true);
+  setStatusMsg("Sending to your email...");
+  
   try {
+    const finalLink = isPaid ? unlockedLink : resource.link;
+    
+    // 1. Send the Email via your API
     const response = await fetch('/api/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1118,15 +1118,32 @@ const handleSendResource = async () => {
         userName: formData.name,
         userEmail: formData.email,
         serviceName: resource.title,
-        fileLink: resource.link // Free links can stay in the frontend
+        fileLink: finalLink
       }),
     });
     
-    if (!response.ok) throw new Error("Email failed");
-    setStatusMsg("Resource Sent to your Email!");
-    setTimeout(() => onClose(), 2000);
+    if (!response.ok) throw new Error("Email delivery failed");
+    
+    // 2. Kill the code in the database so it can't be used again
+    if (isPaid) {
+      const codesRef = collection(db, "access_codes");
+      const q = query(codesRef, where("code", "==", accessCode.trim()));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        await updateDoc(doc(db, "access_codes", snapshot.docs[0].id), {
+          isUsed: true,
+          usedAt: serverTimestamp(),
+          usedBy: formData.email
+        });
+      }
+    }
+    
+    setStatusMsg("Success! Please check your email for the download link.");
+    setTimeout(() => onClose(), 3000);
   } catch (error) {
-    setStatusMsg("Error sending resource.");
+    console.error(error);
+    setStatusMsg("Error processing request.");
   } finally {
     setIsSending(false);
   }
@@ -1140,8 +1157,6 @@ const validateCode = async () => {
   
   try {
     const codesRef = collection(db, "access_codes");
-    
-    // 1. Find the code that matches the product and is NOT used
     const q = query(
       codesRef,
       where("code", "==", accessCode.trim()),
@@ -1152,30 +1167,12 @@ const validateCode = async () => {
     const snapshot = await getDocs(q);
     
     if (!snapshot.empty) {
-      const codeDoc = snapshot.docs[0];
-      const secureData = codeDoc.data();
-      
-      // 2. Mark as used so it can't be reused
-      await updateDoc(doc(db, "access_codes", codeDoc.id), {
-        isUsed: true,
-        usedAt: serverTimestamp(),
-        usedBy: formData.email || "Guest"
-      });
-      
+      const secureData = snapshot.docs[0].data();
+      // Store the link in state; do NOT trigger download
+      setUnlockedLink(secureData.downloadUrl);
       setIsValidated(true);
-      setStatusMsg("Verified! Your download is starting...");
-      
-      // 3. Trigger the hidden download link
-      const link = document.createElement('a');
-      link.href = secureData.downloadUrl;
-      link.setAttribute('download', resource.title);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      setTimeout(() => onClose(), 3000);
+      setStatusMsg("Code Verified! Click 'Obtain Now' to receive the link via email.");
     } else {
-      // If we reach here, either code is wrong, title is a typo, or isUsed is already true
       setStatusMsg("Invalid code, wrong resource, or already used.");
       setIsValidated(false);
     }
