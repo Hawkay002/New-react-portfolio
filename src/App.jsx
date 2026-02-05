@@ -760,7 +760,7 @@ const data = {
       desc: "A fully responsive React admin template with dark mode and charts.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
       value: "Paid",
-      price: "512",
+      price: "519",
       tags: ["React", "Tailwind", "Admin"]
     },
     {
@@ -1141,7 +1141,7 @@ const validateCode = async () => {
   try {
     const codesRef = collection(db, "access_codes");
     
-    // Strict Query: Code + Matching Resource Title + Not Used
+    // 1. Find the code that matches the product and is NOT used
     const q = query(
       codesRef,
       where("code", "==", accessCode.trim()),
@@ -1155,13 +1155,17 @@ const validateCode = async () => {
       const codeDoc = snapshot.docs[0];
       const secureData = codeDoc.data();
       
-      // Use this to immediately destroy the code so it can't be used again
-await deleteDoc(doc(db, "access_codes", codeDoc.id));
+      // 2. Mark as used so it can't be reused
+      await updateDoc(doc(db, "access_codes", codeDoc.id), {
+        isUsed: true,
+        usedAt: serverTimestamp(),
+        usedBy: formData.email || "Guest"
+      });
       
       setIsValidated(true);
-      setStatusMsg("Code Verified! Starting download...");
+      setStatusMsg("Verified! Your download is starting...");
       
-      // 2. Secretly trigger download using the URL from Firestore
+      // 3. Trigger the hidden download link
       const link = document.createElement('a');
       link.href = secureData.downloadUrl;
       link.setAttribute('download', resource.title);
@@ -1171,6 +1175,7 @@ await deleteDoc(doc(db, "access_codes", codeDoc.id));
       
       setTimeout(() => onClose(), 3000);
     } else {
+      // If we reach here, either code is wrong, title is a typo, or isUsed is already true
       setStatusMsg("Invalid code, wrong resource, or already used.");
       setIsValidated(false);
     }
