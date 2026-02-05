@@ -56,12 +56,8 @@ function getEmailHtml(userName, serviceName, fileLink) {
     <p>Thanks for requesting <strong>${serviceName}</strong>. I've attached the secure download link below.</p>
 
     <div class="button-box">
-      <a href="${fileLink}" class="button">Download File</a>
+      <a href="${fileLink}" class="button">Download</a>
     </div>
-
-    <p>Or copy this link:<br />
-      <a href="${fileLink}" class="link">${fileLink}</a>
-    </p>
     
     <div class="footer">
       © 2026 Shovith Debnath. Automated Portfolio Service.
