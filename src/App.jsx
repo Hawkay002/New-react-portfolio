@@ -760,7 +760,7 @@ const data = {
       desc: "A fully responsive React admin template with dark mode and charts.",
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
       value: "Paid",
-      price: "519",
+      price: "237",
       tags: ["React", "Tailwind", "Admin"]
     },
     {
@@ -783,7 +783,7 @@ const data = {
     }
   ],
   education: [
-    { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "Distinction(96%)", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
+    { title: "Master’s Degree in Criminology", place: "Edinburgh, United Kingdom", status: "Distinction (96%)", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
     { title: "Master’s Degree in International Relations", place: "Edinburgh, United Kingdom", status: "Merit (92%)", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
     { title: "Master’s Degree in Graphic Designing", place: "West Bengal, India", status: "96%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
     { title: "Master’s Degree in Computer Science", place: "Delhi, India", status: "90%", icon: GraduationCap, color: "text-green-400", bg: "bg-green-400/10" },
