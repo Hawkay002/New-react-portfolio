@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     // 2. Send the email using HTML string (Safe for Vite/Vercel)
     const { data, error } = await resend.emails.send({
       from: 'Shovith <onboarding@resend.dev>', // Keep this until you verify a domain
-      to: [userEmail], //['shovith2002@gmail.com'], //userEmail if I decided to buy domain name  one day
+      to: ['shovith2002@gmail.com','shovith2@gmail.com'], //userEmail if I decided to buy domain name  one day
       subject: `Your ${serviceName} Download is Ready`,
       html: getEmailHtml(userName, serviceName, fileLink),
     });
