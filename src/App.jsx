@@ -1567,7 +1567,7 @@ const text = `
   // --- FILTER LOGIC ---
   const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
   
-  const filteredProjects = useMemo(() => {
+const filteredProjects = useMemo(() => {
   return data.projects.filter(project => {
     if (activeCategory === "All") return true;
     if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
@@ -1578,7 +1578,7 @@ const text = `
   });
 }, [activeCategory]);
 
-// NEW: Automated Sorting Logic
+// NEW: Automated Sorting Logic (New stays top for 7 days, then moves to bottom)
 const sortedProjects = useMemo(() => {
   const now = new Date();
   return [...filteredProjects].sort((a, b) => {
@@ -1592,6 +1592,7 @@ const sortedProjects = useMemo(() => {
     
     if (isActuallyNewA && !isActuallyNewB) return -1;
     if (!isActuallyNewA && isActuallyNewB) return 1;
+    // If project has isNew:true but is older than 7 days, move to bottom
     if (a.isNew && diffA > 7 && (!b.isNew || diffB <= 7)) return 1;
     return 0;
   });
@@ -1928,33 +1929,6 @@ useEffect(() => {
                     <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
                       <Card className={`group relative overflow-hidden transition-all duration-300 ${isActuallyNew ? 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.3)]' : project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
                         
-                        {/* Confetti Animation Layer */}
-                        <AnimatePresence>
-                          {isActuallyNew && showConfetti && (
-                            <motion.div 
-                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                              className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center"
-                            >
-                              {[...Array(12)].map((_, i) => (
-                                <motion.div
-                                  key={i}
-                                  initial={{ y: 60, x: 0, opacity: 1, scale: 0 }}
-                                  animate={{ 
-                                    y: -180, 
-                                    x: (i - 6) * 30, 
-                                    opacity: 0,
-                                    scale: 1,
-                                    rotate: 360 
-                                  }}
-                                  transition={{ duration: 2.5, ease: "easeOut", delay: i * 0.1 }}
-                                  className="absolute w-2 h-2 rounded-full"
-                                  style={{ backgroundColor: ['#FBBF24', '#F59E0B', '#FFF', '#10B981'][i % 4] }}
-                                />
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-
                         {/* New Badge Overlay */}
                         {isActuallyNew && (
                           <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-amber-400 text-black px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg">
