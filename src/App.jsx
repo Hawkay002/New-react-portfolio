@@ -830,7 +830,7 @@ const TrendingLegend = () => (
       </div>
 
       {/* Divider */}
-      <div className="w-px h-3 bg-slate-700 hidden sm:block"></div>
+      <div className="w-px h-3 bg-white-700 hidden sm:block"></div>
 
       {/* Item 2 */}
       <div className="flex items-center gap-1.5 text-[10px] font-bold text-cyan-400">
@@ -839,7 +839,7 @@ const TrendingLegend = () => (
       </div>
 
       {/* Divider */}
-      <div className="w-px h-3 bg-slate-700 hidden sm:block"></div>
+      <div className="w-px h-3 bg-white-700 hidden sm:block"></div>
 
       {/* Item 3 */}
       <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
