@@ -1097,14 +1097,15 @@ const Navbar = () => {
 };
 
 // --- NEW RESOURCE MODAL COMPONENT ---
+// --- UPDATED RESOURCE MODAL COMPONENT ---
 const ResourceModal = ({ isOpen, onClose, resource }) => {
   const [activeTab, setActiveTab] = useState("obtain");
   const [formData, setFormData] = useState({ name: "", email: "" });
+  const [transactionId, setTransactionId] = useState(""); // New state for TxID
   const [accessCode, setAccessCode] = useState("");
-const [isVerifying, setIsVerifying] = useState(false);
-const [isValidated, setIsValidated] = useState(false);
-// New state to hold the link until "Obtain Now" is clicked
-const [unlockedLink, setUnlockedLink] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isValidated, setIsValidated] = useState(false);
+  const [unlockedLink, setUnlockedLink] = useState(null);
   const [isSending, setIsSending] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   
@@ -1114,97 +1115,97 @@ const [unlockedLink, setUnlockedLink] = useState(null);
       setIsValidated(false);
       setStatusMsg("");
       setAccessCode("");
+      setTransactionId(""); // Reset TxID on open
     }
   }, [isOpen]);
   
-// PASTE THIS NEW BLOCK
-const handleSendResource = async () => {
-  setIsSending(true);
-  setStatusMsg("Sending to your email...");
+  const handleSendResource = async () => {
+    setIsSending(true);
+    setStatusMsg("Sending to your email...");
+    
+    try {
+      const finalLink = isPaid ? unlockedLink : resource.link;
+      
+      const response = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName: formData.name,
+          userEmail: formData.email,
+          serviceName: resource.title,
+          fileLink: finalLink
+        }),
+      });
+      
+      if (!response.ok) throw new Error("Email delivery failed");
+      
+      if (isPaid) {
+        const codesRef = collection(db, "access_codes");
+        const q = query(codesRef, where("code", "==", accessCode.trim()));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          await updateDoc(doc(db, "access_codes", snapshot.docs[0].id), {
+            isUsed: true,
+            usedAt: serverTimestamp(),
+            usedBy: formData.email
+          });
+        }
+      }
+      
+      setStatusMsg("Success! Please check your email for the download link.");
+      setTimeout(() => onClose(), 3000);
+    } catch (error) {
+      console.error(error);
+      setStatusMsg("Error processing request.");
+    } finally {
+      setIsSending(false);
+    }
+  };
   
-  try {
-    const finalLink = isPaid ? unlockedLink : resource.link;
+  const validateCode = async () => {
+    if (!accessCode) return;
+    setIsVerifying(true);
+    setStatusMsg("");
     
-    // 1. Send the Email via your API
-    const response = await fetch('/api/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userName: formData.name,
-        userEmail: formData.email,
-        serviceName: resource.title,
-        fileLink: finalLink
-      }),
-    });
-    
-    if (!response.ok) throw new Error("Email delivery failed");
-    
-    // 2. Kill the code in the database so it can't be used again
-    if (isPaid) {
+    try {
       const codesRef = collection(db, "access_codes");
-      const q = query(codesRef, where("code", "==", accessCode.trim()));
+      const q = query(
+        codesRef,
+        where("code", "==", accessCode.trim()),
+        where("resourceName", "==", resource.title),
+        where("isUsed", "==", false)
+      );
+      
       const snapshot = await getDocs(q);
       
       if (!snapshot.empty) {
-        await updateDoc(doc(db, "access_codes", snapshot.docs[0].id), {
-          isUsed: true,
-          usedAt: serverTimestamp(),
-          usedBy: formData.email
-        });
+        const secureData = snapshot.docs[0].data();
+        setUnlockedLink(secureData.downloadUrl);
+        setIsValidated(true);
+        setStatusMsg("Code Verified! Click 'Obtain Now' to receive the link via email.");
+      } else {
+        setStatusMsg("Invalid code, wrong resource, or already used.");
+        setIsValidated(false);
       }
+    } catch (err) {
+      console.error("Auth Error:", err);
+      setStatusMsg("Security verification failed.");
+    } finally {
+      setIsVerifying(false);
     }
-    
-    setStatusMsg("Success! Please check your email for the download link.");
-    setTimeout(() => onClose(), 3000);
-  } catch (error) {
-    console.error(error);
-    setStatusMsg("Error processing request.");
-  } finally {
-    setIsSending(false);
-  }
-};
-  
-// PASTE THIS NEW BLOCK
-const validateCode = async () => {
-  if (!accessCode) return;
-  setIsVerifying(true);
-  setStatusMsg("");
-  
-  try {
-    const codesRef = collection(db, "access_codes");
-    const q = query(
-      codesRef,
-      where("code", "==", accessCode.trim()),
-      where("resourceName", "==", resource.title),
-      where("isUsed", "==", false)
-    );
-    
-    const snapshot = await getDocs(q);
-    
-    if (!snapshot.empty) {
-      const secureData = snapshot.docs[0].data();
-      // Store the link in state; do NOT trigger download
-      setUnlockedLink(secureData.downloadUrl);
-      setIsValidated(true);
-      setStatusMsg("Code Verified! Click 'Obtain Now' to receive the link via email.");
-    } else {
-      setStatusMsg("Invalid code, wrong resource, or already used.");
-      setIsValidated(false);
-    }
-  } catch (err) {
-    console.error("Auth Error:", err);
-    setStatusMsg("Security verification failed.");
-  } finally {
-    setIsVerifying(false);
-  }
-};
+  };
   
   if (!isOpen || !resource) return null;
   
   const isPaid = resource.value === "Paid";
-  // NOTE: Ensure VITE_UPI_ID and VITE_WHATSAPP_NUMBER are in your .env file
   const upiLink = `upi://pay?pa=${import.meta.env.VITE_UPI_ID}&pn=ShovithDev&am=${resource.price}&cu=INR&tn=${resource.title.replace(/\s/g, '%20')}`;
-  const whatsappLink = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=Hi,%20I%20just%20paid%20for%20${resource.title}.%20My%20Name%20is%20${formData.name || 'User'}.%20Please%20send%20access%20code.`;
+  
+  // Dynamic WhatsApp Link Construction
+  const encodedMsg = encodeURIComponent(
+    `Hey, I'm ${formData.name || 'User'}, I just purchased ${resource.title}. Here's the transaction ID- ${transactionId}. Please send me my access code`
+  );
+  const whatsappLink = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodedMsg}`;
   
   return (
     <AnimatePresence>
@@ -1241,11 +1242,38 @@ const validateCode = async () => {
                   <input placeholder="Your Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none"/>
                   <input placeholder="Your Email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none"/>
                 </div>
+                
                 {isPaid ? (
                   <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl space-y-3">
-                    <p className="text-xs text-amber-200/80">Step 1: Pay using any UPI App. Step 2: Contact on WhatsApp for code.</p>
-                    <a href={upiLink} className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 border border-slate-600 transition-all"><CreditCard size={18} className="text-neon-green"/> Pay ₹{resource.price} via UPI</a>
-                    <a href={whatsappLink} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] text-black font-bold rounded-lg hover:opacity-90 transition-all"><MessageCircle size={18} /> Get Code on WhatsApp</a>
+                    <p className="text-xs text-amber-200/80">Step 1: Pay via UPI. Step 2: Paste Transaction ID below. Step 3: Get Code.</p>
+                    <a href={upiLink} className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 border border-slate-600 transition-all">
+                      <CreditCard size={18} className="text-neon-green"/> Pay ₹{resource.price} via UPI
+                    </a>
+                    
+                    {/* NEW TRANSACTION ID INPUT */}
+                    <div className="relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                      <input 
+                        placeholder="Enter Transaction ID" 
+                        value={transactionId} 
+                        onChange={(e) => setTransactionId(e.target.value)} 
+                        className="w-full pl-10 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none font-mono"
+                      />
+                    </div>
+
+                    {/* DYNAMIC WHATSAPP BUTTON */}
+                    <a 
+                      href={transactionId ? whatsappLink : "#"} 
+                      target={transactionId ? "_blank" : "_self"}
+                      rel="noreferrer" 
+                      className={`flex items-center justify-center gap-2 w-full py-3 font-bold rounded-lg transition-all ${
+                        transactionId 
+                          ? "bg-[#25D366] text-black hover:opacity-90" 
+                          : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-50"
+                      }`}
+                    >
+                      <MessageCircle size={18} /> Get Code on WhatsApp
+                    </a>
                   </div>
                 ) : (
                   <button onClick={handleSendResource} disabled={isSending || !formData.email} className="w-full py-4 bg-neon-green text-black font-bold rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
