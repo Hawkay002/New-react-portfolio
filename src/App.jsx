@@ -745,6 +745,7 @@ const data = {
      link: "telegram_automation.html", // You can replace this with a GitHub link or a Colab link 
      icon: Send, 
      date: "Feb 08, 2026",
+     isNew: true,
      color: "text-cyan-400", 
      bg: "bg-cyan-400/10",
      cardBorder: "border-cyan-500/20",
@@ -1567,15 +1568,44 @@ const text = `
   const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
   
   const filteredProjects = useMemo(() => {
-    return data.projects.filter(project => {
-      if (activeCategory === "All") return true;
-      if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
-      if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
-      if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
-      if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
-      return false;
-    });
-  }, [activeCategory]);
+  return data.projects.filter(project => {
+    if (activeCategory === "All") return true;
+    if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
+    if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
+    if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
+    if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
+    return false;
+  });
+}, [activeCategory]);
+
+// NEW: Automated Sorting Logic
+const sortedProjects = useMemo(() => {
+  const now = new Date();
+  return [...filteredProjects].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    const diffA = (now - dateA) / (1000 * 60 * 60 * 24);
+    const diffB = (now - dateB) / (1000 * 60 * 60 * 24);
+    
+    const isActuallyNewA = a.isNew && diffA >= 0 && diffA <= 7;
+    const isActuallyNewB = b.isNew && diffB >= 0 && diffB <= 7;
+    
+    if (isActuallyNewA && !isActuallyNewB) return -1;
+    if (!isActuallyNewA && isActuallyNewB) return 1;
+    if (a.isNew && diffA > 7 && (!b.isNew || diffB <= 7)) return 1;
+    return 0;
+  });
+}, [filteredProjects]);
+
+// NEW: Confetti Timer State
+const [showConfetti, setShowConfetti] = useState(false);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 5000);
+  }, 60000);
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <div className="min-h-screen bg-app-bg text-slate-200 font-sans selection:bg-neon-green selection:text-black overflow-x-hidden">
@@ -1890,48 +1920,84 @@ const text = `
                   ))}
                 </div>
 
-                {filteredProjects.map((project, idx) => (
-                  <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
-                    <Card className={`group relative overflow-hidden transition-all duration-300 ${project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
-                      {/* ... COPY YOUR EXISTING PROJECT CARD CONTENT HERE ... */}
-                      {/* Make sure to paste the exact content of your old Project Card here. 
-                          I am omitting it to save space, but it's the code with <img src={project.image}>, <ProjectLikeButton>, etc. 
-                      */}
-                      <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                        <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
-                      </div>
-                      <div className="flex justify-between items-start mb-4 relative z-10">
-                        <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
-                          <project.icon size={24} />
-                        </div>
-                        <ProjectLikeButton title={project.title} />
-                      </div>
-                      <div className="flex justify-between items-center mb-3 relative z-10">
-                        <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
-                        {project.isDownload ? (
-                          <button onClick={() => handleDownloadClick(project)} className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
-                            {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
-                          </button>
-                        ) : (
-                          <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"><ExternalLink size={16} /></a>
+{sortedProjects.map((project, idx) => {
+                  const diff = (new Date() - new Date(project.date)) / (1000 * 60 * 60 * 24);
+                  const isActuallyNew = project.isNew && diff >= 0 && diff <= 7;
+
+                  return (
+                    <RevealCard key={project.title} direction={idx % 2 === 0 ? "left" : "right"}>
+                      <Card className={`group relative overflow-hidden transition-all duration-300 ${isActuallyNew ? 'border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.3)]' : project.cardBorder} ${project.hoverBg} ${project.hoverBorder} ${project.hoverShadow}`}>
+                        
+                        {/* Confetti Animation Layer */}
+                        <AnimatePresence>
+                          {isActuallyNew && showConfetti && (
+                            <motion.div 
+                              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                              className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center"
+                            >
+                              {[...Array(12)].map((_, i) => (
+                                <motion.div
+                                  key={i}
+                                  initial={{ y: 60, x: 0, opacity: 1, scale: 0 }}
+                                  animate={{ 
+                                    y: -180, 
+                                    x: (i - 6) * 30, 
+                                    opacity: 0,
+                                    scale: 1,
+                                    rotate: 360 
+                                  }}
+                                  transition={{ duration: 2.5, ease: "easeOut", delay: i * 0.1 }}
+                                  className="absolute w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: ['#FBBF24', '#F59E0B', '#FFF', '#10B981'][i % 4] }}
+                                />
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+
+                        {/* New Badge Overlay */}
+                        {isActuallyNew && (
+                          <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5 bg-amber-400 text-black px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg">
+                            <Zap size={10} className="fill-black" /> Recently Added
+                          </div>
                         )}
-                      </div>
-                      <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
-                      <div className="flex flex-wrap gap-2 relative z-10 mb-4">
-                        {project.tags.map((tag, tIdx) => (
-                          <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
-                        ))}
-                      </div>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar size={12} className="text-slate-500" />
-                          <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
+
+                        <div className="h-40 w-[calc(100%+3rem)] -mx-6 -mt-6 mb-6 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                          <img src={project.image} alt={project.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-card-bg to-transparent opacity-60"></div>
                         </div>
-                      </div>
-                    </Card>
-                  </RevealCard>
-                ))}
+                        <div className="flex justify-between items-start mb-4 relative z-10">
+                          <div className={`p-3 rounded-xl inline-block ${project.bg} ${project.color}`}>
+                            <project.icon size={24} />
+                          </div>
+                          <ProjectLikeButton title={project.title} />
+                        </div>
+                        <div className="flex justify-between items-center mb-3 relative z-10">
+                          <h3 className={`font-bold text-lg text-white group-hover:${project.color.split(' ')[0]} transition-colors`}>{project.title}</h3>
+                          {project.isDownload ? (
+                            <button onClick={() => handleDownloadClick(project)} className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer">
+                              {project.locked ? <Lock size={16} className="text-red-400" /> : <Download size={16} />}
+                            </button>
+                          ) : (
+                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-white group-hover:border-white/20 transition-colors cursor-pointer"><ExternalLink size={16} /></a>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-400 mb-5 leading-relaxed relative z-10">{project.desc}</p>
+                        <div className="flex flex-wrap gap-2 relative z-10 mb-4">
+                          {project.tags.map((tag, tIdx) => (
+                            <span key={tIdx} className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-md bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-white/30 transition-colors">{tag}</span>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5 relative z-10">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar size={12} className="text-slate-500" />
+                            <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Published on: {project.date}</span>
+                          </div>
+                        </div>
+                      </Card>
+                    </RevealCard>
+                  );
+                })}
               </motion.div>
             ) : (
               <motion.div
