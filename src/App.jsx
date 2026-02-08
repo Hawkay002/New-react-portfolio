@@ -1903,8 +1903,6 @@ useEffect(() => {
             </div>
           </div>
 
-          <TrendingLegend />
-
           <AnimatePresence mode="wait">
             {activeSectionTab === 'projects' ? (
               <motion.div
@@ -1920,6 +1918,8 @@ useEffect(() => {
                     </button>
                   ))}
                 </div>
+
+          <TrendingLegend />
 
 {sortedProjects.map((project, idx) => {
                   const diff = (new Date() - new Date(project.date)) / (1000 * 60 * 60 * 24);
