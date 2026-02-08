@@ -737,6 +737,21 @@ const data = {
       hoverBorder: "hover:border-indigo-400/50",
       hoverShadow: "hover:shadow-[0_0_20px_rgba(129,140,248,0.2)]",
     },
+    {
+     title: "Telegram Channel Lifecycle Manager",
+     desc: "A professional automation suite for Google Colab that identifies inactive channels, archives them, and performs mass-leave operations safely.",
+     tags: ["Python", "Telethon", "Automation", "Security"],
+     image: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800", 
+     link: "telegram_automation.html", // You can replace this with a GitHub link or a Colab link 
+     icon: Send, 
+     date: "Feb 08, 2026",
+     color: "text-cyan-400", 
+     bg: "bg-cyan-400/10",
+     cardBorder: "border-cyan-500/20",
+     hoverBg: "hover:bg-gradient-to-br hover:from-cyan-500/20 hover:via-cyan-500/5 hover:to-transparent",
+     hoverBorder: "hover:border-cyan-400/50",
+     hoverShadow: "hover:shadow-[0_0_20px_rgba(34,211,238,0.2)]",
+    },
     /*{
       title: "Cupid x Us",
       desc: "A fun, themed personality test based on the 16 personalities to find your perfect match type this Valentine's Day.",
