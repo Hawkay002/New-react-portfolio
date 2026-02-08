@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Channel Management - Professional Automation Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .header { text-align: center; padding: 40px 0; background: linear-gradient(135deg, #0088cc, #005580); color: white; border-radius: 12px; margin-bottom: 30px; }
+        .section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        h2 { color: #0088cc; border-bottom: 2px solid #eef0f2; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Login Notice */
+        .login-notice { background: #e3f2fd; border-left: 5px solid #2196f3; padding: 15px; margin: 20px 0; border-radius: 4px; color: #0d47a1; }
+        
+        /* Warning Box */
+        .warning-box { background: #fff4e5; border-left: 5px solid #ffa117; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .warning-title { font-weight: bold; color: #663c00; display: flex; align-items: center; gap: 10px; }
+        
+        .code-container {
+            position: relative;
+            background: #282c34;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        pre { padding: 20px; overflow-x: auto; margin: 0; color: #abb2bf; font-size: 14px; font-family: 'Consolas', monospace; }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4a4f5a;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 10;
+        }
+        .copy-btn:hover { background: #0088cc; }
+        
+        ol li { margin-bottom: 10px; }
+        .badge { background: #e1f5fe; color: #01579b; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Telegram Channel Optimization Toolkit</h1>
+        <p>Advanced Management & Archiving Guide for Google Colab</p>
+    </div>
+
+    <div class="section">
+        <h2><i class="fas fa-key"></i> 1. Authentication & Credentials</h2>
+        
+        <div class="login-notice">
+            <i class="fas fa-user-check"></i> <b>Interactive Login:</b> When you run Step 2, the console will ask for your <b>Phone Number</b> (in international format, e.g., +123456789) and the <b>OTP code</b> sent to your Telegram account to log you in securely.
+        </div>
+
+        <p>Before running the scripts, you must obtain your unique API ID and API Hash from Telegram:</p>
+        <ol>
+            <li>Log in to your Telegram account at <a href="https://my.telegram.org" target="_blank">my.telegram.org</a>.</li>
+            <li>Click on <b>"API development tools"</b>.</li>
+            <li>If you haven't created an app before, fill out the form (App title and Short name can be anything).</li>
+            <li>Copy your <span class="badge">App api_id</span> and <span class="badge">App api_hash</span>.</li>
+            <li><b>Important:</b> Replace the placeholders in the code snippets below with your actual credentials.</li>
+        </ol>
+    </div>
+
+    <div class="section" style="border: 2px solid #ff4d4d;">
+        <h2 style="color: #ff4d4d !important;"><i class="fas fa-exclamation-triangle"></i> Security & Ban Prevention</h2>
+        <p>Automating Telegram actions can lead to a <b>"Softban"</b> (temporary restriction) or permanent ban if handled incorrectly. Follow these rules to stay safe:</p>
+        
+        <div class="warning-box">
+            <div class="warning-title"><i class="fas fa-bolt"></i> Flood Wait Limits</div>
+            <p>Telegram limits how many actions you can perform per minute. If you leave 100 channels instantly, you will get a <code>FloodWaitError</code>. The scripts below use <code>asyncio.sleep(1.2)</code> to prevent this. <b>Do not decrease this delay.</b></p>
+        </div>
+
+        <div class="warning-box">
+            <div class="warning-title"><i class="fas fa-user-shield"></i> Account Age</div>
+            <p>New accounts (less than 1 month old) are monitored strictly. If your account is new, increase the sleep timers in the code to <code>5.0</code> seconds to avoid detection.</p>
+        </div>
+
+        <div class="warning-box">
+            <div class="warning-title"><i class="fas fa-shield-alt"></i> Sensitive Data</div>
+            <p>Never share your <code>.session</code> files. These files contain your login token. If someone else gets this file, they can access your account without a password. Always run <b>Step 5</b> to delete these files when finished.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Step 1: Install the Telethon library using this</h2>
+        <div class="code-container">
+            <button class="copy-btn" onclick="copyCode(this)"><i class="far fa-copy"></i> Copy</button>
+            <pre>!pip install telethon</pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Step 2: Identify and archive Telegram channels that have been inactive for more than one year</h2>
+        <div class="code-container">
+            <button class="copy-btn" onclick="copyCode(this)"><i class="far fa-copy"></i> Copy</button>
+            <pre>import asyncio
+from datetime import datetime, timedelta, timezone
+from telethon import TelegramClient, functions, types
+
+# --- YOUR CREDENTIALS ---
+API_ID = YOUR_API_ID_HERE
+API_HASH = 'YOUR_API_HASH_HERE'
+THRESHOLD_DAYS = 365
+
+async def main():
+    # Fresh session name
+    client = TelegramClient('session_archive_final_v2', API_ID, API_HASH)
+
+    try:
+        await client.start()
+        print("Successfully logged in!")
+
+        print(f"Scanning for inactivity (> {THRESHOLD_DAYS} days)...")
+
+        inactive_peers = []
+        now = datetime.now(timezone.utc)
+        threshold_date = now - timedelta(days=THRESHOLD_DAYS)
+
+        async for dialog in client.iter_dialogs(limit=None):
+            # Target channels not already archived
+            if dialog.is_channel and (not dialog.folder_id or dialog.folder_id == 0):
+                last_msg = dialog.message
+
+                # FIX: Handle cases where last_msg or last_msg.date might be None
+                is_inactive = False
+                if last_msg is None:
+                    is_inactive = True  # Empty channels are considered inactive
+                elif last_msg.date is None:
+                    is_inactive = True
+                elif last_msg.date < threshold_date:
+                    is_inactive = True
+
+                if is_inactive:
+                    inactive_peers.append(dialog.input_entity)
+
+        if not inactive_peers:
+            print("No inactive channels found.")
+            return
+
+        print(f"Found {len(inactive_peers)} inactive channels. Archiving...")
+
+        # Batch processing
+        count = 0
+        for i in range(0, len(inactive_peers), 20):
+            batch = inactive_peers[i:i+20]
+
+            try:
+                await client(functions.folders.EditPeerFoldersRequest(
+                    folder_peers=[types.InputFolderPeer(peer=p, folder_id=1) for p in batch]
+                ))
+                count += len(batch)
+                print(f"Archived {count}/{len(inactive_peers)}...")
+            except Exception as batch_error:
+                print(f"Error archiving batch: {batch_error}")
+
+            await asyncio.sleep(1.5)
+
+        print(f"\nSuccess! All {len(inactive_peers)} channels moved to Archive.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        await client.disconnect()
+
+# Run in Colab
+await main()</pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Step 3: Verify the archived channels list to ensure the changes if not reflected on Telegram</h2>
+        <div class="code-container">
+            <button class="copy-btn" onclick="copyCode(this)"><i class="far fa-copy"></i> Copy</button>
+            <pre>from telethon import TelegramClient
+
+# --- YOUR CREDENTIALS ---
+API_ID = YOUR_API_ID_HERE
+API_HASH = 'YOUR_API_HASH_HERE'
+
+async def verify():
+    # Using the same session name as the successful run
+    client = TelegramClient('session_archive_final_v2', API_ID, API_HASH)
+    await client.start()
+    
+    print("Checking Archive contents...")
+    count = 0
+    async for dialog in client.iter_dialogs(limit=None):
+        if dialog.folder_id == 1:
+            print(f" [Found in Archive] -> {dialog.name}")
+            count += 1
+            
+    if count == 0:
+        print("The Archive appears empty on the server.")
+    else:
+        print(f"\nTotal items verified in Archive: {count}")
+    
+    await client.disconnect()
+
+await verify()</pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Step 4: Exit the archived channels individually</h2>
+        <div class="code-container">
+            <button class="copy-btn" onclick="copyCode(this)"><i class="far fa-copy"></i> Copy</button>
+            <pre>import asyncio
+from telethon import TelegramClient, functions, types
+
+# --- YOUR CREDENTIALS ---
+API_ID = YOUR_API_ID_HERE
+API_HASH = 'YOUR_API_HASH_HERE'
+
+async def leave_archived():
+    # Using the same session to avoid re-logging in
+    client = TelegramClient('session_archive_final_v2', API_ID, API_HASH)
+    
+    try:
+        await client.start()
+        print("Logged in. Fetching archived channels...")
+
+        archived_peers = []
+        async for dialog in client.iter_dialogs(limit=None):
+            # Folder ID 1 is the Archive
+            if dialog.folder_id == 1 and dialog.is_channel:
+                archived_peers.append(dialog.input_entity)
+
+        if not archived_peers:
+            print("No channels found in the Archive to leave.")
+            return
+
+        total = len(archived_peers)
+        print(f"Found {total} archived channels. Starting to leave...")
+
+        for i, peer in enumerate(archived_peers):
+            try:
+                # The command to leave a channel or group
+                await client(functions.channels.LeaveChannelRequest(channel=peer))
+                print(f"[{i+1}/{total}] Left: {getattr(peer, 'title', 'Channel')}")
+                
+                # Small delay to prevent "Flood Wait"
+                # If leaving many, increase this slightly
+                await asyncio.sleep(1.2) 
+                
+            except Exception as e:
+                print(f"Could not leave channel {i+1}: {e}")
+                # If we hit a flood wait, the script will wait automatically
+                if "flood" in str(e).lower():
+                    await asyncio.sleep(30)
+
+        print(f"\nSuccess! You have left all {total} archived channels.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        await client.disconnect()
+
+# Execute the leave process
+await leave_archived()</pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Step 5: Clear the session data to ensure security and prevent unauthorized access</h2>
+        <div class="code-container">
+            <button class="copy-btn" onclick="copyCode(this)"><i class="far fa-copy"></i> Copy</button>
+            <pre>import os
+import glob
+
+# Remove all files ending in .session or .session-journal
+files_to_remove = glob.glob("*.session*")
+
+if files_to_remove:
+    for file in files_to_remove:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except:
+            pass
+    print("\nAll session data cleared. Your account is now disconnected from this environment.")
+else:
+    print("No session files found. You're already clean!")</pre>
+        </div>
+    </div>
+    <footer>
+      <p style="justify-content: center; text-align: center; color: #005580;">If you're experiencing any issues, please contact me via 
+  <a href="https://t.me/X_o_x_o_002" target="_blank" rel="noopener noreferrer" style="text-decoration: none; font-weight: bold; color: #0088cc;">
+    Telegram
+  </a>.</p>
+    </footer>
+
+    <script>
+        function copyCode(button) {
+            const pre = button.nextElementSibling;
+            const text = pre.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '#4a4f5a';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
