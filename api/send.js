@@ -1,37 +1,40 @@
-import { Resend } from 'resend';
-
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
-  // 1. Security: Only allow POST requests
+  // 1. Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   const { userName, userEmail, serviceName, fileLink } = req.body;
 
+  // 2. Configure the Transporter
+  // Using Environment Variables for security
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.SMTP_USER, // Your Gmail address
+      pass: process.env.SMTP_PASS, // Your 16-character App Password
+    },
+  });
+
   try {
-    // 2. Send the email using HTML string (Safe for Vite/Vercel)
-    const { data, error } = await resend.emails.send({
-      from: 'Shovith <onboarding@resend.dev>', // Keep this until you verify a domain
-      to: ['shovith2002@gmail.com'], //userEmail
+    // 3. Send the Email
+    await transporter.sendMail({
+      from: `"Shovith-dev" <${process.env.SMTP_USER}>`, 
+      to: userEmail, // Now correctly sending to the user who requested it
       subject: `Your ${serviceName} Download is Ready`,
       html: getEmailHtml(userName, serviceName, fileLink),
     });
 
-    if (error) {
-      return res.status(400).json({ error });
-    }
-
-    return res.status(200).json({ success: true, data });
+    return res.status(200).json({ success: true, message: 'Email sent successfully!' });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error('SMTP Error:', error);
+    return res.status(500).json({ error: 'Failed to send email. Check SMTP configuration.' });
   }
 }
 
 // --- HTML TEMPLATE GENERATOR ---
-// This uses standard strings to avoid build errors on Vercel
 function getEmailHtml(userName, serviceName, fileLink) {
   return `
 <!DOCTYPE html>
@@ -44,21 +47,17 @@ function getEmailHtml(userName, serviceName, fileLink) {
     .highlight { color: #10b981; }
     .button-box { text-align: center; margin: 30px 0; }
     .button { background-color: #10b981; color: #000; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block; }
-    .link { color: #10b981; text-decoration: underline; word-break: break-all; }
     .footer { color: #64748b; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #334155; padding-top: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="logo">Shovith<span class="highlight">-dev</span></div>
-    
     <p>Hi ${userName},</p>
-    <p>Thanks for requesting <strong>${serviceName}</strong>. I've attached the secure download link below.</p>
-
+    <p>Thanks for requesting <strong>${serviceName}</strong>. You can download your resource using the link below:</p>
     <div class="button-box">
-      <a href="${fileLink}" class="button">Download</a>
+      <a href="${fileLink}" class="button">Download Now</a>
     </div>
-    
     <div class="footer">
       © 2026 Shovith Debnath. Automated Portfolio Service.
     </div>
