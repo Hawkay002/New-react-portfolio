@@ -1109,7 +1109,6 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
   const [unlockedLink, setUnlockedLink] = useState(null);
   const [isSending, setIsSending] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
-  const [errors, setErrors] = useState({ name: false, email: false }); // Track empty fields
   
   useEffect(() => {
     if (isOpen) {
@@ -1118,32 +1117,28 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
       setStatusMsg("");
       setAccessCode("");
       setTransactionId("");
-      setErrors({ name: false, email: false });
     }
   }, [isOpen]);
   
-  const validateForm = () => {
-    const newErrors = {
-      name: !formData.name.trim(),
-      email: !formData.email.trim()
-    };
-    setErrors(newErrors);
-    
-    if (newErrors.name || newErrors.email) {
-      setStatusMsg("Please fill in all required fields.");
+  // NEW: Validation helper to ensure name and email are present
+  const validateUserInfo = () => {
+    if (!formData.name.trim() || !formData.email.trim()) {
+      setStatusMsg("⚠️ Please enter both your name and email to proceed.");
       return false;
     }
     return true;
   };
   
   const handleSendResource = async () => {
-    if (!validateForm()) return; // Stop if mandatory fields are missing
+    // Check if mandatory fields are filled
+    if (!validateUserInfo()) return;
     
     setIsSending(true);
     setStatusMsg("Sending to your email...");
     
     try {
       const finalLink = isPaid ? unlockedLink : resource.link;
+      
       const response = await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1156,89 +1151,191 @@ const ResourceModal = ({ isOpen, onClose, resource }) => {
       });
       
       if (!response.ok) throw new Error("Email delivery failed");
+      
+      if (isPaid) {
+        const codesRef = collection(db, "access_codes");
+        const q = query(codesRef, where("code", "==", accessCode.trim()));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          await updateDoc(doc(db, "access_codes", snapshot.docs[0].id), {
+            isUsed: true,
+            usedAt: serverTimestamp(),
+            usedBy: formData.email
+          });
+        }
+      }
+      
       setStatusMsg("Success! Please check your email for the download link.");
       setTimeout(() => onClose(), 3000);
     } catch (error) {
+      console.error(error);
       setStatusMsg("Error processing request.");
     } finally {
       setIsSending(false);
     }
   };
   
+  const validateCode = async () => {
+    // Ensure user info is present even for code validation
+    if (!validateUserInfo()) return;
+    if (!accessCode) {
+      setStatusMsg("⚠️ Please enter your access code.");
+      return;
+    }
+    
+    setIsVerifying(true);
+    setStatusMsg("");
+    
+    try {
+      const codesRef = collection(db, "access_codes");
+      const q = query(
+        codesRef,
+        where("code", "==", accessCode.trim()),
+        where("resourceName", "==", resource.title),
+        where("isUsed", "==", false)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        const secureData = snapshot.docs[0].data();
+        setUnlockedLink(secureData.downloadUrl);
+        setIsValidated(true);
+        setStatusMsg("Code Verified! Click 'Obtain Now' to receive the link via email.");
+      } else {
+        setStatusMsg("Invalid code, wrong resource, or already used.");
+        setIsValidated(false);
+      }
+    } catch (err) {
+      console.error("Auth Error:", err);
+      setStatusMsg("Security verification failed.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+  
   if (!isOpen || !resource) return null;
+  
   const isPaid = resource.value === "Paid";
+  const upiLink = `upi://pay?pa=${import.meta.env.VITE_UPI_ID}&pn=ShovithDev&am=${resource.price}&cu=INR&tn=${resource.title.replace(/\s/g, '%20')}`;
   
   const encodedMsg = encodeURIComponent(
-    `Hey, I'm ${formData.name}, I just purchased ${resource.title}. Transaction ID: ${transactionId}.`
+    `Hey, I'm ${formData.name || 'User'}, I just purchased ${resource.title}. Here's the transaction ID- ${transactionId}. Please send me my access code`
   );
   const whatsappLink = `https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER}?text=${encodedMsg}`;
   
   return (
     <AnimatePresence>
-      <motion.div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <motion.div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative">
-          <div className="p-6 border-b border-slate-800 flex justify-between items-start">
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+      >
+        <motion.div 
+          initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+          className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl relative"
+        >
+          <div className="p-6 border-b border-slate-800 flex justify-between items-start bg-slate-900/50">
             <div>
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider mb-2 ${isPaid ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'}`}>
+                {isPaid ? <ShoppingBag size={12} /> : <Gift size={12} />}
+                {resource.value} {isPaid && `- ₹${resource.price}`}
+              </div>
               <h3 className="text-xl font-bold text-white">{resource.title}</h3>
             </div>
-            <button onClick={onClose} className="p-1 text-slate-400"><X size={20} /></button>
+            <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-800 text-slate-400"><X size={20} /></button>
           </div>
 
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <input 
-                  required
-                  placeholder="Your Name *" 
-                  className={`bg-slate-950 border ${errors.name ? 'border-red-500' : 'border-slate-800'} rounded-lg p-3 text-sm text-white outline-none`}
-                  value={formData.name} 
-                  onChange={(e) => {
-                    setFormData({...formData, name: e.target.value});
-                    if (e.target.value) setErrors({...errors, name: false});
-                  }}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <input 
-                  required
-                  type="email"
-                  placeholder="Your Email *" 
-                  className={`bg-slate-950 border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-lg p-3 text-sm text-white outline-none`}
-                  value={formData.email} 
-                  onChange={(e) => {
-                    setFormData({...formData, email: e.target.value});
-                    if (e.target.value) setErrors({...errors, email: false});
-                  }}
-                />
-              </div>
+          {isPaid && (
+            <div className="flex border-b border-slate-800">
+              <button onClick={() => setActiveTab("obtain")} className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "obtain" ? "text-neon-green bg-slate-800/50" : "text-slate-400 hover:text-white"}`}>1. Obtain Access Code</button>
+              <button onClick={() => setActiveTab("validate")} className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === "validate" ? "text-neon-green bg-slate-800/50" : "text-slate-400 hover:text-white"}`}>2. Validate & Download</button>
             </div>
+          )}
 
-            {isPaid ? (
-              <div className="space-y-3">
-                <input 
-                  placeholder="Transaction ID" 
-                  value={transactionId} 
-                  onChange={(e) => setTransactionId(e.target.value)} 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white outline-none"
-                />
-                <button 
-                  onClick={() => { if(validateForm()) window.open(whatsappLink, '_blank'); }}
-                  className={`w-full py-3 font-bold rounded-lg bg-[#25D366] text-black ${!transactionId && 'opacity-50 cursor-not-allowed'}`}
-                  disabled={!transactionId}
-                >
-                  Get Code on WhatsApp
+          <div className="p-6">
+            {(!isPaid || (isPaid && activeTab === "obtain")) && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <input 
+                    required
+                    placeholder="Your Name" 
+                    value={formData.name} 
+                    onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                    className={`bg-slate-950 border rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none transition-all ${!formData.name && statusMsg.includes("name") ? "border-red-500/50" : "border-slate-800"}`}
+                  />
+                  <input 
+                    required
+                    type="email"
+                    placeholder="Your Email" 
+                    value={formData.email} 
+                    onChange={(e) => setFormData({...formData, email: e.target.value})} 
+                    className={`bg-slate-950 border rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none transition-all ${!formData.email && statusMsg.includes("email") ? "border-red-500/50" : "border-slate-800"}`}
+                  />
+                </div>
+                
+                {isPaid ? (
+                  <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-xl space-y-3">
+                    <p className="text-xs text-amber-200/80">Step 1: Pay via UPI. Step 2: Paste Transaction ID below. Step 3: Get Code.</p>
+                    <a href={upiLink} className="flex items-center justify-center gap-2 w-full py-3 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 border border-slate-600 transition-all">
+                      <CreditCard size={18} className="text-neon-green"/> Pay ₹{resource.price} via UPI
+                    </a>
+                    
+                    <div className="relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                      <input 
+                        placeholder="Enter Transaction ID" 
+                        value={transactionId} 
+                        onChange={(e) => setTransactionId(e.target.value)} 
+                        className="w-full pl-10 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none font-mono"
+                      />
+                    </div>
+
+                    <a 
+                      href={transactionId ? whatsappLink : "#"} 
+                      target={transactionId ? "_blank" : "_self"}
+                      rel="noreferrer" 
+                      className={`flex items-center justify-center gap-2 w-full py-3 font-bold rounded-lg transition-all ${
+                        transactionId 
+                          ? "bg-[#25D366] text-black hover:opacity-90" 
+                          : "bg-slate-800 text-slate-500 cursor-not-allowed opacity-50"
+                      }`}
+                    >
+                      <MessageCircle size={18} /> Get Code on WhatsApp
+                    </a>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleSendResource} 
+                    disabled={isSending} 
+                    className="w-full py-4 bg-neon-green text-black font-bold rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSending ? <Loader2 className="animate-spin" /> : <>Obtain Now <ArrowRight size={18} /></>}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {isPaid && activeTab === "validate" && (
+              <div className="space-y-4">
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <input placeholder="Enter One-Time Access Code" value={accessCode} onChange={(e) => { setAccessCode(e.target.value); setIsValidated(false); }} className="w-full pl-10 bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-white focus:border-neon-green outline-none font-mono tracking-widest"/>
+                  <button onClick={validateCode} disabled={isVerifying || isValidated} className="absolute right-2 top-1/2 -translate-y-1/2 text-xs bg-slate-800 px-3 py-1.5 rounded-md text-neon-green hover:bg-slate-700 disabled:opacity-50">{isValidated ? "Verified" : "Verify"}</button>
+                </div>
+                <button onClick={handleSendResource} disabled={!isValidated || isSending} className="w-full py-4 bg-neon-green text-black font-bold rounded-xl hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale">
+                  {isSending ? <Loader2 className="animate-spin" /> : <>Obtain Now <ArrowRight size={18} /></>}
                 </button>
               </div>
-            ) : (
-              <button onClick={handleSendResource} disabled={isSending} className="w-full py-4 bg-neon-green text-black font-bold rounded-xl">
-                {isSending ? <Loader2 className="animate-spin mx-auto" /> : "Obtain Now"}
-              </button>
             )}
-            
             {statusMsg && (
-              <p className={`text-center text-xs mt-2 ${errors.name || errors.email ? 'text-red-400' : 'text-slate-300'}`}>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className={`mt-4 p-3 border rounded-lg text-center text-xs ${statusMsg.startsWith("⚠️") ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-slate-950 border-slate-800 text-slate-300"}`}
+              >
                 {statusMsg}
-              </p>
+              </motion.div>
             )}
           </div>
         </motion.div>
