@@ -1605,18 +1605,7 @@ const text = `
   };
 
   // --- FILTER LOGIC ---
-  const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
-  
-const filteredProjects = useMemo(() => {
-  return data.projects.filter(project => {
-    if (activeCategory === "All") return true;
-    if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
-    if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
-    if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
-    if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
-    return false;
-  });
-}, [activeCategory]);
+
 
 // NEW: Automated Sorting Logic (New stays top for 7 days, then moves to bottom)
 const sortedProjects = useMemo(() => {
