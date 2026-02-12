@@ -1605,7 +1605,18 @@ const text = `
   };
 
   // --- FILTER LOGIC ---
-
+  const categories = ["All", "Web Dev", "Python & AI", "IoT & Hardware", "Security"];
+  
+const filteredProjects = useMemo(() => {
+  return data.projects.filter(project => {
+    if (activeCategory === "All") return true;
+    if (activeCategory === "Web Dev") return project.tags.includes("React") || project.tags.includes("HTML") || project.tags.includes("CSS");
+    if (activeCategory === "Python & AI") return project.tags.includes("Python") || project.tags.includes("Bot");
+    if (activeCategory === "IoT & Hardware") return project.tags.includes("IoT");
+    if (activeCategory === "Security") return project.tags.includes("Security") || project.tags.includes("Forensics") || project.tags.includes("Encryption");
+    return false;
+  });
+}, [activeCategory]);
 
 // NEW: Automated Sorting Logic (New stays top for 7 days, then moves to bottom)
 const sortedProjects = useMemo(() => {
@@ -1939,14 +1950,7 @@ useEffect(() => {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="space-y-6"
               >
-                {/* OLD CATEGORY TABS MOVED HERE */}
-                <div className="flex justify-center mb-8 flex-wrap gap-2 px-2">
-                  {categories.map((cat) => (
-                    <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${activeCategory === cat ? "bg-neon-green text-black shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600"}`}>
-                      {cat}
-                    </button>
-                  ))}
-                </div>
+
 
           <TrendingLegend />
 
